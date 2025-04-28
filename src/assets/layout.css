@@ -1,0 +1,48 @@
+
+.sidebar {
+    width: 240px;
+    background-color: #001f3f;
+    color: #ffffff;
+    height: 100vh;
+    position: fixed;
+    padding: 20px;
+  }
+  
+  .sidebar .logo img {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    margin: 20px 0;
+  }
+  
+  .sidebar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .sidebar a.active {
+    color: #00d1b2;
+  }
+  
+ /*Aqui inicia o Header*/
+  .header {
+    margin-left: 240px;
+    background-color: #f5f5f5;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
