@@ -1,67 +1,123 @@
-import { useState } from 'react'
-import { createEletrodomestico } from '../../../services/ItemService'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from "react"
+import { getEletrodomesticos, deleteEletrodomestico } from "../../../services/ItemService"
+import { useNavigate } from "react-router-dom"
+import { Plus, Edit, Eye, Trash2 } from "lucide-react"
 
-function CadastroEletrodomestico() {
-  const [descricao, setDescricao] = useState('')
-  const [dataCadastro, setDataCadastro] = useState('')
-  const [quantidade, setQuantidade] = useState<number>(1)
-  const [valor, setValor] = useState<number>(0)
-  const [caminhao, setCaminhao] = useState('')
-  const [categoria] = useState('Eletrodomésticos') // fixo
-  const [estadoConservacao, setEstadoConservacao] = useState('')
-  const [situacao, setSituacao] = useState('')
-  const [anexo, setAnexo] = useState<File | null>(null)
-
+function Eletrodomesticos() {
+  const [itens, setItens] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  useEffect(() => {
+    fetchItens()
+  }, [])
 
-    const formData = new FormData()
-    formData.append('descricao', descricao)
-    formData.append('data_cadastro', dataCadastro)
-    formData.append('quantidade', String(quantidade))
-    formData.append('valor', String(valor))
-    formData.append('caminhao', caminhao)
-    formData.append('categoria', categoria)
-    formData.append('estadoConservacao', estadoConservacao)
-    formData.append('situacao', situacao)
-    if (anexo) {
-      formData.append('anexo', anexo)
-    }
-
+  const fetchItens = async () => {
     try {
-      await createEletrodomestico(formData)
-      alert('Cadastrado com sucesso!')
-      navigate('/categorias/eletrodomesticos')
+      const data = await getEletrodomesticos()
+      if (Array.isArray(data)) {
+        setItens(data)
+      } else {
+        setError("Dados retornados não são um array válido.")
+      }
+      setError(null)
     } catch (error) {
-      console.error('Erro ao cadastrar:', error)
+      console.error("Erro ao buscar eletrodomésticos:", error)
+      setError("Erro ao buscar eletrodomésticos. Tente novamente mais tarde.")
     }
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setAnexo(e.target.files[0])
+  const handleNovoCadastro = () => {
+    navigate("/categorias/eletrodomesticos/novo")
+  }
+
+  const handleEditar = (id: number) => {
+    navigate(`/categorias/eletrodomesticos/editar/${id}`)
+  }
+
+  const handleDetalhes = (id: number) => {
+    navigate(`/categorias/eletrodomesticos/detalhes/${id}`)
+  }
+
+  const handleExcluir = async (id: number) => {
+    if (confirm("Tem certeza que deseja excluir este item?")) {
+      try {
+        await deleteEletrodomestico(id)
+        alert("Item excluído com sucesso!")
+        fetchItens()
+      } catch (error) {
+        console.error("Erro ao excluir:", error)
+        alert("Erro ao excluir o item. Tente novamente mais tarde.")
+      }
     }
   }
 
   return (
     <div>
-      <h1>Cadastrar Eletrodoméstico</h1>
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <input type="text" placeholder="Descrição" value={descricao} onChange={(e) => setDescricao(e.target.value)} required />
-        <input type="date" value={dataCadastro} onChange={(e) => setDataCadastro(e.target.value)} required />
-        <input type="number" placeholder="Quantidade" value={quantidade} onChange={(e) => setQuantidade(Number(e.target.value))} required />
-        <input type="number" step="0.01" placeholder="Valor" value={valor} onChange={(e) => setValor(Number(e.target.value))} required />
-        <input type="text" placeholder="Caminhão" value={caminhao} onChange={(e) => setCaminhao(e.target.value)} />
-        <input type="text" placeholder="Estado de Conservação" value={estadoConservacao} onChange={(e) => setEstadoConservacao(e.target.value)} required />
-        <input type="text" placeholder="Situação" value={situacao} onChange={(e) => setSituacao(e.target.value)} required />
-        <input type="file" onChange={handleFileChange} />
-        <button type="submit">Cadastrar</button>
-      </form>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-primary">Lista de Eletrodomésticos</h1>
+        <button className="form-button success flex items-center gap-2" onClick={handleNovoCadastro}>
+          <Plus size={18} />
+          Novo Cadastro
+        </button>
+      </div>
+
+      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+
+      <div className="table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Descrição</th>
+              <th>Data Cadastro</th>
+              <th>Quantidade</th>
+              <th>Valor</th>
+              <th>Caminhão</th>
+              <th>Estado de Conservação</th>
+              <th>Situação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(itens) && itens.length > 0 ? (
+              itens.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.id}</td>
+                  <td>{item.descricao}</td>
+                  <td>{item.data_cadastro}</td>
+                  <td>{item.quantidade}</td>
+                  <td>R$ {Number(item.valor).toFixed(2)}</td>
+                  <td>{item.caminhao}</td>
+                  <td>{item.estadoConservacao}</td>
+                  <td>{item.situacao}</td>
+                  <td>
+                    <div className="actions">
+                      <button className="action-button edit" onClick={() => handleEditar(item.id)} title="Editar">
+                        <Edit size={16} />
+                      </button>
+                      <button className="action-button view" onClick={() => handleDetalhes(item.id)} title="Detalhes">
+                        <Eye size={16} />
+                      </button>
+                      <button className="action-button delete" onClick={() => handleExcluir(item.id)} title="Excluir">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={9} className="text-center">
+                  Nenhum item encontrado.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
 
-export default CadastroEletrodomestico
+export default Eletrodomesticos
