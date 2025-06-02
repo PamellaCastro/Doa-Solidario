@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getItemById, updateItem, Item } from "../../../services/ItemService";
 import axios from "axios";
 
-const EditarEletronicos: React.FC = () => {
+const EditarMoveis: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -13,7 +13,7 @@ const EditarEletronicos: React.FC = () => {
     quantidade: 0,
     valor: 0,
     caminhao: "",
-    categoria: "ELETRONICO",
+    categoria: "MOVEL",
     estadoConservacao: "",
     situacao: "",
     anexo: "",
@@ -61,7 +61,7 @@ const EditarEletronicos: React.FC = () => {
       try {
         await updateItem(parseInt(id), item);
         alert("Item atualizado com sucesso!");
-        navigate("/categorias/eletronicos");
+        navigate("/categorias/movel");
       } catch (err) {
         console.error("Erro ao atualizar o item:", err);
         setError("Erro ao atualizar o item. Tente novamente mais tarde.");
@@ -79,7 +79,7 @@ const EditarEletronicos: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Editar Eletrônico</h1>
+      <h1 className="text-2xl font-bold mb-4">Editar Móvel</h1>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -224,7 +224,7 @@ const EditarEletronicos: React.FC = () => {
 
         <div>
           <button type="submit" className="form-button primary">
-            Atualizar Eletrônico
+            Atualizar Móvel
           </button>
         </div>
       </form>
@@ -232,4 +232,4 @@ const EditarEletronicos: React.FC = () => {
   );
 };
 
-export default EditarEletronicos;
+export default EditarMoveis

@@ -1,38 +1,83 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { getEletronicoById } from '../../../services/ItemService'
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { getItemById, Item } from "../../../services/ItemService";
 
-function DetalhesEletronico() {
-  const { id } = useParams<{ id: string }>()
-  const [item, setItem] = useState<any>(null)
+const DetalhesEletronicos: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [item, setItem] = useState<Item | null>(null);
 
   useEffect(() => {
-    async function fetchItem() {
+    const fetchItem = async () => {
       if (id) {
-        const data = await getEletronicoById(Number(id))
-        setItem(data)
+        try {
+          const data = await getItemById(Number(id));
+          setItem(data);
+        } catch (error) {
+          console.error("Erro ao buscar eletrônico:", error);
+        }
       }
-    }
-    fetchItem()
-  }, [id])
+    };
 
-  if (!item) return <p>Carregando...</p>
+    fetchItem();
+  }, [id]);
+
+  if (!item) return <p>Carregando...</p>;
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("pt-BR");
+  };
+
+  const formatCurrency = (value: number) =>
+    value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
 
   return (
     <div>
-      <h1>Detalhes do Eletrônico</h1>
-      <p><strong>ID:</strong> {item.id}</p>
-      <p><strong>Descrição:</strong> {item.descricao}</p>
-      <p><strong>Data Cadastro:</strong> {item.data_cadastro}</p>
-      <p><strong>Quantidade:</strong> {item.quantidade}</p>
-      <p><strong>Valor:</strong> {item.valor}</p>
-      <p><strong>Caminhão:</strong> {item.caminhao}</p>
-      <p><strong>Categoria:</strong> {item.categoria}</p>
-      <p><strong>Estado de Conservação:</strong> {item.estadoConservacao}</p>
-      <p><strong>Situação:</strong> {item.situacao}</p>
-      <p><strong>Anexo:</strong> {item.anexo ? <a href={item.anexo}>Ver Anexo</a> : 'Sem anexo'}</p>
-    </div>
-  )
-}
+      <h1 className="text-2xl font-bold mb-4">Detalhes do Eletrônico</h1>
 
-export default DetalhesEletronico
+      <p>
+        <strong>ID:</strong> {item.id}
+      </p>
+      <p>
+        <strong>Descrição:</strong> {item.descricao}
+      </p>
+      <p>
+        <strong>Data de Cadastro:</strong>{" "}
+        {item.data_cadastro ? formatDate(item.data_cadastro) : "Não informada"}
+      </p>
+      <p>
+        <strong>Quantidade:</strong> {item.quantidade}
+      </p>
+      <p>
+        <strong>Valor:</strong> {formatCurrency(item.valor)}
+      </p>
+      <p>
+        <strong>Caminhão:</strong> {item.caminhao}
+      </p>
+      <p>
+        <strong>Categoria:</strong> {item.categoria}
+      </p>
+      <p>
+        <strong>Estado de Conservação:</strong> {item.estadoConservacao}
+      </p>
+      <p>
+        <strong>Situação:</strong> {item.situacao}
+      </p>
+      <p>
+        <strong>Anexo:</strong>{" "}
+        {item.anexo ? (
+          <a href={item.anexo} target="_blank" rel="noopener noreferrer">
+            Ver Anexo
+          </a>
+        ) : (
+          "Sem anexo"
+        )}
+      </p>
+    </div>
+  );
+};
+
+export default DetalhesEletronicos;

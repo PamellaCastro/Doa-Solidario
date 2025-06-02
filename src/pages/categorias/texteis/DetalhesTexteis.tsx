@@ -2,29 +2,42 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getItemById, Item } from "../../../services/ItemService";
 
-const DetalhesEletrodomestico: React.FC = () => {
+const DetalhesTextil: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [item, setItem] = useState<Item | null>(null);
 
   useEffect(() => {
-    async function fetchItem() {
+    const fetchItem = async () => {
       if (id) {
         try {
           const data = await getItemById(Number(id));
           setItem(data);
         } catch (error) {
-          console.error("Erro ao buscar eletrodoméstico:", error);
+          console.error("Erro ao buscar têxtil:", error);
         }
       }
-    }
+    };
+
     fetchItem();
   }, [id]);
 
   if (!item) return <p>Carregando...</p>;
 
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("pt-BR");
+  };
+
+  const formatCurrency = (value: number) =>
+    value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+
   return (
     <div>
-      <h1>Detalhes do Eletrodoméstico</h1>
+      <h1 className="text-2xl font-bold mb-4">Detalhes do Têxtil</h1>
+
       <p>
         <strong>ID:</strong> {item.id}
       </p>
@@ -32,13 +45,14 @@ const DetalhesEletrodomestico: React.FC = () => {
         <strong>Descrição:</strong> {item.descricao}
       </p>
       <p>
-        <strong>Data de Cadastro:</strong> {item.data_cadastro || "Não informado"}
+        <strong>Data de Cadastro:</strong>{" "}
+        {item.data_cadastro ? formatDate(item.data_cadastro) : "Não informada"}
       </p>
       <p>
         <strong>Quantidade:</strong> {item.quantidade}
       </p>
       <p>
-        <strong>Valor:</strong> {`R$ ${Number(item.valor).toFixed(2)}`}
+        <strong>Valor:</strong> {formatCurrency(item.valor)}
       </p>
       <p>
         <strong>Caminhão:</strong> {item.caminhao}
@@ -66,4 +80,4 @@ const DetalhesEletrodomestico: React.FC = () => {
   );
 };
 
-export default DetalhesEletrodomestico;
+export default DetalhesTextil;

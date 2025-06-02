@@ -22,7 +22,7 @@ body {
   color: var(--text-dark);
 }
 
-/* Header and Navigation */
+
 .header {
   background-color: var(--primary-blue);
   color: var(--text-light);
@@ -99,7 +99,7 @@ body {
   justify-content: center;
 }
 
-/* Sidebar */
+
 .sidebar {
   width: 240px;
   background-color: var(--primary-blue);
@@ -159,7 +159,7 @@ body {
   border-left: 4px solid var(--accent-orange);
 }
 
-/* Main Content */
+
 .main-content {
   margin-left: 240px;
   margin-top: 70px;
@@ -167,7 +167,7 @@ body {
   min-height: calc(100vh - 70px);
 }
 
-/* Cards and Containers */
+
 .card {
   background-color: var(--card-beige);
   border-radius: 8px;
@@ -189,7 +189,7 @@ body {
   color: var(--text-dark);
 }
 
-/* Forms */
+
 .form-container {
   background-color: var(--card-beige);
   border-radius: 8px;
@@ -290,7 +290,7 @@ body {
   background-color: #c82333;
 }
 
-/* Tables */
+
 .table-container {
   background-color: var(--card-beige);
   border-radius: 8px;
@@ -352,7 +352,7 @@ body {
   color: var(--danger);
 }
 
-/* Dashboard */
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -403,7 +403,7 @@ body {
   color: #6c757d;
 }
 
-/* Login Page */
+
 .login-container {
   display: flex;
   flex-direction: column;
@@ -543,7 +543,7 @@ body {
   text-decoration: underline;
 }
 
-/* Utilities */
+
 .mt-auto {
   margin-top: auto;
 }
