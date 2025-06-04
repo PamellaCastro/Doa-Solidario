@@ -33,14 +33,13 @@ export const getItemById = async (id: number): Promise<Item> => {
 };
 
 // Criar novo item usando FormData para upload de arquivos
-export const createItem = async (data: FormData): Promise<Item> => {
-  const response = await axios.post(API_URL, data, {
+export async function createItem(item: Item) {
+  return axios.post("http://localhost:8080/api/item", item, {
     headers: {
-      "Content-Type": "application/json",
-    },
+      "Content-Type": "application/json"
+    }
   });
-  return response.data;
-};
+}
 
 // Atualizar item (caso a atualização não envolva upload de arquivo, permanece usando Item)
 export const updateItem = async (id: number, item: Item): Promise<Item> => {

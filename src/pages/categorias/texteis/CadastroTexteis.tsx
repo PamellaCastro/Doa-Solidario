@@ -235,7 +235,7 @@ function CadastroMoveis() {
                 <input
                   type="text"
                   className="form-input"
-                  name="descricao"
+                  name="dataCadastro"
                   value={formData.data_cadastro}
                   onChange={handleChange}
                   required

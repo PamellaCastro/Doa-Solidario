@@ -22,7 +22,6 @@ function CadastroEletronicos() {
     // telefoneDoador: "",
     // documentoDoador: "",
 
-
     descricao: "",
     data_cadastro: new Date().toISOString().split("T")[0],
     quantidade: 1,
@@ -33,7 +32,6 @@ function CadastroEletronicos() {
     estadoConservacao: "",
     situacao: "Disponível",
     anexo: null as File | null,
-
 
     // cep: "",
     // endereco: "",
@@ -47,17 +45,18 @@ function CadastroEletronicos() {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-
     if (!e.target.files) return;
 
     if (e.target.files.length > 0) {
@@ -105,7 +104,9 @@ function CadastroEletronicos() {
       }, 3000);
     } catch (error) {
       console.error("Erro ao cadastrar eletrônico:", error);
-      alert("Ocorreu um erro ao cadastrar o eletrônico. Por favor, tente novamente.");
+      alert(
+        "Ocorreu um erro ao cadastrar o eletrônico. Por favor, tente novamente."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -116,7 +117,11 @@ function CadastroEletronicos() {
   };
 
   const validateStep2 = () => {
-    return formData.descricao && formData.estadoConservacao && formData.quantidade > 0;
+    return (
+      formData.descricao &&
+      formData.estadoConservacao &&
+      formData.quantidade > 0
+    );
   };
 
   const validateStep3 = () => {
@@ -196,7 +201,7 @@ function CadastroEletronicos() {
           type="button"
           className="btn btn-primary"
           onClick={nextStep}
-        //disabled={!validateStep1()}
+          //disabled={!validateStep1()}
         >
           Próximo
         </button>
@@ -216,7 +221,9 @@ function CadastroEletronicos() {
         <div className="row g-3">
           <div className="col-md-6">
             <div className="form-group">
-              <label className="form-label form-label-required">Descrição</label>
+              <label className="form-label form-label-required">
+                Descrição
+              </label>
               <input
                 type="text"
                 className="form-input"
@@ -231,11 +238,13 @@ function CadastroEletronicos() {
           <div className="row g-3">
             <div className="col-md-6">
               <div className="form-group">
-                <label className="form-label form-label-required">Data Cadastro</label>
+                <label className="form-label form-label-required">
+                  Data Cadastro
+                </label>
                 <input
                   type="text"
                   className="form-input"
-                  name="descricao"
+                  name="dataCadastro"
                   value={formData.data_cadastro}
                   onChange={handleChange}
                   required
@@ -245,7 +254,9 @@ function CadastroEletronicos() {
 
             <div className="col-md-6">
               <div className="form-group">
-                <label className="form-label form-label-required">Quantidade</label>
+                <label className="form-label form-label-required">
+                  Quantidade
+                </label>
                 <input
                   type="number"
                   className="form-input"
@@ -295,7 +306,9 @@ function CadastroEletronicos() {
 
           <div className="col-md-6">
             <div className="form-group">
-              <label className="form-label form-label-required">Estado de Conservação</label>
+              <label className="form-label form-label-required">
+                Estado de Conservação
+              </label>
               <select
                 className="form-select"
                 name="estadoConservacao"
@@ -307,14 +320,15 @@ function CadastroEletronicos() {
                 <option value="BOM">Bom</option>
                 <option value="REGULAR">Regular</option>
                 <option value="RUIM">Ruim</option>
-
               </select>
             </div>
           </div>
 
           <div className="col-md-6">
             <div className="form-group">
-              <label className="form-label form-label-required">Categoria</label>
+              <label className="form-label form-label-required">
+                Categoria
+              </label>
               <select
                 className="form-select"
                 name="categoria"
@@ -330,7 +344,6 @@ function CadastroEletronicos() {
               </select>
             </div>
           </div>
-
 
           <div className="col-12">
             <div className="form-group">
@@ -353,7 +366,12 @@ function CadastroEletronicos() {
             <ArrowLeft size={16} className="me-2" />
             Voltar
           </button>
-          <button type="button" className="btn btn-primary" onClick={nextStep} disabled={!validateStep2()}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={nextStep}
+            disabled={!validateStep2()}
+          >
             Próximo
           </button>
         </div>
@@ -362,13 +380,13 @@ function CadastroEletronicos() {
   };
 
   const renderStep3 = () => {
-     return (
+    return (
       //  <div className="form-step">
       //    <div className="card-header d-flex align-items-center mb-4">
       //      <MapPin size={20} className="me-2 text-primary" />
       //      <h5 className="card-title mb-0">Localização para Retirada</h5>
       //    </div>
- 
+
       //    <div className="row g-3">
       //      <div className="col-md-4">
       //        <div className="form-group">
@@ -376,7 +394,7 @@ function CadastroEletronicos() {
       //          <input type="text" className="form-input" name="cep" value={formData.cep} onChange={handleChange} />
       //        </div>
       //      </div>
- 
+
       //      <div className="col-md-8">
       //        <div className="form-group">
       //          <label className="form-label form-label-required">Endereço</label>
@@ -390,14 +408,14 @@ function CadastroEletronicos() {
       //          />
       //        </div>
       //      </div>
- 
+
       //      <div className="col-md-4">
       //        <div className="form-group">
       //          <label className="form-label">Número</label>
       //          <input type="text" className="form-input" name="numero" value={formData.numero} onChange={handleChange} />
       //        </div>
       //      </div>
- 
+
       //      <div className="col-md-8">
       //        <div className="form-group">
       //          <label className="form-label">Complemento</label>
@@ -410,14 +428,14 @@ function CadastroEletronicos() {
       //          />
       //        </div>
       //      </div>
- 
+
       //      <div className="col-md-4">
       //        <div className="form-group">
       //          <label className="form-label">Bairro</label>
       //          <input type="text" className="form-input" name="bairro" value={formData.bairro} onChange={handleChange} />
       //        </div>
       //      </div>
- 
+
       //      <div className="col-md-4">
       //        <div className="form-group">
       //          <label className="form-label form-label-required">Cidade</label>
@@ -431,7 +449,7 @@ function CadastroEletronicos() {
       //          />
       //        </div>
       //      </div>
- 
+
       //      <div className="col-md-4">
       //        <div className="form-group">
       //          <label className="form-label form-label-required">Estado</label>
@@ -473,7 +491,7 @@ function CadastroEletronicos() {
       //          </select>
       //        </div>
       //      </div>
- 
+
       //      <div className="col-12">
       //        <div className="form-group">
       //          <label className="form-label">Ponto de Referência</label>
@@ -486,7 +504,7 @@ function CadastroEletronicos() {
       //          />
       //        </div>
       //      </div>
- 
+
       //      <div className="col-12">
       //        <div className="form-group">
       //          <label className="form-label">Disponibilidade para Retirada</label>
@@ -502,33 +520,37 @@ function CadastroEletronicos() {
       //      </div>
       //    </div>
 
-         <div className="form-step-buttons">
-           <button type="button" className="btn btn-outline" onClick={prevStep}>
-             <ArrowLeft size={16} className="me-2" />
-             Voltar
-           </button>
-           <button
-             type="submit"
-             className="btn btn-primary"
-             //disabled={isSubmitting || !validateStep3()}
-             onClick={handleSubmit}
-           >
-             {isSubmitting ? (
-               <>
-                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                 Salvando...
-               </>
-             ) : (
-               <>
-                 <Save size={16} className="me-2" />
-                 Finalizar Cadastro
-               </>
-             )}
-           </button>
-         </div>
+      <div className="form-step-buttons">
+        <button type="button" className="btn btn-outline" onClick={prevStep}>
+          <ArrowLeft size={16} className="me-2" />
+          Voltar
+        </button>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          //disabled={isSubmitting || !validateStep3()}
+          onClick={handleSubmit}
+        >
+          {isSubmitting ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Salvando...
+            </>
+          ) : (
+            <>
+              <Save size={16} className="me-2" />
+              Finalizar Cadastro
+            </>
+          )}
+        </button>
+      </div>
       //  </div>
-     );
-   };
+    );
+  };
 
   const renderStep = () => {
     if (showSuccess) {
@@ -537,11 +559,16 @@ function CadastroEletronicos() {
           <div className="form-success-icon">
             <Save size={32} />
           </div>
-          <h2 className="form-success-title">Cadastro Realizado com Sucesso!</h2>
+          <h2 className="form-success-title">
+            Cadastro Realizado com Sucesso!
+          </h2>
           <p className="form-success-message">
             O Eletrônico foi cadastrado com sucesso no sistema.
           </p>
-          <button className="btn btn-primary" onClick={() => navigate("/categorias/eletronico")}>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate("/categorias/eletronico")}
+          >
             Voltar para Lista
           </button>
         </div>
@@ -553,8 +580,8 @@ function CadastroEletronicos() {
         return renderStep1();
       case 2:
         return renderStep2();
-       case 3:
-         return renderStep3();
+      case 3:
+        return renderStep3();
       default:
         return null;
     }
@@ -563,8 +590,13 @@ function CadastroEletronicos() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-2xl font-bold text-primary mb-0">Cadastro de Eletrônico</h1>
-        <button className="btn btn-outline" onClick={() => navigate("/categorias/eletronico")}>
+        <h1 className="text-2xl font-bold text-primary mb-0">
+          Cadastro de Eletrônico
+        </h1>
+        <button
+          className="btn btn-outline"
+          onClick={() => navigate("/categorias/eletronico")}
+        >
           <ArrowLeft size={16} className="me-2" />
           Voltar para Lista
         </button>

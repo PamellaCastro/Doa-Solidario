@@ -3,9 +3,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Cores definidas para o tema claro */
+  color: #213547; /* Cor do texto padrão (um cinza escuro) */
+  background-color: #ffffff; /* Fundo padrão (branco) */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,11 +15,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #747bff; /* Cor do link para tema claro */
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #535bf2; /* Cor do link ao passar o mouse */
 }
 
 body {
@@ -42,27 +42,78 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f9f9f9; /* Fundo do botão para tema claro */
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #747bff; /* Borda do botão ao passar o mouse */
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+
+/* Estilo para inputs de texto, número, email, etc. */
+.form-input {
+  color: #333333; /* Cor do texto: um cinza escuro */
+  background-color: #ffffff; /* Fundo branco para os inputs */
+  border: 1px solid #ced4da; /* Borda sutil */
+  padding: 0.75rem 1rem; /* Espaçamento interno */
+  border-radius: 0.25rem; /* Bordas levemente arredondadas */
+  width: 100%; /* Ocupa a largura total do container */
+  box-sizing: border-box; /* Inclui padding e border na largura total */
+}
+
+/* Estilo para selects (dropdowns) */
+.form-select {
+  color: #333333; /* Cor do texto */
+  background-color: #ffffff; /* Fundo branco */
+  border: 1px solid #ced4da; /* Borda */
+  padding: 0.75rem 1rem; /* Espaçamento interno */
+  border-radius: 0.25rem; /* Bordas arredondadas */
+  appearance: none; /* Remove estilos padrão do navegador para select */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H18.4c-5%200-9.3%203.2-11.2%207.9-.7%201.8-.8%203.8-.1%205.8l128.4%20168a17.6%2017.6%200%200%200%2027.6%200l128.4-168c1.3-1.6%201.8-3.6%201.2-5.7z%22%2F%3E%3C%2Fsvg%3E'); /* Ícone de seta */
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 0.8em;
+  padding-right: 2.5rem; /* Espaço para o ícone de seta */
+  width: 100%; /* Ocupa a largura total do container */
+  box-sizing: border-box; /* Inclui padding e border na largura total */
+}
+
+/* Estilo para textareas */
+textarea.form-textarea {
+  color: #333333; /* Cor do texto */
+  background-color: #ffffff; /* Fundo branco */
+  border: 1px solid #ced4da; /* Borda */
+  padding: 0.75rem 1rem; /* Espaçamento interno */
+  border-radius: 0.25rem; /* Bordas arredondadas */
+  resize: vertical; /* Permite redimensionar verticalmente */
+  min-height: 80px; /* Altura mínima */
+  width: 100%; /* Ocupa a largura total do container */
+  box-sizing: border-box; /* Inclui padding e border na largura total */
+}
+
+/* Estilo para labels dos formulários */
+.form-label {
+  color: #333333; /* Garante que os rótulos também sejam visíveis */
+  font-weight: 500;
+  margin-bottom: 0.5rem; /* Espaçamento abaixo do label */
+  display: block; /* Garante que o label ocupe sua própria linha */
+}
+
+/* Estilo para o indicador de campo obrigatório */
+.form-label-required::after {
+  content: " *";
+  color: #dc3545; /* Cor vermelha para o asterisco */
+  margin-left: 2px;
+}
+
+/* Estilo para textos de ajuda */
+.form-help-text {
+  font-size: 0.875rem;
+  color: #6c757d; /* Um cinza mais claro para textos de ajuda */
+  margin-top: 0.25rem;
 }
