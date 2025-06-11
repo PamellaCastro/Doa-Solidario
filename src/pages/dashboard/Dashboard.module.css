@@ -1,0 +1,127 @@
+/* Paleta de Cores Sugerida:
+   - Background principal: #F5F0E1 (Bege claro)
+   - Cor de texto geral: #4A4A4A (Cinza escuro)
+   - Cor de destaque/ícones: #2E7D32 (Verde escuro)
+   - Cor de texto para números: #1976D2 (Azul vibrante)
+   - Borda/sombra de cards: rgba(0, 0, 0, 0.1)
+*/
+
+.dashboardContainer {
+  padding: 30px;
+  background-color: #f5f0e1;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  font-family: 'Arial', sans-serif; 
+  color: #4a4a4a;
+}
+
+.title {
+  text-align: center;
+  color: #2e7d32; 
+  margin-bottom: 40px;
+  font-size: 2.2em;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px; 
+}
+
+.categoryCard {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column; 
+  align-items: center; 
+  text-align: center;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.categoryCard:hover {
+  transform: translateY(-5px); 
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.iconContainer {
+  background-color: #e8f5e9; 
+  border-radius: 50%; 
+  padding: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.categoryIcon {
+  font-size: 2.5em; 
+  color: #2e7d32; 
+  line-height: 1; 
+}
+
+.customIcon { 
+  width: 40px;
+  height: 40px;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.categoryName {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.categoryTotal {
+  font-size: 2.5em; 
+  font-weight: 700;
+  color: #1976d2; 
+  margin-bottom: 5px;
+}
+
+.categoryDescription {
+  font-size: 0.9em;
+  color: #777;
+}
+
+/* Media Queries para Responsividade (ajustes para telas menores) */
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 1.8em;
+    margin-bottom: 30px;
+  }
+
+  .cardsGrid {
+    grid-template-columns: 1fr; /* Em telas menores, os cards ficam em uma única coluna */
+    gap: 20px;
+  }
+
+  .categoryCard {
+    padding: 20px;
+  }
+
+  .categoryIcon {
+    font-size: 2em;
+  }
+
+  .categoryName {
+    font-size: 1.3em;
+  }
+
+  .categoryTotal {
+    font-size: 2em;
+  }
+}

@@ -3,8 +3,7 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/api/item";
 
 // Tipo para categoria
-export type Categoria = "ELETRONICO" | "MOVEL" | "ELETRODOMESTICO" | "TEXTIL";
-
+export type Categoria = "ELETRONICO" | "MOVEL" | "ELETRODOMESTICO" | "TEXIL";
 
 export interface Item {
   id?: number;
@@ -16,8 +15,6 @@ export interface Item {
   categoria: Categoria;
   estadoConservacao: string;
   situacao: string;
-  anexo?: string;
-  
 }
 
 // Obter todos os itens de uma categoria específica
@@ -32,16 +29,14 @@ export const getItemById = async (id: number): Promise<Item> => {
   return response.data;
 };
 
-// Criar novo item usando FormData para upload de arquivos
-export async function createItem(item: Item) {
-  return axios.post("http://localhost:8080/api/item", item, {
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
-}
+// Criar novo item (agora aceita um objeto Item diretamente)
+export const createItem = async (item: Item): Promise<Item> => {
+  // axios já define Content-Type: application/json automaticamente quando envia um objeto JS
+  const response = await axios.post(API_URL, item);
+  return response.data;
+};
 
-// Atualizar item (caso a atualização não envolva upload de arquivo, permanece usando Item)
+// Atualizar item
 export const updateItem = async (id: number, item: Item): Promise<Item> => {
   const response = await axios.put(`${API_URL}/${id}`, item);
   return response.data;

@@ -1,27 +1,33 @@
-import { Bell, User } from "lucide-react"
-import logo from "../../assets/transferir (1).png"
+import React from 'react';
+import { Bell, User } from 'lucide-react';
+import Logo from "../../assets/mao.png"
 
-function Header() {
+interface HeaderProps {
+  onLogout: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onLogout }) => {
+  const userName = "Admin";
+
   return (
     <header className="header">
       <div className="header-logo">
-        <img src={logo || "/placeholder.svg"} alt="Bairro da Juventude" />
-        <h1>Bairro da Juventude</h1>
+ <img src={Logo} alt="Bairro da Juventude" />       
+  <h1>Bairro da Juventude</h1>
       </div>
+
       <div className="header-actions">
         <div className="notification-icon">
-          <Bell size={20} color="white" />
+          <Bell size={24} />
           <span className="notification-badge">3</span>
         </div>
         <div className="header-user">
-          <div className="user-avatar">
-            <User size={18} />
-          </div>
-          <span className="text-white">Admin</span>
+          <span className="user-avatar">{userName.charAt(0).toUpperCase()}</span>
+          <span>{userName}</span>
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

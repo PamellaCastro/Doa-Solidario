@@ -1,81 +1,122 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getItemById, Item } from "../../../services/ItemService";
+import { ArrowLeft, Package } from "lucide-react";
 
 const DetalhesTextil: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [item, setItem] = useState<Item | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchItem = async () => {
+      setLoading(true);
+      setError(null);
+
       if (id) {
         try {
           const data = await getItemById(Number(id));
           setItem(data);
-        } catch (error) {
-          console.error("Erro ao buscar têxtil:", error);
+        } catch (err) {
+          console.error("Erro ao buscar têxtil:", err);
+          setError("Não foi possível carregar os detalhes do têxtil. Tente novamente mais tarde.");
+          setItem(null);
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setError("ID do têxtil não fornecido.");
+        setLoading(false);
       }
     };
 
     fetchItem();
   }, [id]);
 
-  if (!item) return <p>Carregando...</p>;
-
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | undefined): string => {
+    if (!dateStr) return "Não informada";
     const date = new Date(dateStr);
-    return date.toLocaleDateString("pt-BR");
+    return isNaN(date.getTime()) ? "Data inválida" : date.toLocaleDateString("pt-BR");
   };
 
-  const formatCurrency = (value: number) =>
-    value.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
+  const formatCurrency = (value: number | undefined): string =>
+    (value ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Carregando...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !item) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <p>{error || "Têxtil não encontrado."}</p>
+        <button className="btn btn-outline-primary mt-3" onClick={() => navigate("/categorias/texxil")}>
+          Voltar para a Lista
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Detalhes do Têxtil</h1>
+    <div className="container mx-auto p-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="text-2xl font-bold text-primary mb-0">Detalhes do Têxtil</h1>
+        <button
+          className="btn btn-outline"
+          onClick={() => navigate("/categorias/texil")}
+        >
+          <ArrowLeft size={16} className="me-2" />
+          Voltar para Lista
+        </button>
+      </div>
 
-      <p>
-        <strong>ID:</strong> {item.id}
-      </p>
-      <p>
-        <strong>Descrição:</strong> {item.descricao}
-      </p>
-      <p>
-        <strong>Data de Cadastro:</strong>{" "}
-        {item.data_cadastro ? formatDate(item.data_cadastro) : "Não informada"}
-      </p>
-      <p>
-        <strong>Quantidade:</strong> {item.quantidade}
-      </p>
-      <p>
-        <strong>Valor:</strong> {formatCurrency(item.valor)}
-      </p>
-      <p>
-        <strong>Caminhão:</strong> {item.caminhao}
-      </p>
-      <p>
-        <strong>Categoria:</strong> {item.categoria}
-      </p>
-      <p>
-        <strong>Estado de Conservação:</strong> {item.estadoConservacao}
-      </p>
-      <p>
-        <strong>Situação:</strong> {item.situacao}
-      </p>
-      <p>
-        <strong>Anexo:</strong>{" "}
-        {item.anexo ? (
-          <a href={item.anexo} target="_blank" rel="noopener noreferrer">
-            Ver Anexo
-          </a>
-        ) : (
-          "Sem anexo"
-        )}
-      </p>
+      <div className="card">
+        <div className="card-content p-4">
+          <div className="card-header d-flex align-items-center mb-4">
+            <Package size={20} className="me-2 text-primary" />
+            <h5 className="card-title mb-0">Informações Completas do Item</h5>
+          </div>
+
+          <div className="row g-3">
+            <div className="col-md-6">
+              <p><strong>ID:</strong> {item.id}</p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Descrição:</strong> {item.descricao}</p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Data de Cadastro:</strong> {formatDate(item.data_cadastro)}</p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Quantidade:</strong> {item.quantidade}</p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Valor:</strong> {formatCurrency(item.valor)}</p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Caminhão:</strong> {item.caminhao || "Não informado"}</p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Categoria:</strong> {item.categoria}</p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Estado de Conservação:</strong> {item.estadoConservacao}</p>
+            </div>
+            <div className="col-md-6">
+              <p><strong>Situação:</strong> {item.situacao}</p>
+            </div>
+            {/* Anexo removido */}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

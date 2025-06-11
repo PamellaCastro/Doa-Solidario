@@ -1,28 +1,75 @@
-import React, { useState, useEffect } from "react";
-import { getItens, Item } from "../../services/ItemService";
+import React, { useEffect, useState } from "react";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { getItens, Categoria, Item } from "../../services/ItemService"; // ajuste o caminho se necessário
+
+const cores = ["#007BFF", "#28A745", "#FFC107", "#DC3545"];
+
+const nomesCategoria: Record<Categoria, string> = {
+  ELETRONICO: "Eletrônicos",
+  ELETRODOMESTICO: "Eletrodomésticos",
+  MOVEL: "Móveis",
+  TEXIL: "Têxteis",
+};
 
 const Dashboard: React.FC = () => {
-  const [eletronicos, setEletronicos] = useState<Item[]>([]);
+  const [dadosGrafico, setDadosGrafico] = useState<{ name: string; value: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const carregarDados = async () => {
       try {
-        // Busca os itens da categoria "ELETRONICO" usando a função getItens
-        const data = await getItens("ELETRONICO");
-        setEletronicos(data);
+        const categorias: Categoria[] = ["ELETRONICO", "ELETRODOMESTICO", "MOVEL", "TEXIL"];
+
+        const resultados = await Promise.all(
+          categorias.map(async (categoria) => {
+            const itens: Item[] = await getItens(categoria);
+            const quantidade = itens.reduce((acc, item) => acc + item.quantidade, 0);
+            return { name: nomesCategoria[categoria], value: quantidade };
+          })
+        );
+
+        setDadosGrafico(resultados);
       } catch (error) {
-        console.error("Erro ao buscar eletrônicos no Dashboard:", error);
+        console.error(error);
+        setErro("Erro ao carregar dados do gráfico.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData();
+    carregarDados();
   }, []);
 
+  if (loading) return <p className="text-center mt-5">Carregando gráfico...</p>;
+  if (erro) return <p className="text-center text-danger">{erro}</p>;
+
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Total de Eletrônicos: {eletronicos.length}</p>
-      {/* Aqui você pode adicionar mais informações, gráficos ou resumos conforme necessário */}
+    <div className="main-content-inner">
+      <h1 className="page-title mb-4">Visão Geral do Inventário</h1>
+
+      <div className="card p-4">
+        <ResponsiveContainer width="100%" height={400}>
+          <PieChart>
+            <Pie
+              data={dadosGrafico}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={120}
+              fill="#8884d8"
+              label
+            >
+              {dadosGrafico.map((_, index) => (
+                <Cell key={index} fill={cores[index % cores.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend verticalAlign="bottom" />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
