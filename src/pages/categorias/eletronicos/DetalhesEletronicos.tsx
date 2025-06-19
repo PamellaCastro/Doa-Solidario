@@ -18,6 +18,10 @@ const DetalhesEletronico: React.FC = () => {
       if (id) {
         try {
           const data = await getItemById(Number(id));
+          // Opcional: padronizar data para ISO yyyy-mm-dd
+          // if (data.data_cadastro) {
+          //   data.data_cadastro = new Date(data.data_cadastro).toISOString().split('T')[0];
+          // }
           setItem(data);
         } catch (err) {
           console.error("Erro ao buscar eletrônico:", err);

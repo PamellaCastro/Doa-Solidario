@@ -8,48 +8,73 @@ const initialItemState: Item = {
   quantidade: 0,
   valor: 0,
   caminhao: "",
-  categoria: "ELETRONICO", 
+  categoria: "ELETRONICO",
   estadoConservacao: "",
   situacao: "",
-  data_cadastro: "", 
+  data_cadastro: new Date().toISOString().split('T')[0],
 };
 
 const CadastroEletronico: React.FC = () => {
   const [item, setItem] = useState<Item>(initialItemState);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  // Handler para atualizar o estado do item conforme os campos do formulário mudam
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  // Manipula mudanças nos campos do formulário
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
 
-    const newValue = (type === 'number' || name === 'quantidade' || name === 'valor')
-      ? parseFloat(value) || 0 
-      : value;
+    if (name === "valor") {
+      const onlyNumbers = value.replace(/[^\d]/g, "");
+      const numericValue = Number(onlyNumbers) / 100;
 
-    setItem((prev) => ({ ...prev, [name]: newValue }));
+      setItem((prev) => ({
+        ...prev,
+        valor: numericValue,
+      }));
+    } else if (type === "number" || name === "quantidade") {
+      setItem((prev) => ({
+        ...prev,
+        [name]: parseFloat(value) || 0,
+      }));
+    } else {
+      setItem((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
+  // Submissão do formulário
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setIsSubmitting(true);
-    setError(null); 
+    setError(null);
 
     try {
-      if (!item.descricao || item.quantidade === 0 || item.valor === 0 || !item.estadoConservacao || !item.situacao) {
-        setError("Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero.");
+      if (
+        !item.descricao ||
+        item.quantidade <= 0 ||
+        item.valor <= 0 ||
+        !item.estadoConservacao ||
+        !item.situacao
+      ) {
+        setError(
+          "Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero."
+        );
+        setIsSubmitting(false);
         return;
       }
 
-      // Chama o serviço para criar o item
-      await createItem(item);
+      const itemToCreate = { ...item };
 
-      // Feedback ao usuário e redirecionamento
+      await createItem(itemToCreate);
+
       alert("Eletrônico cadastrado com sucesso!");
       navigate("/categorias/eletronicos");
     } catch (err) {
-      // Tratamento de erros na requisição
       console.error("Erro ao cadastrar eletrônico:", err);
       setError("Erro ao cadastrar eletrônico. Verifique os dados e tente novamente.");
     } finally {
@@ -69,17 +94,16 @@ const CadastroEletronico: React.FC = () => {
         </button>
       </div>
       <div className="row justify-content-center">
-        
         <div className="col-12">
           <FormularioItem
-            item={item} 
-            onChange={handleChange} 
-            onSubmit={handleSubmit} 
-            modo="cadastro" 
-            error={error} 
-            isSubmitting={isSubmitting} 
-            disableCategoria={true} 
-            disableDataCadastro={true} 
+            item={item}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            modo="cadastro"
+            error={error}
+            isSubmitting={isSubmitting}
+            disableCategoria={true}
+            disableDataCadastro={true}
           />
         </div>
       </div>

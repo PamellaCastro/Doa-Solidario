@@ -13,7 +13,7 @@ import Textil from "./pages/categorias/texteis/Texteis";
 
 // Importações de outras páginas
 import Social from "./pages/social/Social";
-import Configuracoes from "./pages/configuracoes/configuracoes";
+import Configuracoes from "./pages/configuracoes/Configuracoes";
 import QueroDoar from "./pages/queroDoar/QueroDoar";
 
 // Importações dos componentes específicos de Eletrônico (CRUD)

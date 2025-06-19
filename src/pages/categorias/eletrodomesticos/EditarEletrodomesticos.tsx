@@ -17,7 +17,9 @@ const EditarEletrodomestico: React.FC = () => {
         try {
           const data = await getItemById(Number(id));
           if (data.data_cadastro) {
-            data.data_cadastro = new Date(data.data_cadastro).toISOString().split('T')[0];
+            data.data_cadastro = new Date(data.data_cadastro)
+              .toISOString()
+              .split("T")[0];
           }
           setItem(data);
           setError(null);
@@ -37,13 +39,22 @@ const EditarEletrodomestico: React.FC = () => {
     fetchItem();
   }, [id]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value, type } = e.target;
-    if (item) {
-      const newValue = (type === 'number' || name === 'quantidade' || name === 'valor')
-        ? parseFloat(value) || 0
-        : value;
-      setItem((prev) => ({ ...prev!, [name]: newValue }));
+    if (!item) return;
+
+    if (name === "valor") {
+      const numericString = value.replace(/[^\d]/g, "");
+      const numericValue = Number(numericString) / 100;
+      setItem((prev) => ({ ...prev!, valor: numericValue }));
+    } else if (type === "number" || name === "quantidade") {
+      setItem((prev) => ({ ...prev!, [name]: parseFloat(value) || 0 }));
+    } else {
+      setItem((prev) => ({ ...prev!, [name]: value }));
     }
   };
 
@@ -59,8 +70,17 @@ const EditarEletrodomestico: React.FC = () => {
     }
 
     try {
-      if (!item.descricao || item.quantidade === 0 || item.valor === 0 || !item.estadoConservacao || !item.situacao) {
-        setError("Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero.");
+      if (
+        !item.descricao ||
+        item.quantidade <= 0 ||
+        item.valor <= 0 ||
+        !item.estadoConservacao ||
+        !item.situacao
+      ) {
+        setError(
+          "Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero."
+        );
+        setIsSubmitting(false);
         return;
       }
 
@@ -77,7 +97,10 @@ const EditarEletrodomestico: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "200px" }}
+      >
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Carregando...</span>
         </div>
@@ -89,7 +112,10 @@ const EditarEletrodomestico: React.FC = () => {
     return (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
         <p>{error || "Eletrodoméstico não encontrado."}</p>
-        <button className="btn btn-outline-primary mt-3" onClick={() => navigate("/categorias/eletrodomesticos")}>
+        <button
+          className="btn btn-outline-primary mt-3"
+          onClick={() => navigate("/categorias/eletrodomesticos")}
+        >
           Voltar para a Lista
         </button>
       </div>
@@ -107,20 +133,17 @@ const EditarEletrodomestico: React.FC = () => {
           Voltar para Lista
         </button>
       </div>
-      <div className="row justify-content-center">
-        <div className="col-12 col-lg-8">
-          <FormularioItem
-            item={item}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            modo="edicao"
-            error={error}
-            isSubmitting={isSubmitting}
-            disableCategoria={true}
-            disableDataCadastro={true}
-          />
-        </div>
-      </div>
+
+      <FormularioItem
+        item={item}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+        modo="edicao"
+        error={error}
+        isSubmitting={isSubmitting}
+        disableCategoria={true}
+        disableDataCadastro={false}
+      />
     </div>
   );
 };

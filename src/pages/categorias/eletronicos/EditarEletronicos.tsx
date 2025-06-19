@@ -39,11 +39,18 @@ const EditarEletronico: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    if (item) {
-      const newValue = (type === 'number' || name === 'quantidade' || name === 'valor')
-        ? parseFloat(value) || 0
-        : value;
-      setItem((prev) => ({ ...prev!, [name]: newValue }));
+
+    if (!item) return;
+
+    if (name === "valor") {
+      const numericString = value.replace(/[^\d]/g, "");
+      const numericValue = Number(numericString) / 100;
+
+      setItem((prev) => ({ ...prev!, valor: numericValue }));
+    } else if (type === "number" || name === "quantidade") {
+      setItem((prev) => ({ ...prev!, [name]: parseFloat(value) || 0 }));
+    } else {
+      setItem((prev) => ({ ...prev!, [name]: value }));
     }
   };
 
@@ -59,7 +66,7 @@ const EditarEletronico: React.FC = () => {
     }
 
     try {
-      if (!item.descricao || item.quantidade === 0 || item.valor === 0 || !item.estadoConservacao || !item.situacao) {
+      if (!item.descricao || item.quantidade <= 0 || item.valor <= 0 || !item.estadoConservacao || !item.situacao) {
         setError("Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero.");
         return;
       }
@@ -101,13 +108,12 @@ const EditarEletronico: React.FC = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Editar Eletrônico</h1>
         <button
-          className="btn btn-outline-secondary" // Estilo de botão Bootstrap
+          className="btn btn-outline-secondary"
           onClick={() => navigate("/categorias/eletronicos")}
         >
           Voltar para Lista
         </button>
       </div>
-      {/* Wrapper para controlar a largura e centralizar o formulário */}
       <div className="row justify-content-center">
         <div className="col-12 col-lg-8">
           <FormularioItem

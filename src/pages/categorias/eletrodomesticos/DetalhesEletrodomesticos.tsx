@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getItemById, Item } from "../../../services/ItemService";
-import { ArrowLeft, Package } from "lucide-react"; // Adicionado Package para ícone de título
+import { ArrowLeft, Package } from "lucide-react";
 
 const DetalhesEletrodomestico: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,14 +20,14 @@ const DetalhesEletrodomestico: React.FC = () => {
           const data = await getItemById(Number(id));
           setItem(data);
         } catch (err) {
-          console.error("Erro ao buscar eletrôdoméstico:", err);
-          setError("Não foi possível carregar os detalhes do eletrôdoméstico. Tente novamente mais tarde.");
+          console.error("Erro ao buscar eletrodoméstico:", err);
+          setError("Não foi possível carregar os detalhes do eletrodoméstico.");
           setItem(null);
         } finally {
           setLoading(false);
         }
       } else {
-        setError("ID do eletrôdoméstico não fornecido.");
+        setError("ID do eletrodoméstico não fornecido.");
         setLoading(false);
       }
     };
@@ -57,7 +57,7 @@ const DetalhesEletrodomestico: React.FC = () => {
   if (error || !item) {
     return (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        <p>{error || "Eletrôdoméstico não encontrado."}</p>
+        <p>{error || "Eletrodoméstico não encontrado."}</p>
         <button className="btn btn-outline-primary mt-3" onClick={() => navigate("/categorias/eletrodomesticos")}>
           Voltar para a Lista
         </button>
@@ -68,11 +68,8 @@ const DetalhesEletrodomestico: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-2xl font-bold text-primary mb-0">Detalhes do Eletrôdoméstico</h1>
-        <button
-          className="btn btn-outline"
-          onClick={() => navigate("/categorias/eletrodomesticos")}
-        >
+        <h1 className="text-2xl font-bold text-primary mb-0">Detalhes do Eletrodoméstico</h1>
+        <button className="btn btn-outline" onClick={() => navigate("/categorias/eletrodomesticos")}>
           <ArrowLeft size={16} className="me-2" />
           Voltar para Lista
         </button>
@@ -86,34 +83,15 @@ const DetalhesEletrodomestico: React.FC = () => {
           </div>
 
           <div className="row g-3">
-            <div className="col-md-6">
-              <p><strong>ID:</strong> {item.id}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Descrição:</strong> {item.descricao}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Data de Cadastro:</strong> {formatDate(item.data_cadastro)}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Quantidade:</strong> {item.quantidade}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Valor:</strong> {formatCurrency(item.valor)}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Caminhão:</strong> {item.caminhao || "Não informado"}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Categoria:</strong> {item.categoria}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Estado de Conservação:</strong> {item.estadoConservacao}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Situação:</strong> {item.situacao}</p>
-            </div>
-            {/* Anexo removido conforme as outras categorias */}
+            <div className="col-md-6"><p><strong>ID:</strong> {item.id}</p></div>
+            <div className="col-md-6"><p><strong>Descrição:</strong> {item.descricao}</p></div>
+            <div className="col-md-6"><p><strong>Data de Cadastro:</strong> {formatDate(item.data_cadastro)}</p></div>
+            <div className="col-md-6"><p><strong>Quantidade:</strong> {item.quantidade}</p></div>
+            <div className="col-md-6"><p><strong>Valor:</strong> {formatCurrency(item.valor)}</p></div>
+            <div className="col-md-6"><p><strong>Caminhão:</strong> {item.caminhao || "Não informado"}</p></div>
+            <div className="col-md-6"><p><strong>Categoria:</strong> {item.categoria}</p></div>
+            <div className="col-md-6"><p><strong>Estado de Conservação:</strong> {item.estadoConservacao}</p></div>
+            <div className="col-md-6"><p><strong>Situação:</strong> {item.situacao}</p></div>
           </div>
         </div>
       </div>

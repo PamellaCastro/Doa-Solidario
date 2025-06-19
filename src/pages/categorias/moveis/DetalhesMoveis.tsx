@@ -69,10 +69,7 @@ const DetalhesMovel: React.FC = () => {
     <div className="container mx-auto p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="text-2xl font-bold text-primary mb-0">Detalhes do Móvel</h1>
-        <button
-          className="btn btn-outline"
-          onClick={() => navigate("/categorias/moveis")}
-        >
+        <button className="btn btn-outline" onClick={() => navigate("/categorias/moveis")}>
           <ArrowLeft size={16} className="me-2" />
           Voltar para Lista
         </button>
@@ -86,34 +83,15 @@ const DetalhesMovel: React.FC = () => {
           </div>
 
           <div className="row g-3">
-            <div className="col-md-6">
-              <p><strong>ID:</strong> {item.id}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Descrição:</strong> {item.descricao}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Data de Cadastro:</strong> {formatDate(item.data_cadastro)}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Quantidade:</strong> {item.quantidade}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Valor:</strong> {formatCurrency(item.valor)}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Caminhão:</strong> {item.caminhao || "Não informado"}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Categoria:</strong> {item.categoria}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Estado de Conservação:</strong> {item.estadoConservacao}</p>
-            </div>
-            <div className="col-md-6">
-              <p><strong>Situação:</strong> {item.situacao}</p>
-            </div>
-            {/* Anexo removido */}
+            <div className="col-md-6"><p><strong>ID:</strong> {item.id}</p></div>
+            <div className="col-md-6"><p><strong>Descrição:</strong> {item.descricao}</p></div>
+            <div className="col-md-6"><p><strong>Data de Cadastro:</strong> {formatDate(item.data_cadastro)}</p></div>
+            <div className="col-md-6"><p><strong>Quantidade:</strong> {item.quantidade}</p></div>
+            <div className="col-md-6"><p><strong>Valor:</strong> {formatCurrency(item.valor)}</p></div>
+            <div className="col-md-6"><p><strong>Caminhão:</strong> {item.caminhao || "Não informado"}</p></div>
+            <div className="col-md-6"><p><strong>Categoria:</strong> {item.categoria}</p></div>
+            <div className="col-md-6"><p><strong>Estado de Conservação:</strong> {item.estadoConservacao}</p></div>
+            <div className="col-md-6"><p><strong>Situação:</strong> {item.situacao}</p></div>
           </div>
         </div>
       </div>

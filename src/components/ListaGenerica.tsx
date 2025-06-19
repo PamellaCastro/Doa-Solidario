@@ -4,7 +4,7 @@ import { getItens, deleteItem, Item, Categoria } from "../services/ItemService";
 import { Plus, Edit, Eye, Trash2 } from "lucide-react";
 
 interface ListaGenericaProps {
-  categoriaApi: Categoria; // tipo Categoria
+  categoriaApi: Categoria; 
   titulo: string;
   rotaBase: string;
 }
@@ -17,7 +17,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rot
 
   useEffect(() => {
     fetchItens();
-  }, [categoriaApi]); // Recarrega se a categoria mudar
+  }, [categoriaApi]);
 
   const fetchItens = async () => {
     setLoading(true);
@@ -91,33 +91,24 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rot
           <table className="table data-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th className="text-center">Ações</th>
+                {/* <th>ID</th> */}
                 <th>Descrição</th>
                 <th>Data Cadastro</th>
-                <th>Quantidade</th>
+                <th>Quantidade do Item</th>
                 <th>Valor</th>
                 <th>Caminhão</th>
                 <th>Categoria</th>
                 <th>Estado de Conservação</th>
                 <th>Situação</th>
-                <th className="text-center">Ações</th>
+                
               </tr>
             </thead>
             <tbody>
               {itens.length > 0 ? (
                 itens.map((item) => (
                   <tr key={item.id}>
-                    <td>{item.id}</td>
-                    <td>{item.descricao}</td>
-                    <td>{formatDate(item.data_cadastro)}</td>
-                    <td>{item.quantidade}</td>
-                    <td>{formatCurrency(item.valor)}</td>
-                    <td>{item.caminhao}</td>
-                    <td>{item.categoria}</td>
-                    <td>{item.estadoConservacao}</td>
-                    <td>{item.situacao}</td>
-                    <td className="text-center">
-                      <div className="actions d-flex justify-content-center gap-2">
+                    <div className="actions d-flex justify-content-center gap-2">
                         <button
                           className="btn btn-sm btn-info"
                           onClick={() => handleEditar(item.id!)}
@@ -140,6 +131,17 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rot
                           <Trash2 size={16} />
                         </button>
                       </div>
+                    {/* <td>{item.id}</td> */}
+                    <td>{item.descricao}</td>
+                    <td>{formatDate(item.data_cadastro)}</td>
+                    <td>{item.quantidade}</td>
+                    <td>{formatCurrency(item.valor)}</td>
+                    <td>{item.caminhao}</td>
+                    <td>{item.categoria}</td>
+                    <td>{item.estadoConservacao}</td>
+                    <td>{item.situacao}</td>
+                    <td className="text-center">
+                      
                     </td>
                   </tr>
                 ))

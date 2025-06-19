@@ -8,9 +8,10 @@ const initialItemState: Item = {
   quantidade: 0,
   valor: 0,
   caminhao: "",
-  categoria: "MOVEL", // Categoria específica
+  categoria: "MOVEL",
   estadoConservacao: "",
   situacao: "",
+  data_cadastro: new Date().toISOString().split("T")[0],
 };
 
 const CadastroMovel: React.FC = () => {
@@ -19,12 +20,32 @@ const CadastroMovel: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value, type } = e.target;
-    const newValue = (type === 'number' || name === 'quantidade' || name === 'valor')
-      ? parseFloat(value) || 0
-      : value;
-    setItem((prev) => ({ ...prev, [name]: newValue }));
+
+    if (name === "valor") {
+      const onlyNumbers = value.replace(/[^\d]/g, "");
+      const numericValue = Number(onlyNumbers) / 100;
+
+      setItem((prev) => ({
+        ...prev,
+        valor: numericValue,
+      }));
+    } else if (type === "number" || name === "quantidade") {
+      setItem((prev) => ({
+        ...prev,
+        [name]: parseFloat(value) || 0,
+      }));
+    } else {
+      setItem((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,8 +54,17 @@ const CadastroMovel: React.FC = () => {
     setError(null);
 
     try {
-      if (!item.descricao || item.quantidade === 0 || item.valor === 0 || !item.estadoConservacao || !item.situacao) {
-        setError("Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero.");
+      if (
+        !item.descricao ||
+        item.quantidade <= 0 ||
+        item.valor <= 0 ||
+        !item.estadoConservacao ||
+        !item.situacao
+      ) {
+        setError(
+          "Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero."
+        );
+        setIsSubmitting(false);
         return;
       }
 
@@ -62,7 +92,7 @@ const CadastroMovel: React.FC = () => {
         </button>
       </div>
       <div className="row justify-content-center">
-        <div className="col-12 col-lg-8">
+        <div className="col-12">
           <FormularioItem
             item={item}
             onChange={handleChange}

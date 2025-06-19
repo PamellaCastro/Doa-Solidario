@@ -14,31 +14,31 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           <li>
             <NavLink to="/dashboard" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <Home size={20} />
-              <span>Dashboard</span>
+              <span>Grafico</span>
             </NavLink>
           </li>
           <li>
             <NavLink to="/categorias/eletronicos" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <Monitor size={20} />
-              <span>Eletrônicos</span>
+              <span>Eletrônico</span>
             </NavLink>
           </li>
           <li>
             <NavLink to="/categorias/eletrodomesticos" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <ShoppingBag size={20} />
-              <span>Eletrodomésticos</span>
+              <span>Eletrodoméstico</span>
             </NavLink>
           </li>
           <li>
             <NavLink to="/categorias/moveis" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <Sofa size={20} />
-              <span>Móveis</span>
+              <span>Móvel</span>
             </NavLink>
           </li>
           <li>
             <NavLink to="/categorias/texteis" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <Shirt size={20} />
-              <span>Têxteis</span>
+              <span>Têxtil</span>
             </NavLink>
           </li>
           <li>

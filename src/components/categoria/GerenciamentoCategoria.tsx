@@ -6,7 +6,7 @@ import { X, PlusCircle, Edit } from "lucide-react";
 const CATEGORIAS_ENUM = [
   "ELETRONICO",
   "ELETRODOMESTICO",
-  "TEXIL", 
+  "TEXTIL", 
   "MOVEL",
 ];
 

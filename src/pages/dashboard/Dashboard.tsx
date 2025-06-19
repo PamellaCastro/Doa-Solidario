@@ -8,7 +8,7 @@ const nomesCategoria: Record<Categoria, string> = {
   ELETRONICO: "Eletrônicos",
   ELETRODOMESTICO: "Eletrodomésticos",
   MOVEL: "Móveis",
-  TEXIL: "Têxteis",
+  TEXTIL: "Têxteis",
 };
 
 const Dashboard: React.FC = () => {
@@ -19,7 +19,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        const categorias: Categoria[] = ["ELETRONICO", "ELETRODOMESTICO", "MOVEL", "TEXIL"];
+        const categorias: Categoria[] = ["ELETRONICO", "ELETRODOMESTICO", "MOVEL", "TEXTIL"];
 
         const resultados = await Promise.all(
           categorias.map(async (categoria) => {

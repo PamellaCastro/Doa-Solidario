@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/api/item";
 
 // Tipo para categoria
-export type Categoria = "ELETRONICO" | "MOVEL" | "ELETRODOMESTICO" | "TEXIL";
+export type Categoria = "ELETRONICO" | "MOVEL" | "ELETRODOMESTICO" | "TEXTIL";
 
 export interface Item {
   id?: number;

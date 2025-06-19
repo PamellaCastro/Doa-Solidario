@@ -2,9 +2,9 @@ import ListaGenerica from "../../../components/ListaGenerica";
 
 const Textil = () => (
   <ListaGenerica
-    categoriaApi="TEXIL"
+    categoriaApi="TEXTIL"
     titulo="Têxteis"
-    rotaBase="/categorias/texil"
+    rotaBase="/categorias/texteis"
   />
 );
 
