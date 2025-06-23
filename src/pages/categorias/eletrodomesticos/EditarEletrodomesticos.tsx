@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import FormularioItem from "../../../components/FormularioItem";
+import FormularioItem from "../../../components/formularios/FormularioItem";
 import { getItemById, updateItem, Item } from "../../../services/ItemService";
 
 const EditarEletrodomestico: React.FC = () => {
@@ -25,7 +25,9 @@ const EditarEletrodomestico: React.FC = () => {
           setError(null);
         } catch (err) {
           console.error("Erro ao buscar eletrodoméstico:", err);
-          setError("Não foi possível carregar os dados do eletrodoméstico para edição.");
+          setError(
+            "Não foi possível carregar os dados do eletrodoméstico para edição."
+          );
           setItem(null);
         } finally {
           setLoading(false);
@@ -89,7 +91,9 @@ const EditarEletrodomestico: React.FC = () => {
       navigate("/categorias/eletrodomesticos");
     } catch (err) {
       console.error("Erro ao atualizar eletrodoméstico:", err);
-      setError("Erro ao atualizar eletrodoméstico. Verifique os dados e tente novamente.");
+      setError(
+        "Erro ao atualizar eletrodoméstico. Verifique os dados e tente novamente."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +129,9 @@ const EditarEletrodomestico: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-2xl font-bold text-primary">Editar Eletrodoméstico</h1>
+        <h1 className="text-2xl font-bold text-primary">
+          Editar Eletrodoméstico
+        </h1>
         <button
           className="btn btn-outline-secondary"
           onClick={() => navigate("/categorias/eletrodomesticos")}

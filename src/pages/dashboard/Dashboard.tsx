@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { getItens, Categoria, Item } from "../../services/ItemService"; // ajuste o caminho se necessário
 
 const cores = ["#007BFF", "#28A745", "#FFC107", "#DC3545"];
@@ -12,19 +19,29 @@ const nomesCategoria: Record<Categoria, string> = {
 };
 
 const Dashboard: React.FC = () => {
-  const [dadosGrafico, setDadosGrafico] = useState<{ name: string; value: number }[]>([]);
+  const [dadosGrafico, setDadosGrafico] = useState<
+    { name: string; value: number }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        const categorias: Categoria[] = ["ELETRONICO", "ELETRODOMESTICO", "MOVEL", "TEXTIL"];
+        const categorias: Categoria[] = [
+          "ELETRONICO",
+          "ELETRODOMESTICO",
+          "MOVEL",
+          "TEXTIL",
+        ];
 
         const resultados = await Promise.all(
           categorias.map(async (categoria) => {
             const itens: Item[] = await getItens(categoria);
-            const quantidade = itens.reduce((acc, item) => acc + item.quantidade, 0);
+            const quantidade = itens.reduce(
+              (acc, item) => acc + item.quantidade,
+              0
+            );
             return { name: nomesCategoria[categoria], value: quantidade };
           })
         );

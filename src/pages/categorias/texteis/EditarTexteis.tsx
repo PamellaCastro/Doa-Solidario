@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import FormularioItem from "../../../components/FormularioItem";
+import FormularioItem from "../../../components/formularios/FormularioItem";
 import { getItemById, updateItem, Item } from "../../../services/ItemService";
 
 const EditarTextil: React.FC = () => {
@@ -16,7 +16,7 @@ const EditarTextil: React.FC = () => {
       if (id) {
         try {
           const data = await getItemById(Number(id));
-          
+
           // Verifica se data_cadastro existe e é uma string antes de formatar
           if (data.data_cadastro && typeof data.data_cadastro === "string") {
             data.data_cadastro = new Date(data.data_cadastro)

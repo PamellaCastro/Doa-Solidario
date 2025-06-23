@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FormularioItem from "../../../components/FormularioItem";
+import FormularioItem from "../../../components/formularios/FormularioItem";
 import { createItem, Item } from "../../../services/ItemService";
 
 const initialItemState: Item = {

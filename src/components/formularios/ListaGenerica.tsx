@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getItens, deleteItem, Item, Categoria } from "../services/ItemService";
+import {
+  getItens,
+  deleteItem,
+  Item,
+  Categoria,
+} from "../../services/ItemService";
 import { Plus, Edit, Eye, Trash2 } from "lucide-react";
 
 interface ListaGenericaProps {
-  categoriaApi: Categoria; 
+  categoriaApi: Categoria;
   titulo: string;
   rotaBase: string;
 }
 
-const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rotaBase }) => {
+const ListaGenerica: React.FC<ListaGenericaProps> = ({
+  categoriaApi,
+  titulo,
+  rotaBase,
+}) => {
   const [itens, setItens] = useState<Item[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -55,11 +64,16 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rot
   const formatDate = (dateStr: string | undefined): string => {
     if (!dateStr) return "N/A";
     const date = new Date(dateStr);
-    return isNaN(date.getTime()) ? "Data inválida" : date.toLocaleDateString("pt-BR");
+    return isNaN(date.getTime())
+      ? "Data inválida"
+      : date.toLocaleDateString("pt-BR");
   };
 
   const formatCurrency = (value: number | undefined): string =>
-    (value ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    (value ?? 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
 
   return (
     <div className="container mx-auto p-4">
@@ -81,7 +95,10 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rot
       )}
 
       {loading ? (
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{ minHeight: "200px" }}
+        >
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Carregando...</span>
           </div>
@@ -101,7 +118,6 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rot
                 <th>Categoria</th>
                 <th>Estado de Conservação</th>
                 <th>Situação</th>
-                
               </tr>
             </thead>
             <tbody>
@@ -109,28 +125,28 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rot
                 itens.map((item) => (
                   <tr key={item.id}>
                     <div className="actions d-flex justify-content-center gap-2">
-                        <button
-                          className="btn btn-sm btn-info"
-                          onClick={() => handleEditar(item.id!)}
-                          title="Editar"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-primary"
-                          onClick={() => handleDetalhes(item.id!)}
-                          title="Detalhes"
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleExcluir(item.id)}
-                          title="Excluir"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+                      <button
+                        className="btn btn-sm btn-info"
+                        onClick={() => handleEditar(item.id!)}
+                        title="Editar"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => handleDetalhes(item.id!)}
+                        title="Detalhes"
+                      >
+                        <Eye size={16} />
+                      </button>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleExcluir(item.id)}
+                        title="Excluir"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                     {/* <td>{item.id}</td> */}
                     <td>{item.descricao}</td>
                     <td>{formatDate(item.data_cadastro)}</td>
@@ -140,15 +156,14 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoriaApi, titulo, rot
                     <td>{item.categoria}</td>
                     <td>{item.estadoConservacao}</td>
                     <td>{item.situacao}</td>
-                    <td className="text-center">
-                      
-                    </td>
+                    <td className="text-center"></td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan={10} className="text-center py-4">
-                    Nenhum item encontrado. Clique em "Novo Cadastro" para adicionar um.
+                    Nenhum item encontrado. Clique em "Novo Cadastro" para
+                    adicionar um.
                   </td>
                 </tr>
               )}

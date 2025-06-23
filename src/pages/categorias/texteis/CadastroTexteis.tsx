@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Item } from "../../../services/ItemService";
-import FormularioItem from "../../../components/FormularioItem";
+import FormularioItem from "../../../components/formularios/FormularioItem";
 
 const CadastroTextil: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +16,11 @@ const CadastroTextil: React.FC = () => {
     data_cadastro: new Date().toISOString().split("T")[0],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
     if (name === "valor") {
       const numeric = Number(value.replace(/[^\d]/g, "")) / 100;
@@ -54,4 +58,4 @@ const CadastroTextil: React.FC = () => {
   );
 };
 
-export default CadastroTextil
+export default CadastroTextil;

@@ -1,4 +1,4 @@
-import ListaGenerica from "../../../components/ListaGenerica";
+import ListaGenerica from "../../../components/formularios/ListaGenerica";
 
 const Moveis = () => (
   <ListaGenerica

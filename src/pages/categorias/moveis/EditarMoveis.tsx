@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import FormularioItem from "../../../components/FormularioItem";
+import FormularioItem from "../../../components/formularios/FormularioItem";
 import { getItemById, updateItem, Item } from "../../../services/ItemService";
 
 const EditarMovel: React.FC = () => {
@@ -89,7 +89,9 @@ const EditarMovel: React.FC = () => {
       navigate("/categorias/moveis");
     } catch (err) {
       console.error("Erro ao atualizar móvel:", err);
-      setError("Erro ao atualizar móvel. Verifique os dados e tente novamente.");
+      setError(
+        "Erro ao atualizar móvel. Verifique os dados e tente novamente."
+      );
     } finally {
       setIsSubmitting(false);
     }

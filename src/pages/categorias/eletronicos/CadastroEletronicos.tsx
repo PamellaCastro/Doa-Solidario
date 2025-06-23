@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FormularioItem from "../../../components/FormularioItem";
+import FormularioItem from "../../../components/formularios/FormularioItem";
 import { createItem, Item } from "../../../services/ItemService";
 
 const initialItemState: Item = {
@@ -11,7 +11,7 @@ const initialItemState: Item = {
   categoria: "ELETRONICO",
   estadoConservacao: "",
   situacao: "",
-  data_cadastro: new Date().toISOString().split('T')[0],
+  data_cadastro: new Date().toISOString().split("T")[0],
 };
 
 const CadastroEletronico: React.FC = () => {
@@ -22,7 +22,9 @@ const CadastroEletronico: React.FC = () => {
 
   // Manipula mudanças nos campos do formulário
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value, type } = e.target;
 
@@ -76,7 +78,9 @@ const CadastroEletronico: React.FC = () => {
       navigate("/categorias/eletronicos");
     } catch (err) {
       console.error("Erro ao cadastrar eletrônico:", err);
-      setError("Erro ao cadastrar eletrônico. Verifique os dados e tente novamente.");
+      setError(
+        "Erro ao cadastrar eletrônico. Verifique os dados e tente novamente."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -85,7 +89,9 @@ const CadastroEletronico: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-2xl font-bold text-primary">Cadastrar Novo Eletrônico</h1>
+        <h1 className="text-2xl font-bold text-primary">
+          Cadastrar Novo Eletrônico
+        </h1>
         <button
           className="btn btn-outline-secondary"
           onClick={() => navigate("/categorias/eletronicos")}

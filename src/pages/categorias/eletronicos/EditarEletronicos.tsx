@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import FormularioItem from "../../../components/FormularioItem";
+import FormularioItem from "../../../components/formularios/FormularioItem";
 import { getItemById, updateItem, Item } from "../../../services/ItemService";
 
 const EditarEletronico: React.FC = () => {
@@ -17,13 +17,17 @@ const EditarEletronico: React.FC = () => {
         try {
           const data = await getItemById(Number(id));
           if (data.data_cadastro) {
-            data.data_cadastro = new Date(data.data_cadastro).toISOString().split('T')[0];
+            data.data_cadastro = new Date(data.data_cadastro)
+              .toISOString()
+              .split("T")[0];
           }
           setItem(data);
           setError(null);
         } catch (err) {
           console.error("Erro ao buscar eletrônico:", err);
-          setError("Não foi possível carregar os dados do eletrônico para edição.");
+          setError(
+            "Não foi possível carregar os dados do eletrônico para edição."
+          );
           setItem(null);
         } finally {
           setLoading(false);
@@ -37,7 +41,11 @@ const EditarEletronico: React.FC = () => {
     fetchItem();
   }, [id]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value, type } = e.target;
 
     if (!item) return;
@@ -66,8 +74,16 @@ const EditarEletronico: React.FC = () => {
     }
 
     try {
-      if (!item.descricao || item.quantidade <= 0 || item.valor <= 0 || !item.estadoConservacao || !item.situacao) {
-        setError("Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero.");
+      if (
+        !item.descricao ||
+        item.quantidade <= 0 ||
+        item.valor <= 0 ||
+        !item.estadoConservacao ||
+        !item.situacao
+      ) {
+        setError(
+          "Por favor, preencha todos os campos obrigatórios e garanta que quantidade e valor sejam maiores que zero."
+        );
         return;
       }
 
@@ -76,7 +92,9 @@ const EditarEletronico: React.FC = () => {
       navigate("/categorias/eletronicos");
     } catch (err) {
       console.error("Erro ao atualizar eletrônico:", err);
-      setError("Erro ao atualizar eletrônico. Verifique os dados e tente novamente.");
+      setError(
+        "Erro ao atualizar eletrônico. Verifique os dados e tente novamente."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +102,10 @@ const EditarEletronico: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "200px" }}
+      >
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Carregando...</span>
         </div>
@@ -96,7 +117,10 @@ const EditarEletronico: React.FC = () => {
     return (
       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
         <p>{error || "Eletrônico não encontrado."}</p>
-        <button className="btn btn-outline-primary mt-3" onClick={() => navigate("/categorias/eletronicos")}>
+        <button
+          className="btn btn-outline-primary mt-3"
+          onClick={() => navigate("/categorias/eletronicos")}
+        >
           Voltar para a Lista
         </button>
       </div>

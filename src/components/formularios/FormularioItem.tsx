@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState } from "react";
-import type { Item, Categoria } from "../services/ItemService";
+import type { Item, Categoria } from "../../services/ItemService";
 import { Save, XCircle, Search, UserPlus, User, X } from "lucide-react";
 
 interface Pessoa {

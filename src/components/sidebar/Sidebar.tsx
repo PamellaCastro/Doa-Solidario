@@ -14,7 +14,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           <li>
             <NavLink to="/dashboard" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <Home size={20} />
-              <span>Grafico</span>
+              <span>Gráfico</span>
             </NavLink>
           </li>
           <li>
