@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import ListaGenericaIntegrada from "../../../components/formularios/ListaGenerica"
 import { Categoria, type Item } from "../../../types/Item"
 
-const EletrodomesticosIntegrado: React.FC = () => {
+const Eletrodomesticos: React.FC = () => {
   const navigate = useNavigate()
 
   const handleEdit = (item: Item) => {
@@ -29,4 +29,4 @@ const EletrodomesticosIntegrado: React.FC = () => {
   )
 }
 
-export default EletrodomesticosIntegrado
+export default Eletrodomesticos

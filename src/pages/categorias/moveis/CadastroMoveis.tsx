@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -18,7 +16,7 @@ const initialItemState: Item = {
   data_cadastro: new Date().toISOString().split("T")[0],
 }
 
-const CadastroMovelIntegrado: React.FC = () => {
+const CadastroMovel: React.FC = () => {
   const [item, setItem] = useState<Item>(initialItemState)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -103,4 +101,4 @@ const CadastroMovelIntegrado: React.FC = () => {
   )
 }
 
-export default CadastroMovelIntegrado
+export default CadastroMovel

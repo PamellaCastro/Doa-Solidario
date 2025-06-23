@@ -16,7 +16,7 @@ const initialItemState: Item = {
   data_cadastro: new Date().toISOString().split("T")[0],
 }
 
-const CadastroTextilIntegrado: React.FC = () => {
+const CadastroTextil: React.FC = () => {
   const [item, setItem] = useState<Item>(initialItemState)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -46,7 +46,7 @@ const CadastroTextilIntegrado: React.FC = () => {
     setError(null)
 
     try {
-      // Validação básica
+      // Validação
       if (
         !item.descricao ||
         item.quantidade <= 0 ||
@@ -102,4 +102,4 @@ const CadastroTextilIntegrado: React.FC = () => {
   )
 }
 
-export default CadastroTextilIntegrado
+export default CadastroTextil

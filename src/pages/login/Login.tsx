@@ -18,9 +18,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     e.preventDefault();
     setError("");
 
-    // Lógica de autenticação (simplificada para o exemplo)
+    // Lógica de autenticação
     if (email === 'doa@solidario.com' && password === 'solidario') {
-      onLogin(); // Chama a função onLogin do App.tsx para atualizar o estado de autenticação
+      onLogin();
     } else {
       setError('E-mail ou senha inválidos.');
     }
@@ -94,9 +94,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 Entrar
               </button>
             </form>
-            {/* <div className="login-footer">
-              <p>Esqueceu sua senha? <a href="#" className="login-link">Redefinir aqui</a></p>
-            </div> */}
           </div>
         </div>
       </main>

@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Search, Users, Package, Heart, Plus, User, MapPin, DollarSign } from "lucide-react"
@@ -9,7 +7,7 @@ import type { Item, Situacao } from "../../types/Item"
 import type { Beneficiario } from "../../types/Beneficiario"
 import { Estado } from "../../types/Endereco"
 
-const AreaSocialIntegrada: React.FC = () => {
+const AreaSocial: React.FC = () => {
   const [itensDisponiveis, setItensDisponiveis] = useState<Item[]>([])
   const [beneficiarios, setBeneficiarios] = useState<Beneficiario[]>([])
   const [loading, setLoading] = useState(true)
@@ -130,7 +128,7 @@ const AreaSocialIntegrada: React.FC = () => {
       const itemAtualizado: Item = {
         ...selectedItem,
         situacao: "DOADO" as Situacao,
-        // Aqui você pode adicionar um campo para o beneficiário se necessário
+        // Adicionar um campo para o beneficiário se necessário
         // beneficiario: selectedBeneficiario
       }
 
@@ -140,7 +138,7 @@ const AreaSocialIntegrada: React.FC = () => {
         `Doação realizada com sucesso!\n\nItem: ${selectedItem.descricao}\nBeneficiário: ${selectedBeneficiario.nome}`,
       )
 
-      // Resetar seleções e recarregar dados
+      // Reseta seleções e recarregar dados
       setSelectedItem(null)
       setBeneficiario(null)
       setShowModalDoacao(false)
@@ -160,10 +158,10 @@ const AreaSocialIntegrada: React.FC = () => {
 
   const iniciarVenda = (item: Item) => {
     setSelectedItem(item)
-    setBeneficiario(null) // Reset beneficiário
-    setResultadosBeneficiario([]) // Reset resultados
-    setSearchBeneficiario("") // Reset busca
-    setObservacoesVenda("") // Reset observações
+    setBeneficiario(null)
+    setResultadosBeneficiario([]) 
+    setSearchBeneficiario("") 
+    setObservacoesVenda("") 
     setShowModalVenda(true)
   }
 
@@ -186,7 +184,7 @@ const AreaSocialIntegrada: React.FC = () => {
         `Venda realizada com sucesso!\n\nItem: ${selectedItem.descricao}\nBeneficiário: ${selectedBeneficiario.nome}`,
       )
 
-      // Resetar seleções e recarregar dados
+      // Reseta seleções e recarregar dados
       setSelectedItem(null)
       setBeneficiario(null)
       setObservacoesVenda("")
@@ -925,4 +923,4 @@ const AreaSocialIntegrada: React.FC = () => {
   )
 }
 
-export default AreaSocialIntegrada
+export default AreaSocial

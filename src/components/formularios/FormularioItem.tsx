@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Save, XCircle, Search, UserPlus, User, X } from "lucide-react"
@@ -19,7 +17,7 @@ interface FormularioItemProps {
   disableDataCadastro?: boolean
 }
 
-const FormularioItemIntegrado: React.FC<FormularioItemProps> = ({
+const FormularioItem: React.FC<FormularioItemProps> = ({
   item,
   onChange,
   onSubmit,
@@ -49,7 +47,6 @@ const FormularioItemIntegrado: React.FC<FormularioItemProps> = ({
     },
   })
 
-  // Adicionar após as declarações de estado, antes do useEffect
   const formatarTexto = (texto: string): string => {
     return texto
       .toLowerCase()
@@ -58,9 +55,8 @@ const FormularioItemIntegrado: React.FC<FormularioItemProps> = ({
       .join(" ")
   }
 
-  // Adicionar após as declarações de estado, antes do if (!item && modo === "edicao")
   useEffect(() => {
-    // Se estamos no modo de edição e o item tem uma pessoa associada, definir como selecionada
+    // No modo de edição vem com uma pessoa selecionada
     if (modo === "edicao" && item?.pessoa && !selectedPessoa) {
       setSelectedPessoa(item.pessoa)
     }
@@ -74,7 +70,7 @@ const FormularioItemIntegrado: React.FC<FormularioItemProps> = ({
   const situacoes = Object.values(Situacao)
   const estados = Object.values(Estado)
 
-  // Busca real de pessoa usando a API
+  // Busca de pessoa usando a API
   const buscarPessoa = async () => {
     if (!searchTerm.trim()) return
 
@@ -114,7 +110,7 @@ const FormularioItemIntegrado: React.FC<FormularioItemProps> = ({
     }
   }
 
-  // Cadastro real de pessoa usando a API
+  // Cadastro de pessoa usando a API
   const cadastrarNovaPessoa = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmittingPessoa(true)
@@ -636,4 +632,4 @@ const FormularioItemIntegrado: React.FC<FormularioItemProps> = ({
   )
 }
 
-export default FormularioItemIntegrado
+export default FormularioItem

@@ -32,7 +32,7 @@ interface DadosEstatisticas {
   categoriaComMaisItens: string
 }
 
-const DashboardIntegrado: React.FC = () => {
+const Dashboard: React.FC = () => {
   const [dadosGrafico, setDadosGrafico] = useState<
     { name: string; value: number; quantidade: number }[]
   >([])
@@ -308,4 +308,4 @@ const DashboardIntegrado: React.FC = () => {
   )
 }
 
-export default DashboardIntegrado
+export default Dashboard

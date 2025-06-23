@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
@@ -7,7 +5,7 @@ import FormularioItemIntegrado from "../../../components/formularios/FormularioI
 import { ItemService } from "../../../services/ItemService"
 import type { Item } from "../../../types/Item"
 
-const EditarTextilIntegrado: React.FC = () => {
+const EditarTextil: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [item, setItem] = useState<Item | null>(null)
@@ -145,4 +143,4 @@ const EditarTextilIntegrado: React.FC = () => {
   )
 }
 
-export default EditarTextilIntegrado
+export default EditarTextil

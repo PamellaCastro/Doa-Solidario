@@ -1,4 +1,3 @@
-// Utilitários para formatação
 export const formatCpf = (cpf: string): string => {
   return cpf
     .replace(/\D/g, "")

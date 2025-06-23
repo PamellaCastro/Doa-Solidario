@@ -65,7 +65,7 @@ function App() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem("authToken"); // Remove o token
+    localStorage.removeItem("authToken"); 
     navigate("/login"); 
   };
 
@@ -88,7 +88,7 @@ function App() {
       {/* Header global, visível apenas se logado E NÃO for uma página pública */}
       {isLoggedIn && !isPublicPage && <Header onLogout={handleLogout} />}
 
-      <div className="content-wrapper"> {/* Envolve Sidebar e Main Content */}
+      <div className="content-wrapper">
 
         {/* Sidebar, visível apenas se logado E NÃO for uma página pública */}
         {isLoggedIn && !isPublicPage && <Sidebar onLogout={handleLogout} />}

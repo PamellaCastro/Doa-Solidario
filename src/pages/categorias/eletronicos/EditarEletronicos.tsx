@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
@@ -7,7 +5,7 @@ import FormularioItemIntegrado from "../../../components/formularios/FormularioI
 import { ItemService } from "../../../services/ItemService"
 import type { Item } from "../../../types/Item"
 
-const EditarEletronicoIntegrado: React.FC = () => {
+const EditarEletronico: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [item, setItem] = useState<Item | null>(null)
@@ -21,7 +19,7 @@ const EditarEletronicoIntegrado: React.FC = () => {
         try {
           const data = await ItemService.buscarPorId(Number(id))
 
-          // Formatar data se necessário
+          // Formatar data
           if (data.data_cadastro) {
             data.data_cadastro = new Date(data.data_cadastro).toISOString().split("T")[0]
           }
@@ -149,4 +147,4 @@ const EditarEletronicoIntegrado: React.FC = () => {
   )
 }
 
-export default EditarEletronicoIntegrado
+export default EditarEletronico

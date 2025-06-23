@@ -1,4 +1,3 @@
-// Interface corrigida para ser compatível com o backend
 export interface Endereco {
   id?: number
   cidade: string

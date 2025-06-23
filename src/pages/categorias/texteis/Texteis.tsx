@@ -1,11 +1,9 @@
-"use client"
-
 import type React from "react"
 import { useNavigate } from "react-router-dom"
 import ListaGenericaIntegrada from "../../../components/formularios/ListaGenerica"
 import { Categoria, type Item } from "../../../types/Item"
 
-const TexteisIntegrado: React.FC = () => {
+const Texteis: React.FC = () => {
   const navigate = useNavigate()
 
   const handleEdit = (item: Item) => {
@@ -31,4 +29,4 @@ const TexteisIntegrado: React.FC = () => {
   )
 }
 
-export default TexteisIntegrado
+export default Texteis

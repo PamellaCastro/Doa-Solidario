@@ -16,7 +16,7 @@ const initialItemState: Item = {
   data_cadastro: new Date().toISOString().split("T")[0],
 }
 
-const CadastroEletronicoFinal: React.FC = () => {
+const CadastroEletronico: React.FC = () => {
   const [item, setItem] = useState<Item>(initialItemState)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -101,4 +101,4 @@ const CadastroEletronicoFinal: React.FC = () => {
   )
 }
 
-export default CadastroEletronicoFinal
+export default CadastroEletronico

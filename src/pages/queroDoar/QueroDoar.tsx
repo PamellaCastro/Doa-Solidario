@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -128,13 +126,13 @@ export default function QueroDoarIntegrado() {
     setIsSubmitting(true)
 
     try {
-      // 1. Primeiro, verifica se a pessoa já existe pelo CPF
+      // Primeiro, verifica se a pessoa já existe pelo CPF
       let pessoa: Pessoa
       try {
         pessoa = await PessoaService.buscarPorCpf(formData.cpf)
         console.log("Pessoa encontrada:", pessoa)
       } catch {
-        // 2. Se não existir, cria uma nova pessoa com endereço
+        // Se não existir, cria uma nova pessoa com endereço
         const novaPessoa: Pessoa = {
           nome: formData.nome,
           cpf: formData.cpf,
@@ -152,7 +150,7 @@ export default function QueroDoarIntegrado() {
         console.log("Nova pessoa criada:", pessoa)
       }
 
-      // 3. Cria o item associado à pessoa
+      // Cria o item associado à pessoa
       const novoItem: Item = {
         descricao: formData.descricao,
         quantidade: Number(formData.quantidade) || 0,
@@ -250,7 +248,7 @@ export default function QueroDoarIntegrado() {
               </div>
               <div className="card-body">
                 <form onSubmit={handleSubmit}>
-                  {/* Step 1: Dados Pessoais */}
+                  {/* Dados Pessoais */}
                   {currentStep === 1 && (
                     <div className="row g-3">
                       <div className="col-12">
@@ -301,7 +299,7 @@ export default function QueroDoarIntegrado() {
                     </div>
                   )}
 
-                  {/* Step 2: Endereço */}
+                  {/* Endereço */}
                   {currentStep === 2 && (
                     <div className="row g-3">
                       <div className="col-md-6">
@@ -385,7 +383,7 @@ export default function QueroDoarIntegrado() {
                     </div>
                   )}
 
-                  {/* Step 3: Item para Doação */}
+                  {/* Item para Doação */}
                   {currentStep === 3 && (
                     <div className="row g-3">
                       <div className="col-12">
@@ -524,7 +522,7 @@ export default function QueroDoarIntegrado() {
                     </div>
                   )}
 
-                  {/* Navigation Buttons */}
+                  {/* Navegação Botões */}
                   <div className="d-flex justify-content-between mt-4">
                     <button
                       type="button"

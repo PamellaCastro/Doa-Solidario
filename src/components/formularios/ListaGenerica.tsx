@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Edit, Trash2, Eye, Plus, Search, Package } from "lucide-react"
@@ -14,7 +12,7 @@ interface ListaGenericaProps {
   onAdd: () => void
 }
 
-const ListaGenericaIntegrada: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit, onView, onAdd }) => {
+const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit, onView, onAdd }) => {
   const [itens, setItens] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -314,4 +312,4 @@ const ListaGenericaIntegrada: React.FC<ListaGenericaProps> = ({ categoria, titul
   )
 }
 
-export default ListaGenericaIntegrada
+export default ListaGenerica
