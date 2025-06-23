@@ -4,8 +4,11 @@ import type React from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { CheckCircle, User, MapPin, Package, ArrowLeft, ArrowRight } from "lucide-react"
-
-const API_URL = "http://localhost:8080/api/item"
+import { ItemService } from "../../services/ItemService"
+import { PessoaService } from "../../services/PessoaService"
+import { type Item, Categoria, EstadoConservacao, Situacao } from "../../types/Item"
+import type { Pessoa } from "../../types/Pessoa"
+import { Estado } from "../../types/Endereco"
 
 interface FormData {
   // Dados da Pessoa
@@ -31,58 +34,30 @@ interface FormData {
   estadoConservacao: string
 }
 
-const estados = [
-  "AC",
-  "AL",
-  "AP",
-  "AM",
-  "BA",
-  "CE",
-  "DF",
-  "ES",
-  "GO",
-  "MA",
-  "MT",
-  "MS",
-  "MG",
-  "PA",
-  "PB",
-  "PR",
-  "PE",
-  "PI",
-  "RJ",
-  "RN",
-  "RS",
-  "RO",
-  "RR",
-  "SC",
-  "SP",
-  "SE",
-  "TO",
-]
+const estados = Object.values(Estado)
 
 const categorias = [
-  { value: "ELETRONICO", label: "Eletrônico" },
-  { value: "ELETRODOMESTICO", label: "Eletrodoméstico" },
-  { value: "MOVEL", label: "Móvel" },
-  { value: "TEXTIL", label: "Têxtil" },
+  { value: Categoria.ELETRONICO, label: "Eletrônico" },
+  { value: Categoria.ELETRODOMESTICO, label: "Eletrodoméstico" },
+  { value: Categoria.MOVEL, label: "Móvel" },
+  { value: Categoria.TEXTIL, label: "Têxtil" },
 ]
 
 const situacoes = [
-  { value: "ABERTO", label: "Aberto" },
-  { value: "EM_ANDAMENTO", label: "Em Andamento" },
-  { value: "DEPOSITADO", label: "Depositado" },
-  { value: "SOLICITADO", label: "Solicitado" },
-  { value: "DOADO", label: "Doado" },
+  { value: Situacao.ABERTO, label: "Aberto" },
+  { value: Situacao.EM_ANDAMENTO, label: "Em Andamento" },
+  { value: Situacao.DEPOSITADO, label: "Depositado" },
+  { value: Situacao.SOLICITADO, label: "Solicitado" },
+  { value: Situacao.DOADO, label: "Doado" },
 ]
 
 const estadosConservacao = [
-  { value: "BOM", label: "Bom" },
-  { value: "REGULAR", label: "Regular" },
-  { value: "RUIM", label: "Ruim" },
+  { value: EstadoConservacao.BOM, label: "Bom" },
+  { value: EstadoConservacao.REGULAR, label: "Regular" },
+  { value: EstadoConservacao.RUIM, label: "Ruim" },
 ]
 
-export default function FormularioDoacao() {
+export default function QueroDoarIntegrado() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
@@ -102,7 +77,7 @@ export default function FormularioDoacao() {
     caminhao: "",
     valor: "",
     categoria: "",
-    situacao: "",
+    situacao: Situacao.ABERTO,
     estadoConservacao: "",
   })
 
@@ -152,33 +127,51 @@ export default function FormularioDoacao() {
 
     setIsSubmitting(true)
 
-    const payload = {
-      descricao: formData.descricao,
-      quantidade: Number(formData.quantidade) || 0,
-      valor: Number(formData.valor) || 0,
-      caminhao: formData.caminhao === "true",
-      categoria: formData.categoria,
-      situacao: formData.situacao || "ABERTO",
-      estadoConservacao: formData.estadoConservacao,
-      data_cadastro: formData.data_cadastro,
-    }
-
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
+      // 1. Primeiro, verifica se a pessoa já existe pelo CPF
+      let pessoa: Pessoa
+      try {
+        pessoa = await PessoaService.buscarPorCpf(formData.cpf)
+        console.log("Pessoa encontrada:", pessoa)
+      } catch {
+        // 2. Se não existir, cria uma nova pessoa com endereço
+        const novaPessoa: Pessoa = {
+          nome: formData.nome,
+          cpf: formData.cpf,
+          email: formData.email,
+          endereco: {
+            cidade: formData.cidade,
+            cep: formData.cep || undefined,
+            rua: formData.rua,
+            numero: formData.numero ? Number(formData.numero) : undefined,
+            estado: formData.estado as Estado,
+          },
+        }
 
-      if (response.ok) {
-        alert("Item cadastrado com sucesso!")
-        navigate("/login")
-      } else {
-        alert("Erro ao cadastrar item. Tente novamente.")
+        pessoa = await PessoaService.criar(novaPessoa)
+        console.log("Nova pessoa criada:", pessoa)
       }
+
+      // 3. Cria o item associado à pessoa
+      const novoItem: Item = {
+        descricao: formData.descricao,
+        quantidade: Number(formData.quantidade) || 0,
+        valor: Number(formData.valor) || 0,
+        caminhao: formData.caminhao === "true",
+        categoria: formData.categoria as Categoria,
+        situacao: (formData.situacao as Situacao) || Situacao.ABERTO,
+        estadoConservacao: formData.estadoConservacao as EstadoConservacao,
+        data_cadastro: formData.data_cadastro,
+        pessoa: pessoa,
+      }
+
+      await ItemService.criar(novoItem)
+
+      alert("Doação cadastrada com sucesso! Obrigado pela sua contribuição!")
+      navigate("/login")
     } catch (error) {
-      console.error("Erro na API:", error)
-      alert("Erro ao conectar com a API.")
+      console.error("Erro ao cadastrar doação:", error)
+      alert("Erro ao cadastrar doação. Tente novamente.")
     } finally {
       setIsSubmitting(false)
     }
@@ -200,7 +193,7 @@ export default function FormularioDoacao() {
               ← Voltar ao Login
             </button>
             <h1 className="display-5 fw-bold text-dark mb-0 flex-grow-1">Formulário de Doação</h1>
-            <div style={{ width: "140px" }}></div> {/* Spacer para centralizar o título */}
+            <div style={{ width: "140px" }}></div>
           </div>
           <p className="text-muted">Sua doação faz a diferença! Preencha os dados em etapas.</p>
         </div>
@@ -559,8 +552,17 @@ export default function FormularioDoacao() {
                         className="btn btn-success d-flex align-items-center gap-2"
                         disabled={!validateStep(3) || isSubmitting}
                       >
-                        {isSubmitting ? "Enviando..." : "Finalizar Doação"}
-                        <Package size={16} />
+                        {isSubmitting ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" />
+                            Enviando...
+                          </>
+                        ) : (
+                          <>
+                            Finalizar Doação
+                            <Package size={16} />
+                          </>
+                        )}
                       </button>
                     )}
                   </div>

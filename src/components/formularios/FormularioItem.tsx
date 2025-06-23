@@ -1,36 +1,25 @@
-import type React from "react";
-import { useState } from "react";
-import type { Item, Categoria } from "../../services/ItemService";
-import { Save, XCircle, Search, UserPlus, User, X } from "lucide-react";
+"use client"
 
-interface Pessoa {
-  id?: number;
-  nome: string;
-  cpf: string;
-  email: string;
-  cidade: string;
-  cep: string;
-  rua: string;
-  numero: string;
-  estado: string;
-}
+import type React from "react"
+import { useState, useEffect } from "react"
+import { Save, XCircle, Search, UserPlus, User, X } from "lucide-react"
+import { type Item, Categoria, EstadoConservacao, Situacao } from "../../types/Item"
+import type { Pessoa } from "../../types/Pessoa"
+import { Estado } from "../../types/Endereco"
+import { PessoaService } from "../../services/PessoaService"
 
 interface FormularioItemProps {
-  item: Item | null;
-  onChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  modo: "cadastro" | "edicao";
-  error: string | null;
-  isSubmitting: boolean;
-  disableCategoria?: boolean;
-  disableDataCadastro?: boolean;
+  item: Item | null
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void
+  onSubmit: (e: React.FormEvent) => void
+  modo: "cadastro" | "edicao"
+  error: string | null
+  isSubmitting: boolean
+  disableCategoria?: boolean
+  disableDataCadastro?: boolean
 }
 
-const FormularioItem: React.FC<FormularioItemProps> = ({
+const FormularioItemIntegrado: React.FC<FormularioItemProps> = ({
   item,
   onChange,
   onSubmit,
@@ -40,166 +29,145 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
   disableCategoria = false,
   disableDataCadastro = false,
 }) => {
-  const [showModal, setShowModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPessoa, setSelectedPessoa] = useState<Pessoa | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<Pessoa[]>([]);
-  const [isSubmittingPessoa, setIsSubmittingPessoa] = useState(false);
+  const [showModal, setShowModal] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedPessoa, setSelectedPessoa] = useState<Pessoa | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<Pessoa[]>([])
+  const [isSubmittingPessoa, setIsSubmittingPessoa] = useState(false)
 
   const [novaPessoa, setNovaPessoa] = useState<Pessoa>({
     nome: "",
     cpf: "",
     email: "",
-    cidade: "",
-    cep: "",
-    rua: "",
-    numero: "",
-    estado: "",
-  });
+    endereco: {
+      cidade: "",
+      cep: "",
+      rua: "",
+      numero: 0,
+      estado: Estado.SC,
+    },
+  })
 
-  if (!item && modo === "edicao") return null;
+  // Adicionar após as declarações de estado, antes do useEffect
+  const formatarTexto = (texto: string): string => {
+    return texto
+      .toLowerCase()
+      .split("_")
+      .map((palavra) => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+      .join(" ")
+  }
 
-  const categorias: Categoria[] = [
-    "ELETRONICO",
-    "ELETRODOMESTICO",
-    "MOVEL",
-    "TEXTIL",
-  ];
-
-  const estadosConservacao = ["BOM", "REGULAR", "RUIM"];
-  const situacoes = [
-    "ABERTO",
-    "EM_ANDAMENTO",
-    "DEPOSITADO",
-    "VENDIDO",
-    "SOLICITADO",
-    "DOADO",
-  ];
-
-  const estados = [
-    "AC",
-    "AL",
-    "AP",
-    "AM",
-    "BA",
-    "CE",
-    "DF",
-    "ES",
-    "GO",
-    "MA",
-    "MT",
-    "MS",
-    "MG",
-    "PA",
-    "PB",
-    "PR",
-    "PE",
-    "PI",
-    "RJ",
-    "RN",
-    "RS",
-    "RO",
-    "RR",
-    "SC",
-    "SP",
-    "SE",
-    "TO",
-  ];
-
-  // Simular busca de pessoa (substitua pela sua API)
-  const buscarPessoa = async () => {
-    if (!searchTerm.trim()) return;
-
-    setIsSearching(true);
-    try {
-      // Simular chamada à API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Dados mockados - substitua pela sua API
-      const mockResults: Pessoa[] = [
-        {
-          id: 1,
-          nome: "João Silva",
-          cpf: "123.456.789-00",
-          email: "joao@email.com",
-          cidade: "São Paulo",
-          cep: "01234-567",
-          rua: "Rua das Flores",
-          numero: "123",
-          estado: "SP",
-        },
-      ];
-
-      setSearchResults(
-        mockResults.filter(
-          (p) =>
-            p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.cpf.includes(searchTerm)
-        )
-      );
-    } catch (error) {
-      console.error("Erro ao buscar pessoa:", error);
-    } finally {
-      setIsSearching(false);
+  // Adicionar após as declarações de estado, antes do if (!item && modo === "edicao")
+  useEffect(() => {
+    // Se estamos no modo de edição e o item tem uma pessoa associada, definir como selecionada
+    if (modo === "edicao" && item?.pessoa && !selectedPessoa) {
+      setSelectedPessoa(item.pessoa)
     }
-  };
+  }, [item, modo, selectedPessoa])
+
+  if (!item && modo === "edicao") return null
+
+  const categorias: Categoria[] = [Categoria.ELETRONICO, Categoria.ELETRODOMESTICO, Categoria.MOVEL, Categoria.TEXTIL]
+
+  const estadosConservacao = Object.values(EstadoConservacao)
+  const situacoes = Object.values(Situacao)
+  const estados = Object.values(Estado)
+
+  // Busca real de pessoa usando a API
+  const buscarPessoa = async () => {
+    if (!searchTerm.trim()) return
+
+    setIsSearching(true)
+    try {
+      const resultados = await PessoaService.buscar(searchTerm)
+      setSearchResults(resultados)
+    } catch (error) {
+      console.error("Erro ao buscar pessoa:", error)
+      setSearchResults([])
+      alert("Erro ao buscar pessoa. Tente novamente.")
+    } finally {
+      setIsSearching(false)
+    }
+  }
 
   const selecionarPessoa = (pessoa: Pessoa) => {
-    setSelectedPessoa(pessoa);
-    setSearchResults([]);
-    setSearchTerm("");
-  };
+    setSelectedPessoa(pessoa)
+    setSearchResults([])
+    setSearchTerm("")
+  }
 
-  const handleNovaPessoaChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setNovaPessoa((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleNovaPessoaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
 
+    if (name.startsWith("endereco.")) {
+      const enderecoField = name.split(".")[1]
+      setNovaPessoa((prev) => ({
+        ...prev,
+        endereco: {
+          ...prev.endereco!,
+          [enderecoField]: enderecoField === "numero" ? Number(value) : value,
+        },
+      }))
+    } else {
+      setNovaPessoa((prev) => ({ ...prev, [name]: value }))
+    }
+  }
+
+  // Cadastro real de pessoa usando a API
   const cadastrarNovaPessoa = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmittingPessoa(true);
+    e.preventDefault()
+    setIsSubmittingPessoa(true)
 
     try {
-      // Simular cadastro na API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const pessoaCadastrada: Pessoa = {
-        ...novaPessoa,
-        id: Date.now(), // Simular ID gerado
-      };
-
-      setSelectedPessoa(pessoaCadastrada);
-      setShowModal(false);
+      const pessoaCadastrada = await PessoaService.criar(novaPessoa)
+      setSelectedPessoa(pessoaCadastrada)
+      setShowModal(false)
       setNovaPessoa({
         nome: "",
         cpf: "",
         email: "",
-        cidade: "",
-        cep: "",
-        rua: "",
-        numero: "",
-        estado: "",
-      });
-
-      alert("Pessoa cadastrada com sucesso!");
+        endereco: {
+          cidade: "",
+          cep: "",
+          rua: "",
+          numero: 0,
+          estado: Estado.SC,
+        },
+      })
+      alert("Pessoa cadastrada com sucesso!")
     } catch (error) {
-      console.error("Erro ao cadastrar pessoa:", error);
-      alert("Erro ao cadastrar pessoa");
+      console.error("Erro ao cadastrar pessoa:", error)
+      alert("Erro ao cadastrar pessoa. Verifique os dados e tente novamente.")
     } finally {
-      setIsSubmittingPessoa(false);
+      setIsSubmittingPessoa(false)
     }
-  };
+  }
 
   const removerPessoa = () => {
-    setSelectedPessoa(null);
-  };
+    setSelectedPessoa(null)
+  }
+
+  // Função para submeter o formulário com a pessoa selecionada
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!selectedPessoa) {
+      alert("Por favor, selecione uma pessoa antes de continuar.")
+      return
+    }
+
+    // Adiciona a pessoa ao item antes de submeter
+    if (item) {
+      item.pessoa = selectedPessoa
+    }
+
+    onSubmit(e)
+  }
 
   return (
     <>
-      <form onSubmit={onSubmit} className="card p-4">
+      <form onSubmit={handleFormSubmit} className="card p-4">
         {/* Seção de Pessoa */}
         <div className="row mb-4">
           <div className="col-12">
@@ -229,21 +197,13 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                       onClick={buscarPessoa}
                       disabled={isSearching || !searchTerm.trim()}
                     >
-                      {isSearching ? (
-                        <span className="spinner-border spinner-border-sm" />
-                      ) : (
-                        <Search size={16} />
-                      )}
+                      {isSearching ? <span className="spinner-border spinner-border-sm" /> : <Search size={16} />}
                     </button>
                   </div>
                 </div>
 
                 <div className="col-md-4 mb-3 d-flex align-items-end">
-                  <button
-                    type="button"
-                    className="btn btn-success w-100"
-                    onClick={() => setShowModal(true)}
-                  >
+                  <button type="button" className="btn btn-success w-100" onClick={() => setShowModal(true)}>
                     <UserPlus size={16} className="me-2" />
                     Cadastrar Nova Pessoa
                   </button>
@@ -254,9 +214,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   <div className="col-12">
                     <div className="card">
                       <div className="card-header">
-                        <small className="text-muted">
-                          Resultados encontrados:
-                        </small>
+                        <small className="text-muted">Resultados encontrados:</small>
                       </div>
                       <div className="card-body p-2">
                         {searchResults.map((pessoa) => (
@@ -271,6 +229,10 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                               <br />
                               <small className="text-muted">
                                 CPF: {pessoa.cpf} | Email: {pessoa.email}
+                              </small>
+                              {pessoa.endereco && <br />}
+                              <small className="text-muted">
+                                {pessoa.endereco?.cidade} - {pessoa.endereco?.estado}
                               </small>
                             </div>
                             <button
@@ -295,12 +257,16 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   <small>
                     CPF: {selectedPessoa.cpf} | Email: {selectedPessoa.email}
                   </small>
+                  {selectedPessoa.endereco && (
+                    <>
+                      <br />
+                      <small>
+                        {selectedPessoa.endereco.cidade} - {selectedPessoa.endereco.estado}
+                      </small>
+                    </>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-danger"
-                  onClick={removerPessoa}
-                >
+                <button type="button" className="btn btn-sm btn-outline-danger" onClick={removerPessoa}>
                   <X size={16} />
                 </button>
               </div>
@@ -321,7 +287,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="descricao" className="form-label">
-              Descrição
+              Descrição *
             </label>
             <input
               type="text"
@@ -336,34 +302,30 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="quantidade" className="form-label">
-              Quantidade
+              Quantidade *
             </label>
             <input
               type="number"
               className="form-control"
               id="quantidade"
               name="quantidade"
-              value={item?.quantidade || ""}
+              value={item?.quantidade && item.quantidade > 0 ? item.quantidade : ""}
               onChange={onChange}
               required
-              min="0"
+              min="1"
             />
           </div>
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="valor" className="form-label">
-              Valor (R$)
+              Valor (R$) *
             </label>
             <input
               type="text"
               className="form-control"
               id="valor"
               name="valor"
-              value={
-                item?.valor !== undefined && item?.valor !== null
-                  ? item.valor.toString().replace(".", ",")
-                  : ""
-              }
+              value={item?.valor !== undefined && item?.valor !== null ? item.valor.toString().replace(".", ",") : ""}
               onChange={onChange}
               inputMode="decimal"
               required
@@ -372,21 +334,23 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="caminhao" className="form-label">
-              Caminhão
+              Necessita Caminhão?
             </label>
-            <input
-              type="text"
-              className="form-control"
+            <select
+              className="form-select"
               id="caminhao"
               name="caminhao"
-              value={item?.caminhao || ""}
+              value={item?.caminhao ? "true" : "false"}
               onChange={onChange}
-            />
+            >
+              <option value="false">Não</option>
+              <option value="true">Sim</option>
+            </select>
           </div>
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="categoria" className="form-label">
-              Categoria
+              Categoria *
             </label>
             <select
               className="form-select"
@@ -400,7 +364,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               <option value="">Selecione uma categoria</option>
               {categorias.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat.replace("_", " ")}
+                  {formatarTexto(cat)}
                 </option>
               ))}
             </select>
@@ -408,7 +372,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="estadoConservacao" className="form-label">
-              Estado de Conservação
+              Estado de Conservação *
             </label>
             <select
               className="form-select"
@@ -421,7 +385,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               <option value="">Selecione o estado</option>
               {estadosConservacao.map((estado) => (
                 <option key={estado} value={estado}>
-                  {estado}
+                  {formatarTexto(estado)}
                 </option>
               ))}
             </select>
@@ -429,7 +393,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="situacao" className="form-label">
-              Situação
+              Situação *
             </label>
             <select
               className="form-select"
@@ -442,7 +406,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               <option value="">Selecione a situação</option>
               {situacoes.map((situ) => (
                 <option key={situ} value={situ}>
-                  {situ}
+                  {formatarTexto(situ)}
                 </option>
               ))}
             </select>
@@ -465,10 +429,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           {error && (
             <div className="col-12">
-              <div
-                className="alert alert-danger d-flex align-items-center"
-                role="alert"
-              >
+              <div className="alert alert-danger d-flex align-items-center" role="alert">
                 <XCircle size={20} className="me-2" />
                 <div>{error}</div>
               </div>
@@ -483,11 +444,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
             >
               {isSubmitting ? (
                 <>
-                  <span
-                    className="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                   Salvando...
                 </>
               ) : (
@@ -508,10 +465,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
       {/* Modal para Cadastrar Nova Pessoa */}
       {showModal && (
-        <div
-          className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
+        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -519,11 +473,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   <UserPlus size={20} className="me-2" />
                   Cadastrar Nova Pessoa
                 </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                ></button>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={cadastrarNovaPessoa}>
                 <div className="modal-body">
@@ -574,74 +524,78 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                       />
                     </div>
 
+                    <div className="col-12">
+                      <h6 className="text-secondary mt-3 mb-2">Endereço</h6>
+                    </div>
+
                     <div className="col-md-6">
-                      <label htmlFor="cidade" className="form-label">
+                      <label htmlFor="endereco.cidade" className="form-label">
                         Cidade *
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        id="cidade"
-                        name="cidade"
-                        value={novaPessoa.cidade}
+                        id="endereco.cidade"
+                        name="endereco.cidade"
+                        value={novaPessoa.endereco?.cidade || ""}
                         onChange={handleNovaPessoaChange}
                         required
                       />
                     </div>
 
                     <div className="col-md-6">
-                      <label htmlFor="cep" className="form-label">
+                      <label htmlFor="endereco.cep" className="form-label">
                         CEP
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        id="cep"
-                        name="cep"
-                        value={novaPessoa.cep}
+                        id="endereco.cep"
+                        name="endereco.cep"
+                        value={novaPessoa.endereco?.cep || ""}
                         onChange={handleNovaPessoaChange}
                         placeholder="00000-000"
                       />
                     </div>
 
                     <div className="col-12">
-                      <label htmlFor="rua" className="form-label">
+                      <label htmlFor="endereco.rua" className="form-label">
                         Rua *
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        id="rua"
-                        name="rua"
-                        value={novaPessoa.rua}
+                        id="endereco.rua"
+                        name="endereco.rua"
+                        value={novaPessoa.endereco?.rua || ""}
                         onChange={handleNovaPessoaChange}
                         required
                       />
                     </div>
 
                     <div className="col-md-6">
-                      <label htmlFor="numero" className="form-label">
+                      <label htmlFor="endereco.numero" className="form-label">
                         Número
                       </label>
                       <input
-                        type="text"
+                        type="number"
                         className="form-control"
-                        id="numero"
-                        name="numero"
-                        value={novaPessoa.numero}
+                        id="endereco.numero"
+                        name="endereco.numero"
+                        value={novaPessoa.endereco?.numero || ""}
                         onChange={handleNovaPessoaChange}
                       />
                     </div>
 
                     <div className="col-md-6">
-                      <label htmlFor="estado" className="form-label">
+                      <label htmlFor="endereco.estado" className="form-label">
                         Estado *
                       </label>
                       <select
                         className="form-select"
-                        id="estado"
-                        name="estado"
-                        value={novaPessoa.estado}
+                        id="endereco.estado"
+                        name="endereco.estado"
+                        value={novaPessoa.endereco?.estado || ""}
                         onChange={handleNovaPessoaChange}
                         required
                       >
@@ -656,18 +610,10 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowModal(false)}
-                  >
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
                     Cancelar
                   </button>
-                  <button
-                    type="submit"
-                    className="btn btn-success"
-                    disabled={isSubmittingPessoa}
-                  >
+                  <button type="submit" className="btn btn-success" disabled={isSubmittingPessoa}>
                     {isSubmittingPessoa ? (
                       <>
                         <span className="spinner-border spinner-border-sm me-2" />
@@ -687,7 +633,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
-export default FormularioItem;
+export default FormularioItemIntegrado

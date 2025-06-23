@@ -1,178 +1,317 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  getItens,
-  deleteItem,
-  Item,
-  Categoria,
-} from "../../services/ItemService";
-import { Plus, Edit, Eye, Trash2 } from "lucide-react";
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import { Edit, Trash2, Eye, Plus, Search, Package } from "lucide-react"
+import { ItemService } from "../../services/ItemService"
+import type { Item, Categoria } from "../../types/Item"
 
 interface ListaGenericaProps {
-  categoriaApi: Categoria;
-  titulo: string;
-  rotaBase: string;
+  categoria: Categoria
+  titulo: string
+  onEdit: (item: Item) => void
+  onView: (item: Item) => void
+  onAdd: () => void
 }
 
-const ListaGenerica: React.FC<ListaGenericaProps> = ({
-  categoriaApi,
-  titulo,
-  rotaBase,
-}) => {
-  const [itens, setItens] = useState<Item[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const navigate = useNavigate();
+const ListaGenericaIntegrada: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit, onView, onAdd }) => {
+  const [itens, setItens] = useState<Item[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
-    fetchItens();
-  }, [categoriaApi]);
+    carregarItens()
+  }, [categoria])
 
-  const fetchItens = async () => {
-    setLoading(true);
-    setError(null);
+  const carregarItens = async () => {
+    setLoading(true)
+    setError(null)
     try {
-      const data = await getItens(categoriaApi);
-      setItens(data);
+      const data = await ItemService.listarTodos(categoria)
+      setItens(data)
     } catch (err) {
-      console.error(`Erro ao buscar itens da categoria ${categoriaApi}:`, err);
-      setError("Erro ao buscar itens. Por favor, tente novamente mais tarde.");
-      setItens([]);
+      setError(`Erro ao carregar ${titulo.toLowerCase()}`)
+      console.error(err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const handleNovoCadastro = () => navigate(`${rotaBase}/novo`);
-  const handleEditar = (id: number) => navigate(`${rotaBase}/editar/${id}`);
-  const handleDetalhes = (id: number) => navigate(`${rotaBase}/detalhes/${id}`);
-
-  const handleExcluir = async (id?: number) => {
-    if (!id) return;
-    if (confirm("Tem certeza que deseja excluir este item?")) {
-      try {
-        await deleteItem(id);
-        alert("Item excluído com sucesso!");
-        fetchItens();
-      } catch (err) {
-        console.error("Erro ao excluir:", err);
-        alert("Erro ao excluir o item. Tente novamente mais tarde.");
-      }
+  const handleDelete = async (id: number) => {
+    if (!confirm(`Tem certeza que deseja excluir este ${titulo.toLowerCase().slice(0, -1)}?`)) {
+      return
     }
-  };
 
-  const formatDate = (dateStr: string | undefined): string => {
-    if (!dateStr) return "N/A";
-    const date = new Date(dateStr);
-    return isNaN(date.getTime())
-      ? "Data inválida"
-      : date.toLocaleDateString("pt-BR");
-  };
+    try {
+      await ItemService.deletar(id)
+      alert(`${titulo.slice(0, -1)} excluído com sucesso!`)
+      await carregarItens() // Recarrega a lista
+    } catch (err) {
+      alert(`Erro ao excluir ${titulo.toLowerCase().slice(0, -1)}`)
+      console.error(err)
+    }
+  }
 
-  const formatCurrency = (value: number | undefined): string =>
-    (value ?? 0).toLocaleString("pt-BR", {
+  const filteredItens = itens.filter(
+    (item) =>
+      item.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.pessoa?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.situacao.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
+  const formatCurrency = (value: number): string => {
+    return value.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
-    });
+    })
+  }
+
+  const formatDate = (dateString?: string): string => {
+    if (!dateString) return "N/A"
+    return new Date(dateString).toLocaleDateString("pt-BR")
+  }
+
+  const getSituacaoBadgeClass = (situacao: string): string => {
+    const classes: Record<string, string> = {
+      ABERTO: "bg-primary",
+      EM_ANDAMENTO: "bg-warning",
+      DEPOSITADO: "bg-info",
+      VENDIDO: "bg-success",
+      SOLICITADO: "bg-secondary",
+      DOADO: "bg-success",
+    }
+    return classes[situacao] || "bg-secondary"
+  }
+
+  const getEstadoConservacaoClass = (estado: string): string => {
+    const classes: Record<string, string> = {
+      BOM: "text-success",
+      REGULAR: "text-warning",
+      RUIM: "text-danger",
+    }
+    return classes[estado] || "text-secondary"
+  }
+
+  const formatarTexto = (texto: string): string => {
+    return texto
+      .toLowerCase()
+      .split("_")
+      .map((palavra) => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+      .join(" ")
+  }
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "300px" }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Carregando {titulo.toLowerCase()}...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="alert alert-danger text-center" role="alert">
+        <h4>Erro ao carregar dados</h4>
+        <p>{error}</p>
+        <button className="btn btn-outline-danger" onClick={carregarItens}>
+          Tentar Novamente
+        </button>
+      </div>
+    )
+  }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container-fluid p-4">
+      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-2xl font-bold text-primary">Lista de {titulo}</h1>
-        <button
-          className="btn btn-success d-flex align-items-center gap-2"
-          onClick={handleNovoCadastro}
-        >
+        <h1 className="h2 text-primary mb-0">{titulo}</h1>
+        <button className="btn btn-success d-flex align-items-center gap-2" onClick={onAdd}>
           <Plus size={18} />
-          Novo Cadastro
+          Adicionar {titulo.slice(0, -1)}
         </button>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div
-          className="d-flex justify-content-center align-items-center"
-          style={{ minHeight: "200px" }}
-        >
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Carregando...</span>
+      {/* Busca */}
+      <div className="row mb-4">
+        <div className="col-md-6">
+          <div className="input-group">
+            <span className="input-group-text">
+              <Search size={16} />
+            </span>
+            <input
+              type="text"
+              className="form-control"
+              placeholder={`Buscar ${titulo.toLowerCase()} por descrição, pessoa ou situação...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
-      ) : (
-        <div className="table-responsive">
-          <table className="table data-table">
-            <thead>
-              <tr>
-                <th className="text-center">Ações</th>
-                {/* <th>ID</th> */}
-                <th>Descrição</th>
-                <th>Data Cadastro</th>
-                <th>Quantidade do Item</th>
-                <th>Valor</th>
-                <th>Caminhão</th>
-                <th>Categoria</th>
-                <th>Estado de Conservação</th>
-                <th>Situação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {itens.length > 0 ? (
-                itens.map((item) => (
-                  <tr key={item.id}>
-                    <div className="actions d-flex justify-content-center gap-2">
-                      <button
-                        className="btn btn-sm btn-info"
-                        onClick={() => handleEditar(item.id!)}
-                        title="Editar"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-primary"
-                        onClick={() => handleDetalhes(item.id!)}
-                        title="Detalhes"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleExcluir(item.id)}
-                        title="Excluir"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                    {/* <td>{item.id}</td> */}
-                    <td>{item.descricao}</td>
-                    <td>{formatDate(item.data_cadastro)}</td>
-                    <td>{item.quantidade}</td>
-                    <td>{formatCurrency(item.valor)}</td>
-                    <td>{item.caminhao}</td>
-                    <td>{item.categoria}</td>
-                    <td>{item.estadoConservacao}</td>
-                    <td>{item.situacao}</td>
-                    <td className="text-center"></td>
-                  </tr>
-                ))
-              ) : (
+        <div className="col-md-6 text-end">
+          <small className="text-muted">
+            Total: {filteredItens.length} {filteredItens.length === 1 ? "item" : "itens"}
+          </small>
+        </div>
+      </div>
+
+      {/* Tabela */}
+      <div className="card">
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover mb-0">
+              <thead className="table-light">
                 <tr>
-                  <td colSpan={10} className="text-center py-4">
-                    Nenhum item encontrado. Clique em "Novo Cadastro" para
-                    adicionar um.
-                  </td>
+                  <th>Ações</th>
+                  <th>Descrição</th>
+                  <th>Pessoa</th>
+                  <th>Quantidade</th>
+                  <th>Valor</th>
+                  <th>Estado</th>
+                  <th>Situação</th>
+                  <th>Data Cadastro</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredItens.length > 0 ? (
+                  filteredItens.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <div className="d-flex gap-1">
+                          <button
+                            className="btn btn-sm btn-outline-info"
+                            onClick={() => onView(item)}
+                            title="Visualizar"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => onEdit(item)}
+                            title="Editar"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleDelete(item.id!)}
+                            title="Excluir"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          <strong>{item.descricao}</strong>
+                          {item.caminhao && (
+                            <span className="badge bg-warning text-dark ms-2" title="Necessita caminhão">
+                              🚛
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        {item.pessoa ? (
+                          <div>
+                            <div>{item.pessoa.nome}</div>
+                            <small className="text-muted">{item.pessoa.email}</small>
+                          </div>
+                        ) : (
+                          <span className="text-muted">Não informado</span>
+                        )}
+                      </td>
+                      <td>
+                        <span className="badge bg-light text-dark">{item.quantidade}</span>
+                      </td>
+                      <td>{formatCurrency(item.valor || 0)}</td>
+                      <td>
+                        <span className={`fw-bold ${getEstadoConservacaoClass(item.estadoConservacao)}`}>
+                          {formatarTexto(item.estadoConservacao)}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge ${getSituacaoBadgeClass(item.situacao)} text-white`}>
+                          {formatarTexto(item.situacao)}
+                        </span>
+                      </td>
+                      <td>{formatDate(item.data_cadastro)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="text-center py-5">
+                      <div className="text-muted">
+                        <Package size={48} className="mb-3 opacity-50" />
+                        <h5>Nenhum item encontrado</h5>
+                        <p>
+                          {searchTerm
+                            ? `Nenhum resultado para "${searchTerm}"`
+                            : `Não há ${titulo.toLowerCase()} cadastrados ainda.`}
+                        </p>
+                        {!searchTerm && (
+                          <button className="btn btn-primary" onClick={onAdd}>
+                            <Plus size={16} className="me-2" />
+                            Adicionar Primeiro {titulo.slice(0, -1)}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Estatísticas */}
+      {filteredItens.length > 0 && (
+        <div className="row mt-4">
+          <div className="col-md-3">
+            <div className="card bg-primary text-white">
+              <div className="card-body text-center">
+                <h5>Total de Itens</h5>
+                <h3>{filteredItens.reduce((acc, item) => acc + item.quantidade, 0)}</h3>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card bg-success text-white">
+              <div className="card-body text-center">
+                <h5>Valor Total</h5>
+                <h3>{formatCurrency(filteredItens.reduce((acc, item) => acc + (item.valor || 0), 0))}</h3>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card bg-info text-white">
+              <div className="card-body text-center">
+                <h5>Pessoas</h5>
+                <h3>{new Set(filteredItens.map((item) => item.pessoa?.id).filter(Boolean)).size}</h3>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card bg-warning text-white">
+              <div className="card-body text-center">
+                <h5>Valor Médio</h5>
+                <h3>
+                  {filteredItens.length > 0
+                    ? formatCurrency(
+                        filteredItens.reduce((acc, item) => acc + (item.valor || 0), 0) / filteredItens.length,
+                      )
+                    : "R$ 0,00"}
+                </h3>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ListaGenerica;
+export default ListaGenericaIntegrada

@@ -1,11 +1,34 @@
-import ListaGenerica from "../../../components/formularios/ListaGenerica";
+"use client"
 
-const Eletronicos = () => (
-  <ListaGenerica
-    categoriaApi="ELETRONICO"
-    titulo="Eletrônicos"
-    rotaBase="/categorias/eletronicos"
-  />
-);
+import type React from "react"
+import { useNavigate } from "react-router-dom"
+import ListaGenericaIntegrada from "../../../components/formularios/ListaGenerica"
+import { Categoria, type Item } from "../../../types/Item"
 
-export default Eletronicos;
+const EletronicosIntegrado: React.FC = () => {
+  const navigate = useNavigate()
+
+  const handleEdit = (item: Item) => {
+    navigate(`/categorias/eletronicos/editar/${item.id}`)
+  }
+
+  const handleView = (item: Item) => {
+    navigate(`/categorias/eletronicos/detalhes/${item.id}`)
+  }
+
+  const handleAdd = () => {
+    navigate("/categorias/eletronicos/novo")
+  }
+
+  return (
+    <ListaGenericaIntegrada
+      categoria={Categoria.ELETRONICO}
+      titulo="Eletrônicos"
+      onEdit={handleEdit}
+      onView={handleView}
+      onAdd={handleAdd}
+    />
+  )
+}
+
+export default EletronicosIntegrado

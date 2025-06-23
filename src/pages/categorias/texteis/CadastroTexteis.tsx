@@ -1,61 +1,105 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Item } from "../../../services/ItemService";
-import FormularioItem from "../../../components/formularios/FormularioItem";
+import type React from "react"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import FormularioItemIntegrado from "../../../components/formularios/FormularioItem"
+import { ItemService } from "../../../services/ItemService"
+import { type Item, Categoria, EstadoConservacao, Situacao } from "../../../types/Item"
 
-const CadastroTextil: React.FC = () => {
-  const navigate = useNavigate();
-  const [item, setItem] = React.useState<Item>({
-    descricao: "",
-    quantidade: 0,
-    valor: 0,
-    caminhao: "",
-    categoria: "TEXTIL",
-    estadoConservacao: "",
-    situacao: "",
-    data_cadastro: new Date().toISOString().split("T")[0],
-  });
+const initialItemState: Item = {
+  descricao: "",
+  quantidade: 1,
+  valor: 0,
+  caminhao: false,
+  categoria: Categoria.TEXTIL,
+  estadoConservacao: EstadoConservacao.BOM,
+  situacao: Situacao.ABERTO,               
+  data_cadastro: new Date().toISOString().split("T")[0],
+}
+
+const CadastroTextilIntegrado: React.FC = () => {
+  const [item, setItem] = useState<Item>(initialItemState)
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const navigate = useNavigate()
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target
+
     if (name === "valor") {
-      const numeric = Number(value.replace(/[^\d]/g, "")) / 100;
-      setItem((prev) => ({ ...prev, valor: numeric }));
+      const onlyNumbers = value.replace(/[^\d]/g, "")
+      const numericValue = Number(onlyNumbers) / 100
+      setItem((prev) => ({ ...prev, valor: numericValue }))
+    } else if (name === "caminhao") {
+      setItem((prev) => ({ ...prev, caminhao: value === "true" }))
+    } else if (type === "number" || name === "quantidade") {
+      setItem((prev) => ({ ...prev, [name]: Number.parseFloat(value) || 0 }))
     } else {
-      setItem((prev) => ({ ...prev, [name]: value }));
+      setItem((prev) => ({ ...prev, [name]: value }))
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Aqui você chamaria o método de criação de item
-    alert("Têxtil cadastrado com sucesso!");
-    navigate("/categorias/texteis");
-  };
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      // Validação básica
+      if (
+        !item.descricao ||
+        item.quantidade <= 0 ||
+        item.valor <= 0 ||
+        !item.estadoConservacao ||
+        !item.situacao
+      ) {
+        setError("Por favor, preencha todos os campos obrigatórios.")
+        return
+      }
+
+      if (!item.pessoa) {
+        setError("Por favor, selecione uma pessoa.")
+        return
+      }
+
+      // Salva o item
+      await ItemService.criar(item)
+      alert("Têxtil cadastrado com sucesso!")
+      navigate("/categorias/texteis")
+    } catch (err) {
+      console.error("Erro ao cadastrar têxtil:", err)
+      setError("Erro ao cadastrar têxtil. Verifique os dados e tente novamente.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-primary">Cadastrar Têxtil</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="text-2xl font-bold text-primary">Cadastrar Novo Têxtil</h1>
+        <button className="btn btn-outline-secondary" onClick={() => navigate("/categorias/texteis")}>
+          Voltar para Lista
+        </button>
+      </div>
+
       <div className="row justify-content-center">
-        <div className="col-12 col-lg-8">
-          <FormularioItem
+        <div className="col-12">
+          <FormularioItemIntegrado
             item={item}
             onChange={handleChange}
             onSubmit={handleSubmit}
             modo="cadastro"
-            error={null}
-            isSubmitting={false}
+            error={error}
+            isSubmitting={isSubmitting}
             disableCategoria={true}
             disableDataCadastro={true}
           />
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CadastroTextil;
+export default CadastroTextilIntegrado

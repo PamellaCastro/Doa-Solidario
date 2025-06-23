@@ -1,143 +1,135 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import FormularioItem from "../../../components/formularios/FormularioItem";
-import { getItemById, updateItem, Item } from "../../../services/ItemService";
+"use client"
 
-const EditarTextil: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [item, setItem] = useState<Item | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+import type React from "react"
+import { useEffect, useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import FormularioItemIntegrado from "../../../components/formularios/FormularioItem"
+import { ItemService } from "../../../services/ItemService"
+import type { Item } from "../../../types/Item"
+
+const EditarTextilIntegrado: React.FC = () => {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const [item, setItem] = useState<Item | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchItem = async () => {
       if (id) {
         try {
-          const data = await getItemById(Number(id));
+          const data = await ItemService.buscarPorId(Number(id))
 
-          // Verifica se data_cadastro existe e é uma string antes de formatar
-          if (data.data_cadastro && typeof data.data_cadastro === "string") {
-            data.data_cadastro = new Date(data.data_cadastro)
-              .toISOString()
-              .split("T")[0];
+          if (data.data_cadastro) {
+            data.data_cadastro = new Date(data.data_cadastro).toISOString().split("T")[0]
           }
 
-          setItem(data);
-          setError(null);
+          setItem(data)
+          setError(null)
         } catch (err) {
-          console.error("Erro ao buscar têxtil:", err);
-          setError("Não foi possível carregar os dados do item para edição.");
-          setItem(null);
+          console.error("Erro ao buscar têxtil:", err)
+          setError("Não foi possível carregar os dados do têxtil para edição.")
+          setItem(null)
         } finally {
-          setLoading(false);
+          setLoading(false)
         }
       } else {
-        setError("ID do item não fornecido.");
-        setLoading(false);
+        setError("ID do têxtil não fornecido.")
+        setLoading(false)
       }
-    };
+    }
 
-    fetchItem();
-  }, [id]);
+    fetchItem()
+  }, [id])
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value, type } = e.target;
-    if (!item) return;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target
+
+    if (!item) return
 
     if (name === "valor") {
-      const numericString = value.replace(/[^\d]/g, "");
-      const numericValue = Number(numericString) / 100;
-      setItem((prev) => ({ ...prev!, valor: numericValue }));
+      const numericString = value.replace(/[^\d]/g, "")
+      const numericValue = Number(numericString) / 100
+      setItem((prev) => ({ ...prev!, valor: numericValue }))
+    } else if (name === "caminhao") {
+      setItem((prev) => ({ ...prev!, caminhao: value === "true" }))
     } else if (type === "number" || name === "quantidade") {
-      setItem((prev) => ({ ...prev!, [name]: parseFloat(value) || 0 }));
+      setItem((prev) => ({ ...prev!, [name]: Number.parseFloat(value) || 0 }))
     } else {
-      setItem((prev) => ({ ...prev!, [name]: value }));
+      setItem((prev) => ({ ...prev!, [name]: value }))
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
 
     if (!item || !item.id) {
-      setError("Item inválido para atualização.");
-      setIsSubmitting(false);
-      return;
+      setError("Item inválido para atualização.")
+      setIsSubmitting(false)
+      return
     }
 
     try {
-      if (
-        !item.descricao ||
-        item.quantidade <= 0 ||
-        item.valor <= 0 ||
-        !item.estadoConservacao ||
-        !item.situacao
-      ) {
-        setError(
-          "Preencha todos os campos obrigatórios. Quantidade e valor devem ser maiores que zero."
-        );
-        return;
+      if (!item.descricao || item.quantidade <= 0 || item.valor <= 0 || !item.estadoConservacao || !item.situacao) {
+        setError("Por favor, preencha todos os campos obrigatórios.")
+        return
       }
 
-      await updateItem(item.id, item);
-      alert("Têxtil atualizado com sucesso!");
-      navigate("/categorias/textil");
+      if (!item.pessoa) {
+        setError("Por favor, selecione uma pessoa.")
+        return
+      }
+
+      await ItemService.atualizar(item.id, item)
+      alert("Têxtil atualizado com sucesso!")
+      navigate("/categorias/texteis")
     } catch (err) {
-      console.error("Erro ao atualizar têxtil:", err);
-      setError("Erro ao atualizar item. Verifique os dados e tente novamente.");
+      console.error("Erro ao atualizar têxtil:", err)
+      setError("Erro ao atualizar têxtil. Verifique os dados e tente novamente.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "200px" }}
-      >
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Carregando...</span>
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !item) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        <p>{error || "Item não encontrado."}</p>
-        <button
-          className="btn btn-outline-primary mt-3"
-          onClick={() => navigate("/categorias/textil")}
-        >
-          Voltar para a Lista
-        </button>
+      <div className="container mx-auto p-4">
+        <div className="alert alert-danger" role="alert">
+          <h4>Erro ao carregar têxtil</h4>
+          <p>{error || "Têxtil não encontrado."}</p>
+          <button className="btn btn-outline-primary mt-3" onClick={() => navigate("/categorias/texteis")}>
+            Voltar para a Lista
+          </button>
+        </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="container mx-auto p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Editar Têxtil</h1>
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() => navigate("/categorias/textil")}
-        >
+        <button className="btn btn-outline-secondary" onClick={() => navigate("/categorias/texteis")}>
           Voltar para Lista
         </button>
       </div>
+
       <div className="row justify-content-center">
-        <div className="col-12 col-lg-8">
-          <FormularioItem
+        <div className="col-12">
+          <FormularioItemIntegrado
             item={item}
             onChange={handleChange}
             onSubmit={handleSubmit}
@@ -150,7 +142,7 @@ const EditarTextil: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EditarTextil;
+export default EditarTextilIntegrado
