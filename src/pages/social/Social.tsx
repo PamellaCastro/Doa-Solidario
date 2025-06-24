@@ -1,26 +1,39 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Search, Users, Package, Heart, Plus, User, MapPin, DollarSign } from "lucide-react"
-import { ItemService } from "../../services/ItemService"
-import { BeneficiarioService } from "../../services/BeneficiarioService"
-import type { Item, Situacao } from "../../types/Item"
-import type { Beneficiario } from "../../types/Beneficiario"
-import { Estado } from "../../types/Endereco"
+import type React from "react";
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Users,
+  Package,
+  Heart,
+  Plus,
+  User,
+  MapPin,
+  DollarSign,
+} from "lucide-react";
+import { ItemService } from "../../services/ItemService";
+import { BeneficiarioService } from "../../services/BeneficiarioService";
+import type { Item, Situacao } from "../../types/Item";
+import type { Beneficiario } from "../../types/Beneficiario";
+import { Estado } from "../../types/Endereco";
 
 const AreaSocial: React.FC = () => {
-  const [itensDisponiveis, setItensDisponiveis] = useState<Item[]>([])
-  const [beneficiarios, setBeneficiarios] = useState<Beneficiario[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null)
-  const [selectedBeneficiario, setBeneficiario] = useState<Beneficiario | null>(null)
-  const [showModalDoacao, setShowModalDoacao] = useState(false)
-  const [showModalBeneficiario, setShowModalBeneficiario] = useState(false)
-  const [searchBeneficiario, setSearchBeneficiario] = useState("")
-  const [resultadosBeneficiario, setResultadosBeneficiario] = useState<Beneficiario[]>([])
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [showModalVenda, setShowModalVenda] = useState(false)
-  const [observacoesVenda, setObservacoesVenda] = useState("")
+  const [itensDisponiveis, setItensDisponiveis] = useState<Item[]>([]);
+  const [beneficiarios, setBeneficiarios] = useState<Beneficiario[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [selectedBeneficiario, setBeneficiario] = useState<Beneficiario | null>(
+    null
+  );
+  const [showModalDoacao, setShowModalDoacao] = useState(false);
+  const [showModalBeneficiario, setShowModalBeneficiario] = useState(false);
+  const [searchBeneficiario, setSearchBeneficiario] = useState("");
+  const [resultadosBeneficiario, setResultadosBeneficiario] = useState<
+    Beneficiario[]
+  >([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showModalVenda, setShowModalVenda] = useState(false);
+  const [observacoesVenda, setObservacoesVenda] = useState("");
 
   const [novoBeneficiario, setNovoBeneficiario] = useState<Beneficiario>({
     nome: "",
@@ -35,66 +48,72 @@ const AreaSocial: React.FC = () => {
       numero: 0,
       estado: Estado.SC,
     },
-  })
+  });
 
   useEffect(() => {
-    carregarDados()
-  }, [])
+    carregarDados();
+  }, []);
 
   const carregarDados = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       // Buscar apenas itens disponíveis para doação (não doados ainda)
-      const todosItens = await ItemService.listarTodos()
-      const itensDisponiveis = todosItens.filter((item) => item.situacao !== "DOADO" && item.situacao !== "VENDIDO")
-      setItensDisponiveis(itensDisponiveis)
+      const todosItens = await ItemService.listarTodos();
+      const itensDisponiveis = todosItens.filter(
+        (item) => item.situacao !== "DOADO" && item.situacao !== "VENDIDO"
+      );
+      setItensDisponiveis(itensDisponiveis);
 
-      const todosBeneficiarios = await BeneficiarioService.listarTodos()
-      setBeneficiarios(todosBeneficiarios)
+      const todosBeneficiarios = await BeneficiarioService.listarTodos();
+      setBeneficiarios(todosBeneficiarios);
     } catch (error) {
-      console.error("Erro ao carregar dados:", error)
+      console.error("Erro ao carregar dados:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const buscarBeneficiario = async () => {
-    if (!searchBeneficiario.trim()) return
+    if (!searchBeneficiario.trim()) return;
 
     try {
-      const resultados = await BeneficiarioService.buscar(searchBeneficiario)
-      setResultadosBeneficiario(resultados)
+      const resultados = await BeneficiarioService.buscar(searchBeneficiario);
+      setResultadosBeneficiario(resultados);
     } catch (error) {
-      console.error("Erro ao buscar beneficiário:", error)
-      setResultadosBeneficiario([])
+      console.error("Erro ao buscar beneficiário:", error);
+      setResultadosBeneficiario([]);
     }
-  }
+  };
 
   const handleNovoBeneficiarioChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
 
     if (name.startsWith("endereco.")) {
-      const enderecoField = name.split(".")[1]
+      const enderecoField = name.split(".")[1];
       setNovoBeneficiario((prev) => ({
         ...prev,
         endereco: {
           ...prev.endereco!,
           [enderecoField]: enderecoField === "numero" ? Number(value) : value,
         },
-      }))
+      }));
     } else {
-      setNovoBeneficiario((prev) => ({ ...prev, [name]: value }))
+      setNovoBeneficiario((prev) => ({ ...prev, [name]: value }));
     }
-  }
+  };
 
   const cadastrarBeneficiario = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const beneficiarioCriado = await BeneficiarioService.criar(novoBeneficiario)
-      setBeneficiario(beneficiarioCriado)
-      setShowModalBeneficiario(false)
+      const beneficiarioCriado = await BeneficiarioService.criar(
+        novoBeneficiario
+      );
+      setBeneficiario(beneficiarioCriado);
+      setShowModalBeneficiario(false);
       setNovoBeneficiario({
         nome: "",
         cpf: "",
@@ -108,21 +127,21 @@ const AreaSocial: React.FC = () => {
           numero: 0,
           estado: Estado.SC,
         },
-      })
-      alert("Beneficiário cadastrado com sucesso!")
+      });
+      alert("Beneficiário cadastrado com sucesso!");
     } catch (error) {
-      console.error("Erro ao cadastrar beneficiário:", error)
-      alert("Erro ao cadastrar beneficiário")
+      console.error("Erro ao cadastrar beneficiário:", error);
+      alert("Erro ao cadastrar beneficiário");
     }
-  }
+  };
 
   const processarDoacao = async () => {
     if (!selectedItem || !selectedBeneficiario) {
-      alert("Selecione um item e um beneficiário")
-      return
+      alert("Selecione um item e um beneficiário");
+      return;
     }
 
-    setIsProcessing(true)
+    setIsProcessing(true);
     try {
       // Atualizar o item para status DOADO
       const itemAtualizado: Item = {
@@ -130,96 +149,99 @@ const AreaSocial: React.FC = () => {
         situacao: "DOADO" as Situacao,
         // Adicionar um campo para o beneficiário se necessário
         // beneficiario: selectedBeneficiario
-      }
+      };
 
-      await ItemService.atualizar(selectedItem.id!, itemAtualizado)
+      await ItemService.atualizar(selectedItem.id!, itemAtualizado);
 
       alert(
-        `Doação realizada com sucesso!\n\nItem: ${selectedItem.descricao}\nBeneficiário: ${selectedBeneficiario.nome}`,
-      )
+        `Doação realizada com sucesso!\n\nItem: ${selectedItem.descricao}\nBeneficiário: ${selectedBeneficiario.nome}`
+      );
 
       // Reseta seleções e recarregar dados
-      setSelectedItem(null)
-      setBeneficiario(null)
-      setShowModalDoacao(false)
-      await carregarDados()
+      setSelectedItem(null);
+      setBeneficiario(null);
+      setShowModalDoacao(false);
+      await carregarDados();
     } catch (error) {
-      console.error("Erro ao processar doação:", error)
-      alert("Erro ao processar doação")
+      console.error("Erro ao processar doação:", error);
+      alert("Erro ao processar doação");
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   const iniciarDoacao = (item: Item) => {
-    setSelectedItem(item)
-    setShowModalDoacao(true)
-  }
+    setSelectedItem(item);
+    setShowModalDoacao(true);
+  };
 
   const iniciarVenda = (item: Item) => {
-    setSelectedItem(item)
-    setBeneficiario(null)
-    setResultadosBeneficiario([]) 
-    setSearchBeneficiario("") 
-    setObservacoesVenda("") 
-    setShowModalVenda(true)
-  }
+    setSelectedItem(item);
+    setBeneficiario(null);
+    setResultadosBeneficiario([]);
+    setSearchBeneficiario("");
+    setObservacoesVenda("");
+    setShowModalVenda(true);
+  };
 
   const processarVenda = async () => {
     if (!selectedItem || !selectedBeneficiario) {
-      alert("Selecione um item e um beneficiário")
-      return
+      alert("Selecione um item e um beneficiário");
+      return;
     }
 
-    setIsProcessing(true)
+    setIsProcessing(true);
     try {
       const itemAtualizado: Item = {
         ...selectedItem,
         situacao: "VENDIDO" as Situacao,
-      }
+      };
 
-      await ItemService.atualizar(selectedItem.id!, itemAtualizado)
+      await ItemService.atualizar(selectedItem.id!, itemAtualizado);
 
       alert(
-        `Venda realizada com sucesso!\n\nItem: ${selectedItem.descricao}\nBeneficiário: ${selectedBeneficiario.nome}`,
-      )
+        `Venda realizada com sucesso!\n\nItem: ${selectedItem.descricao}\nBeneficiário: ${selectedBeneficiario.nome}`
+      );
 
       // Reseta seleções e recarregar dados
-      setSelectedItem(null)
-      setBeneficiario(null)
-      setObservacoesVenda("")
-      setShowModalVenda(false)
-      await carregarDados()
+      setSelectedItem(null);
+      setBeneficiario(null);
+      setObservacoesVenda("");
+      setShowModalVenda(false);
+      await carregarDados();
     } catch (error) {
-      console.error("Erro ao processar venda:", error)
-      alert("Erro ao processar venda")
+      console.error("Erro ao processar venda:", error);
+      alert("Erro ao processar venda");
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   const filteredItens = itensDisponiveis.filter(
     (item) =>
       item.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.pessoa?.nome.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      item.pessoa?.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formatCurrency = (value: number): string => {
     return value.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
-    })
-  }
+    });
+  };
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "400px" }}
+      >
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Carregando...</span>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -231,8 +253,12 @@ const AreaSocial: React.FC = () => {
           Área Social - Doações
         </h1>
         <div className="d-flex gap-2">
-          <span className="badge bg-info fs-6">{filteredItens.length} itens disponíveis</span>
-          <span className="badge bg-success fs-6">{beneficiarios.length} beneficiários cadastrados</span>
+          <span className="badge bg-info fs-6">
+            {filteredItens.length} itens disponíveis
+          </span>
+          <span className="badge bg-success fs-6">
+            {beneficiarios.length} beneficiários cadastrados
+          </span>
         </div>
       </div>
 
@@ -253,7 +279,10 @@ const AreaSocial: React.FC = () => {
           </div>
         </div>
         <div className="col-md-4 text-end">
-          <button className="btn btn-success" onClick={() => setShowModalBeneficiario(true)}>
+          <button
+            className="btn btn-success"
+            onClick={() => setShowModalBeneficiario(true)}
+          >
             <Plus size={16} className="me-2" />
             Novo Beneficiário
           </button>
@@ -291,7 +320,10 @@ const AreaSocial: React.FC = () => {
                         <div>
                           <strong>{item.descricao}</strong>
                           {item.caminhao && (
-                            <span className="badge bg-warning text-dark ms-2" title="Necessita caminhão">
+                            <span
+                              className="badge bg-warning text-dark ms-2"
+                              title="Necessita caminhão"
+                            >
                               🚛
                             </span>
                           )}
@@ -318,20 +350,26 @@ const AreaSocial: React.FC = () => {
                         </div>
                       </td>
                       <td>
-                        <span className="badge bg-primary">{item.categoria}</span>
+                        <span className="badge bg-primary">
+                          {item.categoria}
+                        </span>
                       </td>
                       <td>
                         {item.pessoa ? (
                           <div>
                             <div>{item.pessoa.nome}</div>
-                            <small className="text-muted">{item.pessoa.email}</small>
+                            <small className="text-muted">
+                              {item.pessoa.email}
+                            </small>
                           </div>
                         ) : (
                           <span className="text-muted">N/A</span>
                         )}
                       </td>
                       <td>
-                        <span className="badge bg-light text-dark">{item.quantidade}</span>
+                        <span className="badge bg-light text-dark">
+                          {item.quantidade}
+                        </span>
                       </td>
                       <td>{formatCurrency(item.valor || 0)}</td>
                       <td>
@@ -340,14 +378,20 @@ const AreaSocial: React.FC = () => {
                             item.estadoConservacao === "BOM"
                               ? "text-success"
                               : item.estadoConservacao === "REGULAR"
-                                ? "text-warning"
-                                : "text-danger"
+                              ? "text-warning"
+                              : "text-danger"
                           }`}
                         >
                           {item.estadoConservacao}
                         </span>
                       </td>
-                      <td>{item.data_cadastro ? new Date(item.data_cadastro).toLocaleDateString("pt-BR") : "N/A"}</td>
+                      <td>
+                        {item.data_cadastro
+                          ? new Date(item.data_cadastro).toLocaleDateString(
+                              "pt-BR"
+                            )
+                          : "N/A"}
+                      </td>
                     </tr>
                   ))
                 ) : (
@@ -369,7 +413,10 @@ const AreaSocial: React.FC = () => {
 
       {/* Modal de Doação */}
       {showModalDoacao && selectedItem && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -377,7 +424,11 @@ const AreaSocial: React.FC = () => {
                   <Heart size={20} className="me-2" />
                   Processar Doação
                 </h5>
-                <button type="button" className="btn-close" onClick={() => setShowModalDoacao(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModalDoacao(false)}
+                ></button>
               </div>
               <div className="modal-body">
                 {/* Informações do Item */}
@@ -393,15 +444,20 @@ const AreaSocial: React.FC = () => {
                       <div className="col-md-8">
                         <h5>{selectedItem.descricao}</h5>
                         <p className="text-muted mb-1">
-                          <strong>Categoria:</strong> {selectedItem.categoria} |<strong> Quantidade:</strong>{" "}
-                          {selectedItem.quantidade} |<strong> Estado:</strong> {selectedItem.estadoConservacao}
+                          <strong>Categoria:</strong> {selectedItem.categoria} |
+                          <strong> Quantidade:</strong>{" "}
+                          {selectedItem.quantidade} |<strong> Estado:</strong>{" "}
+                          {selectedItem.estadoConservacao}
                         </p>
                         <p className="text-muted mb-0">
-                          <strong>Doador:</strong> {selectedItem.pessoa?.nome || "N/A"}
+                          <strong>Doador:</strong>{" "}
+                          {selectedItem.pessoa?.nome || "N/A"}
                         </p>
                       </div>
                       <div className="col-md-4 text-end">
-                        <h4 className="text-success">{formatCurrency(selectedItem.valor || 0)}</h4>
+                        <h4 className="text-success">
+                          {formatCurrency(selectedItem.valor || 0)}
+                        </h4>
                       </div>
                     </div>
                   </div>
@@ -426,9 +482,15 @@ const AreaSocial: React.FC = () => {
                                 className="form-control"
                                 placeholder="Buscar beneficiário por nome, CPF ou telefone"
                                 value={searchBeneficiario}
-                                onChange={(e) => setSearchBeneficiario(e.target.value)}
+                                onChange={(e) =>
+                                  setSearchBeneficiario(e.target.value)
+                                }
                               />
-                              <button type="button" className="btn btn-outline-primary" onClick={buscarBeneficiario}>
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary"
+                                onClick={buscarBeneficiario}
+                              >
                                 <Search size={16} />
                               </button>
                             </div>
@@ -447,32 +509,36 @@ const AreaSocial: React.FC = () => {
 
                         {/* Resultados da busca */}
                         {resultadosBeneficiario.length > 0 && (
-                          <div className="border rounded p-2" style={{ maxHeight: "200px", overflowY: "auto" }}>
+                          <div
+                            className="border rounded p-2"
+                            style={{ maxHeight: "200px", overflowY: "auto" }}
+                          >
                             {resultadosBeneficiario.map((beneficiario) => (
                               <div
                                 key={beneficiario.id}
                                 className="d-flex justify-content-between align-items-center p-2 border-bottom cursor-pointer hover-bg-light"
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
-                                  setBeneficiario(beneficiario)
-                                  setResultadosBeneficiario([])
-                                  setSearchBeneficiario("")
+                                  setBeneficiario(beneficiario);
+                                  setResultadosBeneficiario([]);
+                                  setSearchBeneficiario("");
                                 }}
                               >
                                 <div>
                                   <strong>{beneficiario.nome}</strong>
                                   <br />
                                   <small className="text-muted">
-                                    CPF: {beneficiario.cpf} | Tel: {beneficiario.telefone}
+                                    CPF: {beneficiario.cpf} | Tel:{" "}
+                                    {beneficiario.telefone}
                                   </small>
                                 </div>
                                 <button
                                   type="button"
                                   className="btn btn-sm btn-primary"
                                   onClick={() => {
-                                    setBeneficiario(beneficiario)
-                                    setResultadosBeneficiario([])
-                                    setSearchBeneficiario("")
+                                    setBeneficiario(beneficiario);
+                                    setResultadosBeneficiario([]);
+                                    setSearchBeneficiario("");
                                   }}
                                 >
                                   Selecionar
@@ -485,16 +551,19 @@ const AreaSocial: React.FC = () => {
                     ) : (
                       <div className="alert alert-success d-flex justify-content-between align-items-center">
                         <div>
-                          <strong>Beneficiário Selecionado:</strong> {selectedBeneficiario.nome}
+                          <strong>Beneficiário Selecionado:</strong>{" "}
+                          {selectedBeneficiario.nome}
                           <br />
                           <small>
-                            CPF: {selectedBeneficiario.cpf} | Tel: {selectedBeneficiario.telefone}
+                            CPF: {selectedBeneficiario.cpf} | Tel:{" "}
+                            {selectedBeneficiario.telefone}
                           </small>
                           {selectedBeneficiario.endereco && (
                             <>
                               <br />
                               <small>
-                                {selectedBeneficiario.endereco.cidade} - {selectedBeneficiario.endereco.estado}
+                                {selectedBeneficiario.endereco.cidade} -{" "}
+                                {selectedBeneficiario.endereco.estado}
                               </small>
                             </>
                           )}
@@ -512,7 +581,11 @@ const AreaSocial: React.FC = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModalDoacao(false)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModalDoacao(false)}
+                >
                   Cancelar
                 </button>
                 <button
@@ -541,7 +614,10 @@ const AreaSocial: React.FC = () => {
 
       {/* Modal de Venda */}
       {showModalVenda && selectedItem && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -549,7 +625,11 @@ const AreaSocial: React.FC = () => {
                   <DollarSign size={20} className="me-2" />
                   Processar Venda
                 </h5>
-                <button type="button" className="btn-close" onClick={() => setShowModalVenda(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModalVenda(false)}
+                ></button>
               </div>
               <div className="modal-body">
                 {/* Informações do Item */}
@@ -565,15 +645,20 @@ const AreaSocial: React.FC = () => {
                       <div className="col-md-8">
                         <h5>{selectedItem.descricao}</h5>
                         <p className="text-muted mb-1">
-                          <strong>Categoria:</strong> {selectedItem.categoria} |<strong> Quantidade:</strong>{" "}
-                          {selectedItem.quantidade} |<strong> Estado:</strong> {selectedItem.estadoConservacao}
+                          <strong>Categoria:</strong> {selectedItem.categoria} |
+                          <strong> Quantidade:</strong>{" "}
+                          {selectedItem.quantidade} |<strong> Estado:</strong>{" "}
+                          {selectedItem.estadoConservacao}
                         </p>
                         <p className="text-muted mb-0">
-                          <strong>Doador:</strong> {selectedItem.pessoa?.nome || "N/A"}
+                          <strong>Doador:</strong>{" "}
+                          {selectedItem.pessoa?.nome || "N/A"}
                         </p>
                       </div>
                       <div className="col-md-4 text-end">
-                        <h4 className="text-success">{formatCurrency(selectedItem.valor || 0)}</h4>
+                        <h4 className="text-success">
+                          {formatCurrency(selectedItem.valor || 0)}
+                        </h4>
                       </div>
                     </div>
                   </div>
@@ -598,9 +683,15 @@ const AreaSocial: React.FC = () => {
                                 className="form-control"
                                 placeholder="Buscar beneficiário por nome, CPF ou telefone"
                                 value={searchBeneficiario}
-                                onChange={(e) => setSearchBeneficiario(e.target.value)}
+                                onChange={(e) =>
+                                  setSearchBeneficiario(e.target.value)
+                                }
                               />
-                              <button type="button" className="btn btn-outline-primary" onClick={buscarBeneficiario}>
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary"
+                                onClick={buscarBeneficiario}
+                              >
                                 <Search size={16} />
                               </button>
                             </div>
@@ -619,32 +710,36 @@ const AreaSocial: React.FC = () => {
 
                         {/* Resultados da busca */}
                         {resultadosBeneficiario.length > 0 && (
-                          <div className="border rounded p-2" style={{ maxHeight: "200px", overflowY: "auto" }}>
+                          <div
+                            className="border rounded p-2"
+                            style={{ maxHeight: "200px", overflowY: "auto" }}
+                          >
                             {resultadosBeneficiario.map((beneficiario) => (
                               <div
                                 key={beneficiario.id}
                                 className="d-flex justify-content-between align-items-center p-2 border-bottom cursor-pointer hover-bg-light"
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
-                                  setBeneficiario(beneficiario)
-                                  setResultadosBeneficiario([])
-                                  setSearchBeneficiario("")
+                                  setBeneficiario(beneficiario);
+                                  setResultadosBeneficiario([]);
+                                  setSearchBeneficiario("");
                                 }}
                               >
                                 <div>
                                   <strong>{beneficiario.nome}</strong>
                                   <br />
                                   <small className="text-muted">
-                                    CPF: {beneficiario.cpf} | Tel: {beneficiario.telefone}
+                                    CPF: {beneficiario.cpf} | Tel:{" "}
+                                    {beneficiario.telefone}
                                   </small>
                                 </div>
                                 <button
                                   type="button"
                                   className="btn btn-sm btn-primary"
                                   onClick={() => {
-                                    setBeneficiario(beneficiario)
-                                    setResultadosBeneficiario([])
-                                    setSearchBeneficiario("")
+                                    setBeneficiario(beneficiario);
+                                    setResultadosBeneficiario([]);
+                                    setSearchBeneficiario("");
                                   }}
                                 >
                                   Selecionar
@@ -657,16 +752,19 @@ const AreaSocial: React.FC = () => {
                     ) : (
                       <div className="alert alert-info d-flex justify-content-between align-items-center">
                         <div>
-                          <strong>Comprador Selecionado:</strong> {selectedBeneficiario.nome}
+                          <strong>Comprador Selecionado:</strong>{" "}
+                          {selectedBeneficiario.nome}
                           <br />
                           <small>
-                            CPF: {selectedBeneficiario.cpf} | Tel: {selectedBeneficiario.telefone}
+                            CPF: {selectedBeneficiario.cpf} | Tel:{" "}
+                            {selectedBeneficiario.telefone}
                           </small>
                           {selectedBeneficiario.endereco && (
                             <>
                               <br />
                               <small>
-                                {selectedBeneficiario.endereco.cidade} - {selectedBeneficiario.endereco.estado}
+                                {selectedBeneficiario.endereco.cidade} -{" "}
+                                {selectedBeneficiario.endereco.estado}
                               </small>
                             </>
                           )}
@@ -700,7 +798,11 @@ const AreaSocial: React.FC = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModalVenda(false)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModalVenda(false)}
+                >
                   Cancelar
                 </button>
                 <button
@@ -729,7 +831,10 @@ const AreaSocial: React.FC = () => {
 
       {/* Modal Cadastro Beneficiário */}
       {showModalBeneficiario && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -737,7 +842,11 @@ const AreaSocial: React.FC = () => {
                   <User size={20} className="me-2" />
                   Cadastrar Novo Beneficiário
                 </h5>
-                <button type="button" className="btn-close" onClick={() => setShowModalBeneficiario(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModalBeneficiario(false)}
+                ></button>
               </div>
               <form onSubmit={cadastrarBeneficiario}>
                 <div className="modal-body">
@@ -906,7 +1015,11 @@ const AreaSocial: React.FC = () => {
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowModalBeneficiario(false)}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowModalBeneficiario(false)}
+                  >
                     Cancelar
                   </button>
                   <button type="submit" className="btn btn-success">
@@ -920,7 +1033,7 @@ const AreaSocial: React.FC = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default AreaSocial
+export default AreaSocial;

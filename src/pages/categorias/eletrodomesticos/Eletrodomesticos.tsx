@@ -1,22 +1,22 @@
-import type React from "react"
-import { useNavigate } from "react-router-dom"
-import ListaGenericaIntegrada from "../../../components/formularios/ListaGenerica"
-import { Categoria, type Item } from "../../../types/Item"
+import type React from "react";
+import { useNavigate } from "react-router-dom";
+import ListaGenericaIntegrada from "../../../components/formularios/ListaGenerica";
+import { Categoria, type Item } from "../../../types/Item";
 
 const Eletrodomesticos: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleEdit = (item: Item) => {
-    navigate(`/categorias/eletrodomesticos/editar/${item.id}`)
-  }
+    navigate(`/categorias/eletrodomesticos/editar/${item.id}`);
+  };
 
   const handleView = (item: Item) => {
-    navigate(`/categorias/eletrodomesticos/detalhes/${item.id}`)
-  }
+    navigate(`/categorias/eletrodomesticos/detalhes/${item.id}`);
+  };
 
   const handleAdd = () => {
-    navigate("/categorias/eletrodomesticos/novo")
-  }
+    navigate("/categorias/eletrodomesticos/novo");
+  };
 
   return (
     <ListaGenericaIntegrada
@@ -26,7 +26,7 @@ const Eletrodomesticos: React.FC = () => {
       onView={handleView}
       onAdd={handleAdd}
     />
-  )
-}
+  );
+};
 
-export default Eletrodomesticos
+export default Eletrodomesticos;

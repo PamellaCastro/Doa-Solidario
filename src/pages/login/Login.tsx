@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User, Lock, XCircle } from 'lucide-react'; 
-import logo from '../../assets/logo.jpg'; 
-import mao from '../../assets/mao.png'; 
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { User, Lock, XCircle } from "lucide-react";
+import logo from "../../assets/logo.jpg";
+import mao from "../../assets/mao.png";
 
 interface LoginProps {
   onLogin: () => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -19,19 +19,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setError("");
 
     // Lógica de autenticação
-    if (email === 'doa@solidario.com' && password === 'solidario') {
+    if (email === "doa@solidario.com" && password === "solidario") {
       onLogin();
     } else {
-      setError('E-mail ou senha inválidos.');
+      setError("E-mail ou senha inválidos.");
     }
   };
 
   const handleDoarClick = () => {
-    navigate('/quero-doar');
+    navigate("/quero-doar");
   };
 
   return (
-    
     <div className="login-container">
       <header className="login-header">
         <div className="login-logo">
@@ -43,9 +42,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         </button>
       </header>
 
-      
       <main className="login-content">
-        <div className="login-box"> 
+        <div className="login-box">
           <div className="login-image">
             <img src={logo} alt="Mãos segurando o mundo" />
           </div>
@@ -53,7 +51,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <h2 className="login-form-title">Acesso ao Sistema</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="email" className="form-label">E-mail *</label>
+                <label htmlFor="email" className="form-label">
+                  E-mail *
+                </label>
                 <div className="input-group">
                   <User size={20} className="input-icon" />
                   <input
@@ -68,7 +68,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 </div>
               </div>
               <div className="form-group">
-                <label htmlFor="password" className="form-label">Senha *</label>
+                <label htmlFor="password" className="form-label">
+                  Senha *
+                </label>
                 <div className="input-group">
                   <Lock size={20} className="input-icon" />
                   <input
@@ -78,7 +80,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     placeholder="Digite sua senha"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                   // required
+                    // required
                   />
                 </div>
               </div>

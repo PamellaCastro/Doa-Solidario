@@ -1,4 +1,10 @@
-import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { useState, useEffect } from "react";
 import Login from "./pages/login/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
@@ -36,7 +42,6 @@ import CadastroTextil from "./pages/categorias/texteis/CadastroTexteis";
 import EditarTextil from "./pages/categorias/texteis/EditarTexteis";
 import DetalhesTextil from "./pages/categorias/texteis/DetalhesTexteis";
 
-
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,24 +59,27 @@ function App() {
     checkAuth();
   }, []);
 
-  const publicPaths = ["/login", "/quero-doar", "/"]; 
+  const publicPaths = ["/login", "/quero-doar", "/"];
   const isPublicPage = publicPaths.includes(location.pathname);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
-    localStorage.setItem("authToken", "dummy-token"); 
-    navigate("/dashboard"); 
+    localStorage.setItem("authToken", "dummy-token");
+    navigate("/dashboard");
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem("authToken"); 
-    navigate("/login"); 
+    localStorage.removeItem("authToken");
+    navigate("/login");
   };
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
         <div className="text-center">
           <div className="spinner-border text-primary mb-3" role="status">
             <span className="visually-hidden">Carregando...</span>
@@ -83,50 +91,95 @@ function App() {
   }
 
   return (
-    <div className="app-container"> {/* Container raiz que sempre existe */}
-
+    <div className="app-container">
+      {" "}
+      {/* Container raiz que sempre existe */}
       {/* Header global, visível apenas se logado E NÃO for uma página pública */}
       {isLoggedIn && !isPublicPage && <Header onLogout={handleLogout} />}
-
       <div className="content-wrapper">
-
         {/* Sidebar, visível apenas se logado E NÃO for uma página pública */}
         {isLoggedIn && !isPublicPage && <Sidebar onLogout={handleLogout} />}
 
         {/* Aplica "main-content" se for uma página interna, "full-width-content" para login/quero-doar */}
-        <main className={isLoggedIn && !isPublicPage ? "main-content" : "full-width-content"}>
+        <main
+          className={
+            isLoggedIn && !isPublicPage ? "main-content" : "full-width-content"
+          }
+        >
           <Routes>
-            <Route path="/" element={<Navigate to="/login" />} /> {/* Redireciona a raiz para login */}
+            <Route path="/" element={<Navigate to="/login" />} />{" "}
+            {/* Redireciona a raiz para login */}
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route path="/quero-doar" element={<QueroDoar />} />
-
             {/* Rotas Protegidas - Renderizadas apenas se o usuário estiver logado */}
             {isLoggedIn ? (
               <>
                 <Route path="/dashboard" element={<Dashboard />} />
                 {/* Rotas de Eletrônicos (CRUD) */}
-                <Route path="/categorias/eletronicos" element={<Eletronicos />} />
-                <Route path="/categorias/eletronicos/novo" element={<CadastroEletronico />} />
-                <Route path="/categorias/eletronicos/editar/:id" element={<EditarEletronico />} />
-                <Route path="/categorias/eletronicos/detalhes/:id" element={<DetalhesEletronico />} />
+                <Route
+                  path="/categorias/eletronicos"
+                  element={<Eletronicos />}
+                />
+                <Route
+                  path="/categorias/eletronicos/novo"
+                  element={<CadastroEletronico />}
+                />
+                <Route
+                  path="/categorias/eletronicos/editar/:id"
+                  element={<EditarEletronico />}
+                />
+                <Route
+                  path="/categorias/eletronicos/detalhes/:id"
+                  element={<DetalhesEletronico />}
+                />
 
                 {/* Rotas de Eletrodomésticos (CRUD) */}
-                <Route path="/categorias/eletrodomesticos" element={<Eletrodomesticos />} />
-                <Route path="/categorias/eletrodomesticos/novo" element={<CadastroEletrodomestico />} />
-                <Route path="/categorias/eletrodomesticos/editar/:id" element={<EditarEletrodomestico />} />
-                <Route path="/categorias/eletrodomesticos/detalhes/:id" element={<DetalhesEletrodomestico />} />
+                <Route
+                  path="/categorias/eletrodomesticos"
+                  element={<Eletrodomesticos />}
+                />
+                <Route
+                  path="/categorias/eletrodomesticos/novo"
+                  element={<CadastroEletrodomestico />}
+                />
+                <Route
+                  path="/categorias/eletrodomesticos/editar/:id"
+                  element={<EditarEletrodomestico />}
+                />
+                <Route
+                  path="/categorias/eletrodomesticos/detalhes/:id"
+                  element={<DetalhesEletrodomestico />}
+                />
 
                 {/* Rotas de Móveis (CRUD) */}
                 <Route path="/categorias/moveis" element={<Moveis />} />
-                <Route path="/categorias/moveis/novo" element={<CadastroMovel />} />
-                <Route path="/categorias/moveis/editar/:id" element={<EditarMovel />} />
-                <Route path="/categorias/moveis/detalhes/:id" element={<DetalhesMovel />} />
+                <Route
+                  path="/categorias/moveis/novo"
+                  element={<CadastroMovel />}
+                />
+                <Route
+                  path="/categorias/moveis/editar/:id"
+                  element={<EditarMovel />}
+                />
+                <Route
+                  path="/categorias/moveis/detalhes/:id"
+                  element={<DetalhesMovel />}
+                />
 
                 {/* Rotas de Têxteis (CRUD) */}
                 <Route path="/categorias/texteis" element={<Textil />} />
-                <Route path="/categorias/texteis/novo" element={<CadastroTextil />} />
-                <Route path="/categorias/texteis/editar/:id" element={<EditarTextil />} />
-                <Route path="/categorias/texteis/detalhes/:id" element={<DetalhesTextil />} />
+                <Route
+                  path="/categorias/texteis/novo"
+                  element={<CadastroTextil />}
+                />
+                <Route
+                  path="/categorias/texteis/editar/:id"
+                  element={<EditarTextil />}
+                />
+                <Route
+                  path="/categorias/texteis/detalhes/:id"
+                  element={<DetalhesTextil />}
+                />
 
                 {/* Outras Rotas Protegidas */}
                 <Route path="/social" element={<Social />} />

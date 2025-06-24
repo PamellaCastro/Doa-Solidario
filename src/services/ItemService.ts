@@ -1,4 +1,4 @@
-import api from "./api"
+import api from "../../api"
 import type { Item, Categoria } from "../types/Item"
 
 export class ItemService {

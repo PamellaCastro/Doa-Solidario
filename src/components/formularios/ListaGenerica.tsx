@@ -1,74 +1,86 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Edit, Trash2, Eye, Plus, Search, Package } from "lucide-react"
-import { ItemService } from "../../services/ItemService"
-import type { Item, Categoria } from "../../types/Item"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Edit, Trash2, Eye, Plus, Search, Package } from "lucide-react";
+import { ItemService } from "../../services/ItemService";
+import type { Item, Categoria } from "../../types/Item";
 
 interface ListaGenericaProps {
-  categoria: Categoria
-  titulo: string
-  onEdit: (item: Item) => void
-  onView: (item: Item) => void
-  onAdd: () => void
+  categoria: Categoria;
+  titulo: string;
+  onEdit: (item: Item) => void;
+  onView: (item: Item) => void;
+  onAdd: () => void;
 }
 
-const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit, onView, onAdd }) => {
-  const [itens, setItens] = useState<Item[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
+const ListaGenerica: React.FC<ListaGenericaProps> = ({
+  categoria,
+  titulo,
+  onEdit,
+  onView,
+  onAdd,
+}) => {
+  const [itens, setItens] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    carregarItens()
-  }, [categoria])
+    carregarItens();
+  }, [categoria]);
 
   const carregarItens = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const data = await ItemService.listarTodos(categoria)
-      setItens(data)
+      const data = await ItemService.listarTodos(categoria);
+      setItens(data);
     } catch (err) {
-      setError(`Erro ao carregar ${titulo.toLowerCase()}`)
-      console.error(err)
+      setError(`Erro ao carregar ${titulo.toLowerCase()}`);
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (id: number) => {
-    if (!confirm(`Tem certeza que deseja excluir este ${titulo.toLowerCase().slice(0, -1)}?`)) {
-      return
+    if (
+      !confirm(
+        `Tem certeza que deseja excluir este ${titulo
+          .toLowerCase()
+          .slice(0, -1)}?`
+      )
+    ) {
+      return;
     }
 
     try {
-      await ItemService.deletar(id)
-      alert(`${titulo.slice(0, -1)} excluído com sucesso!`)
-      await carregarItens() // Recarrega a lista
+      await ItemService.deletar(id);
+      alert(`${titulo.slice(0, -1)} excluído com sucesso!`);
+      await carregarItens(); // Recarrega a lista
     } catch (err) {
-      alert(`Erro ao excluir ${titulo.toLowerCase().slice(0, -1)}`)
-      console.error(err)
+      alert(`Erro ao excluir ${titulo.toLowerCase().slice(0, -1)}`);
+      console.error(err);
     }
-  }
+  };
 
   const filteredItens = itens.filter(
     (item) =>
       item.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.pessoa?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.situacao.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      item.situacao.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formatCurrency = (value: number): string => {
     return value.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
-    })
-  }
+    });
+  };
 
   const formatDate = (dateString?: string): string => {
-    if (!dateString) return "N/A"
-    return new Date(dateString).toLocaleDateString("pt-BR")
-  }
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("pt-BR");
+  };
 
   const getSituacaoBadgeClass = (situacao: string): string => {
     const classes: Record<string, string> = {
@@ -78,35 +90,40 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
       VENDIDO: "bg-success",
       SOLICITADO: "bg-secondary",
       DOADO: "bg-success",
-    }
-    return classes[situacao] || "bg-secondary"
-  }
+    };
+    return classes[situacao] || "bg-secondary";
+  };
 
   const getEstadoConservacaoClass = (estado: string): string => {
     const classes: Record<string, string> = {
       BOM: "text-success",
       REGULAR: "text-warning",
       RUIM: "text-danger",
-    }
-    return classes[estado] || "text-secondary"
-  }
+    };
+    return classes[estado] || "text-secondary";
+  };
 
   const formatarTexto = (texto: string): string => {
     return texto
       .toLowerCase()
       .split("_")
       .map((palavra) => palavra.charAt(0).toUpperCase() + palavra.slice(1))
-      .join(" ")
-  }
+      .join(" ");
+  };
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "300px" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "300px" }}
+      >
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Carregando {titulo.toLowerCase()}...</span>
+          <span className="visually-hidden">
+            Carregando {titulo.toLowerCase()}...
+          </span>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -118,7 +135,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
           Tentar Novamente
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -126,9 +143,12 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="h2 text-primary mb-0">{titulo}</h1>
-        <button className="btn btn-success d-flex align-items-center gap-2" onClick={onAdd}>
+        <button
+          className="btn btn-success d-flex align-items-center gap-2"
+          onClick={onAdd}
+        >
           <Plus size={18} />
-          Adicionar {titulo.slice(0, -1)}
+          Adicionar {titulo.slice(0)}
         </button>
       </div>
 
@@ -150,7 +170,8 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
         </div>
         <div className="col-md-6 text-end">
           <small className="text-muted">
-            Total: {filteredItens.length} {filteredItens.length === 1 ? "item" : "itens"}
+            Total: {filteredItens.length}{" "}
+            {filteredItens.length === 1 ? "item" : "itens"}
           </small>
         </div>
       </div>
@@ -205,7 +226,10 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
                         <div>
                           <strong>{item.descricao}</strong>
                           {item.caminhao && (
-                            <span className="badge bg-warning text-dark ms-2" title="Necessita caminhão">
+                            <span
+                              className="badge bg-warning text-dark ms-2"
+                              title="Necessita caminhão"
+                            >
                               🚛
                             </span>
                           )}
@@ -215,23 +239,35 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
                         {item.pessoa ? (
                           <div>
                             <div>{item.pessoa.nome}</div>
-                            <small className="text-muted">{item.pessoa.email}</small>
+                            <small className="text-muted">
+                              {item.pessoa.email}
+                            </small>
                           </div>
                         ) : (
                           <span className="text-muted">Não informado</span>
                         )}
                       </td>
                       <td>
-                        <span className="badge bg-light text-dark">{item.quantidade}</span>
+                        <span className="badge bg-light text-dark">
+                          {item.quantidade}
+                        </span>
                       </td>
                       <td>{formatCurrency(item.valor || 0)}</td>
                       <td>
-                        <span className={`fw-bold ${getEstadoConservacaoClass(item.estadoConservacao)}`}>
+                        <span
+                          className={`fw-bold ${getEstadoConservacaoClass(
+                            item.estadoConservacao
+                          )}`}
+                        >
                           {formatarTexto(item.estadoConservacao)}
                         </span>
                       </td>
                       <td>
-                        <span className={`badge ${getSituacaoBadgeClass(item.situacao)} text-white`}>
+                        <span
+                          className={`badge ${getSituacaoBadgeClass(
+                            item.situacao
+                          )} text-white`}
+                        >
                           {formatarTexto(item.situacao)}
                         </span>
                       </td>
@@ -267,49 +303,72 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
 
       {/* Estatísticas */}
       {filteredItens.length > 0 && (
-        <div className="row mt-4">
-          <div className="col-md-3">
+        <div className="row mt-4 row-cols-1 row-cols-md-4 g-2">
+          <div className="col">
             <div className="card bg-primary text-white">
-              <div className="card-body text-center">
-                <h5>Total de Itens</h5>
-                <h3>{filteredItens.reduce((acc, item) => acc + item.quantidade, 0)}</h3>
+              <div className="card-body text-center py-1 px-0">
+                <h6 className="mb-0 smaller-text">Total de Itens</h6>
+                <strong className="fs-6">
+                  {filteredItens.reduce(
+                    (acc, item) => acc + item.quantidade,
+                    0
+                  )}
+                </strong>
               </div>
             </div>
           </div>
-          <div className="col-md-3">
+          <div className="col">
             <div className="card bg-success text-white">
-              <div className="card-body text-center">
-                <h5>Valor Total</h5>
-                <h3>{formatCurrency(filteredItens.reduce((acc, item) => acc + (item.valor || 0), 0))}</h3>
+              <div className="card-body text-center py-1 px-0">
+                <h6 className="mb-0 smaller-text">Valor Total</h6>
+                <strong className="fs-6">
+                  {formatCurrency(
+                    filteredItens.reduce(
+                      (acc, item) => acc + (item.valor || 0),
+                      0
+                    )
+                  )}
+                </strong>
               </div>
             </div>
           </div>
-          <div className="col-md-3">
+          <div className="col">
             <div className="card bg-info text-white">
-              <div className="card-body text-center">
-                <h5>Pessoas</h5>
-                <h3>{new Set(filteredItens.map((item) => item.pessoa?.id).filter(Boolean)).size}</h3>
+              <div className="card-body text-center py-1 px-0">
+                <h6 className="mb-0 smaller-text">Pessoas</h6>
+                <strong className="fs-6">
+                  {
+                    new Set(
+                      filteredItens
+                        .map((item) => item.pessoa?.id)
+                        .filter(Boolean)
+                    ).size
+                  }
+                </strong>
               </div>
             </div>
           </div>
-          <div className="col-md-3">
+          <div className="col">
             <div className="card bg-warning text-white">
-              <div className="card-body text-center">
-                <h5>Valor Médio</h5>
-                <h3>
+              <div className="card-body text-center py-1 px-0">
+                <h6 className="mb-0 smaller-text">Valor Médio</h6>
+                <strong className="fs-6">
                   {filteredItens.length > 0
                     ? formatCurrency(
-                        filteredItens.reduce((acc, item) => acc + (item.valor || 0), 0) / filteredItens.length,
+                        filteredItens.reduce(
+                          (acc, item) => acc + (item.valor || 0),
+                          0
+                        ) / filteredItens.length
                       )
                     : "R$ 0,00"}
-                </h3>
+                </strong>
               </div>
             </div>
           </div>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ListaGenerica
+export default ListaGenerica;

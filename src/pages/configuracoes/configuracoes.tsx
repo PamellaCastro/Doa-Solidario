@@ -1,15 +1,22 @@
-import type React from "react"
-import { useState } from "react"
-import { Settings, Database, User, Users, PlusCircle, Home } from "lucide-react"
-import StatusSistema from "../../components/gerenciamento/StatusSistema"
-import GerenciamentoPessoa from "../../components/gerenciamento/GerenciamentoPessoa"
-import GerenciamentoCategoria from "../../components/gerenciamento/GerenciamentoCategoria"
-import GerenciamentoUsuario from "../../components/gerenciamento/GerenciamentoUsuario"
+import type React from "react";
+import { useState } from "react";
+import {
+  Settings,
+  Database,
+  User,
+  Users,
+  PlusCircle,
+  Home,
+} from "lucide-react";
+import StatusSistema from "../../components/gerenciamento/StatusSistema";
+import GerenciamentoPessoa from "../../components/gerenciamento/GerenciamentoPessoa";
+import GerenciamentoCategoria from "../../components/gerenciamento/GerenciamentoCategoria";
+import GerenciamentoUsuario from "../../components/gerenciamento/GerenciamentoUsuario";
 
-type SectionKey = "status" | "pessoas" | "usuarios" | "categorias"
+type SectionKey = "status" | "pessoas" | "usuarios" | "categorias";
 
 const ConfiguracoesSistema: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<SectionKey>("status")
+  const [activeSection, setActiveSection] = useState<SectionKey>("status");
 
   const sections = [
     {
@@ -40,11 +47,11 @@ const ConfiguracoesSistema: React.FC = () => {
       description: "Gestão de categorias e subcategorias",
       color: "warning",
     },
-  ]
+  ];
 
   const getCurrentSection = () => {
-    return sections.find((section) => section.id === activeSection)
-  }
+    return sections.find((section) => section.id === activeSection);
+  };
 
   const renderSectionContent = () => {
     switch (activeSection) {
@@ -53,19 +60,19 @@ const ConfiguracoesSistema: React.FC = () => {
           <div>
             <StatusSistema />
           </div>
-        )
+        );
       case "pessoas":
-        return <GerenciamentoPessoa />
+        return <GerenciamentoPessoa />;
       case "usuarios":
-        return <GerenciamentoUsuario />
+        return <GerenciamentoUsuario />;
       case "categorias":
-        return <GerenciamentoCategoria />
+        return <GerenciamentoCategoria />;
       default:
-        return <StatusSistema />
+        return <StatusSistema />;
     }
-  }
+  };
 
-  const currentSection = getCurrentSection()
+  const currentSection = getCurrentSection();
 
   return (
     <div className="container-fluid p-4">
@@ -111,8 +118,8 @@ const ConfiguracoesSistema: React.FC = () => {
             </div>
             <div className="list-group list-group-flush">
               {sections.map((section) => {
-                const Icon = section.icon
-                const isActive = activeSection === section.id
+                const Icon = section.icon;
+                const isActive = activeSection === section.id;
                 return (
                   <button
                     key={section.id}
@@ -125,11 +132,15 @@ const ConfiguracoesSistema: React.FC = () => {
                       <Icon size={18} className="me-3" />
                       <div className="text-start">
                         <div className="fw-bold">{section.label}</div>
-                        <small className={isActive ? "text-white-50" : "text-muted"}>{section.description}</small>
+                        <small
+                          className={isActive ? "text-white-50" : "text-muted"}
+                        >
+                          {section.description}
+                        </small>
                       </div>
                     </div>
                   </button>
-                )
+                );
               })}
             </div>
           </div>
@@ -142,12 +153,18 @@ const ConfiguracoesSistema: React.FC = () => {
               <div className="d-flex align-items-center">
                 {currentSection && (
                   <>
-                    <div className={`badge bg-${currentSection.color} me-3 p-2`}>
+                    <div
+                      className={`badge bg-${currentSection.color} me-3 p-2`}
+                    >
                       <currentSection.icon size={20} />
                     </div>
                     <div>
-                      <h5 className="card-title mb-0">{currentSection.label}</h5>
-                      <small className="text-muted">{currentSection.description}</small>
+                      <h5 className="card-title mb-0">
+                        {currentSection.label}
+                      </h5>
+                      <small className="text-muted">
+                        {currentSection.description}
+                      </small>
                     </div>
                   </>
                 )}
@@ -158,7 +175,7 @@ const ConfiguracoesSistema: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ConfiguracoesSistema
+export default ConfiguracoesSistema;

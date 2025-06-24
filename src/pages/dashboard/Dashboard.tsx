@@ -1,5 +1,5 @@
-import type React from "react"
-import { useEffect, useState } from "react"
+import type React from "react";
+import { useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -11,108 +11,117 @@ import {
   Bar,
   XAxis,
   YAxis,
-} from "recharts"
-import { ItemService } from "../../services/ItemService"
-import { Categoria, Item } from "../../types/Item"
-import { Package, TrendingUp, Users, DollarSign } from "lucide-react"
+} from "recharts";
+import { ItemService } from "../../services/ItemService";
+import { Categoria, Item } from "../../types/Item";
+import { Package, TrendingUp, Users, DollarSign } from "lucide-react";
 
-const cores = ["#007BFF", "#28A745", "#FFC107", "#DC3545"]
+const cores = ["#007BFF", "#28A745", "#FFC107", "#DC3545"];
 
 const nomesCategoria: Record<Categoria, string> = {
-  [Categoria.ELETRONICO]: "Eletrônicos",
-  [Categoria.ELETRODOMESTICO]: "Eletrodomésticos",
-  [Categoria.MOVEL]: "Móveis",
-  [Categoria.TEXTIL]: "Têxteis",
-}
+  [Categoria.ELETRONICO]: "Eletrônico",
+  [Categoria.ELETRODOMESTICO]: "Eletrodoméstico",
+  [Categoria.MOVEL]: "Móvel",
+  [Categoria.TEXTIL]: "Têxtil",
+};
 
 interface DadosEstatisticas {
-  totalItens: number
-  totalValor: number
-  totalPessoas: number
-  categoriaComMaisItens: string
+  totalItens: number;
+  totalValor: number;
+  totalPessoas: number;
+  categoriaComMaisItens: string;
 }
 
 const Dashboard: React.FC = () => {
   const [dadosGrafico, setDadosGrafico] = useState<
     { name: string; value: number; quantidade: number }[]
-  >([])
+  >([]);
   const [estatisticas, setEstatisticas] = useState<DadosEstatisticas>({
     totalItens: 0,
     totalValor: 0,
     totalPessoas: 0,
     categoriaComMaisItens: "",
-  })
-  const [loading, setLoading] = useState(true)
-  const [erro, setErro] = useState<string | null>(null)
+  });
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        const categorias: Categoria[] = Object.values(Categoria)
+        const categorias: Categoria[] = Object.values(Categoria);
 
         const resultados = await Promise.all(
           categorias.map(async (categoria) => {
-            const itens: Item[] = await ItemService.listarTodos(categoria)
-            const quantidade = itens.reduce((acc, item) => acc + item.quantidade, 0)
-            const valor = itens.reduce((acc, item) => acc + (item.valor || 0), 0)
+            const itens: Item[] = await ItemService.listarTodos(categoria);
+            const quantidade = itens.reduce(
+              (acc, item) => acc + item.quantidade,
+              0
+            );
+            const valor = itens.reduce(
+              (acc, item) => acc + (item.valor || 0),
+              0
+            );
             return {
               categoria,
               name: nomesCategoria[categoria],
               value: valor,
               quantidade,
               itens,
-            }
-          }),
-        )
+            };
+          })
+        );
 
         const dadosPizza = resultados.map((r) => ({
           name: r.name,
           value: r.value,
           quantidade: r.quantidade,
-        }))
+        }));
 
-        const totalItens = resultados.reduce((acc, r) => acc + r.quantidade, 0)
-        const totalValor = resultados.reduce((acc, r) => acc + r.value, 0)
+        const totalItens = resultados.reduce((acc, r) => acc + r.quantidade, 0);
+        const totalValor = resultados.reduce((acc, r) => acc + r.value, 0);
 
-        const pessoasUnicas = new Set<number>()
+        const pessoasUnicas = new Set<number>();
         resultados.forEach((r) => {
           r.itens.forEach((item) => {
             if (item.pessoa?.id) {
-              pessoasUnicas.add(item.pessoa.id)
+              pessoasUnicas.add(item.pessoa.id);
             }
-          })
-        })
+          });
+        });
 
         const categoriaComMaisItens = resultados.reduce((max, current) =>
-          current.quantidade > max.quantidade ? current : max,
-        ).name
+          current.quantidade > max.quantidade ? current : max
+        ).name;
 
-        setDadosGrafico(dadosPizza)
+        setDadosGrafico(dadosPizza);
         setEstatisticas({
           totalItens,
           totalValor,
           totalPessoas: pessoasUnicas.size,
           categoriaComMaisItens,
-        })
+        });
       } catch (error) {
-        console.error(error)
-        setErro("Erro ao carregar dados do dashboard.")
+        console.error(error);
+        setErro("Erro ao carregar dados do dashboard.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    carregarDados()
-  }, [])
+    carregarDados();
+  }, []);
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "400px" }}
+      >
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Carregando gráficos...</span>
         </div>
       </div>
-    )
+    );
   }
 
   if (erro) {
@@ -120,14 +129,16 @@ const Dashboard: React.FC = () => {
       <div className="alert alert-danger text-center" role="alert">
         {erro}
       </div>
-    )
+    );
   }
 
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="h2 text-primary mb-0">Gráficos - Visão Geral</h1>
-        <small className="text-muted">Última atualização: {new Date().toLocaleString("pt-BR")}</small>
+        <small className="text-muted">
+          Última atualização: {new Date().toLocaleString("pt-BR")}
+        </small>
       </div>
 
       {/* Cards de Estatísticas */}
@@ -138,7 +149,9 @@ const Dashboard: React.FC = () => {
               <Package size={40} className="me-3" />
               <div>
                 <h5 className="card-title mb-1">Total de Itens</h5>
-                <h3 className="mb-0">{estatisticas.totalItens.toLocaleString("pt-BR")}</h3>
+                <h3 className="mb-0">
+                  {estatisticas.totalItens.toLocaleString("pt-BR")}
+                </h3>
               </div>
             </div>
           </div>
@@ -167,7 +180,9 @@ const Dashboard: React.FC = () => {
               <Users size={40} className="me-3" />
               <div>
                 <h5 className="card-title mb-1">Doadores</h5>
-                <h3 className="mb-0">{estatisticas.totalPessoas.toLocaleString("pt-BR")}</h3>
+                <h3 className="mb-0">
+                  {estatisticas.totalPessoas.toLocaleString("pt-BR")}
+                </h3>
               </div>
             </div>
           </div>
@@ -212,7 +227,10 @@ const Dashboard: React.FC = () => {
                     }
                   >
                     {dadosGrafico.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={cores[index % cores.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={cores[index % cores.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip
@@ -234,14 +252,21 @@ const Dashboard: React.FC = () => {
         <div className="col-lg-6 mb-4">
           <div className="card h-100">
             <div className="card-header">
-              <h5 className="card-title mb-0">Quantidade de Itens por Categoria</h5>
+              <h5 className="card-title mb-0">
+                Quantidade de Itens por Categoria
+              </h5>
             </div>
             <div className="card-body">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={dadosGrafico}>
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip formatter={(value: number) => [value.toLocaleString("pt-BR"), "Quantidade"]} />
+                  <Tooltip
+                    formatter={(value: number) => [
+                      value.toLocaleString("pt-BR"),
+                      "Quantidade",
+                    ]}
+                  />
                   <Bar dataKey="quantidade" fill="#007BFF" />
                 </BarChart>
               </ResponsiveContainer>
@@ -274,7 +299,9 @@ const Dashboard: React.FC = () => {
                         <td>
                           <span
                             className="badge me-2"
-                            style={{ backgroundColor: cores[index % cores.length] }}
+                            style={{
+                              backgroundColor: cores[index % cores.length],
+                            }}
                           >
                             ●
                           </span>
@@ -289,10 +316,13 @@ const Dashboard: React.FC = () => {
                         </td>
                         <td>
                           {item.quantidade > 0
-                            ? (item.value / item.quantidade).toLocaleString("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                              })
+                            ? (item.value / item.quantidade).toLocaleString(
+                                "pt-BR",
+                                {
+                                  style: "currency",
+                                  currency: "BRL",
+                                }
+                              )
                             : "R$ 0,00"}
                         </td>
                       </tr>
@@ -305,7 +335,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

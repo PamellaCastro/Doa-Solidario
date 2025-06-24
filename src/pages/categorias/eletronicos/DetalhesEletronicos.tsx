@@ -1,8 +1,10 @@
-import type React from "react"
-import DetalhesItemIntegrado from "../../../components/formularios/DetalhesItem"
+import type React from "react";
+import DetalhesItemIntegrado from "../../../components/formularios/DetalhesItem";
 
 const DetalhesEletronico: React.FC = () => {
-  return <DetalhesItemIntegrado categoria="eletronicos" titulo="Eletrônico" />
-}
+  return <DetalhesItemIntegrado 
+  categoria="eletronicos" 
+  titulo="Eletrônico" />;
+};
 
-export default DetalhesEletronico
+export default DetalhesEletronico;

@@ -1,22 +1,22 @@
-import type React from "react"
-import { useNavigate } from "react-router-dom"
-import ListaGenericaIntegrada from "../../../components/formularios/ListaGenerica"
-import { Categoria, type Item } from "../../../types/Item"
+import type React from "react";
+import { useNavigate } from "react-router-dom";
+import ListaGenericaIntegrada from "../../../components/formularios/ListaGenerica";
+import { Categoria, type Item } from "../../../types/Item";
 
 const Moveis: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleEdit = (item: Item) => {
-    navigate(`/categorias/moveis/editar/${item.id}`)
-  }
+    navigate(`/categorias/moveis/editar/${item.id}`);
+  };
 
   const handleView = (item: Item) => {
-    navigate(`/categorias/moveis/detalhes/${item.id}`)
-  }
+    navigate(`/categorias/moveis/detalhes/${item.id}`);
+  };
 
   const handleAdd = () => {
-    navigate("/categorias/moveis/novo")
-  }
+    navigate("/categorias/moveis/novo");
+  };
 
   return (
     <ListaGenericaIntegrada
@@ -26,7 +26,7 @@ const Moveis: React.FC = () => {
       onView={handleView}
       onAdd={handleAdd}
     />
-  )
-}
+  );
+};
 
-export default Moveis
+export default Moveis;

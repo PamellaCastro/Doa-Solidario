@@ -1,20 +1,29 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Save, XCircle, Search, UserPlus, User, X } from "lucide-react"
-import { type Item, Categoria, EstadoConservacao, Situacao } from "../../types/Item"
-import type { Pessoa } from "../../types/Pessoa"
-import { Estado } from "../../types/Endereco"
-import { PessoaService } from "../../services/PessoaService"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Save, XCircle, Search, UserPlus, User, X } from "lucide-react";
+import {
+  type Item,
+  Categoria,
+  EstadoConservacao,
+  Situacao,
+} from "../../types/Item";
+import type { Pessoa } from "../../types/Pessoa";
+import { Estado } from "../../types/Endereco";
+import { PessoaService } from "../../services/PessoaService";
 
 interface FormularioItemProps {
-  item: Item | null
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void
-  onSubmit: (e: React.FormEvent) => void
-  modo: "cadastro" | "edicao"
-  error: string | null
-  isSubmitting: boolean
-  disableCategoria?: boolean
-  disableDataCadastro?: boolean
+  item: Item | null;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  modo: "cadastro" | "edicao";
+  error: string | null;
+  isSubmitting: boolean;
+  disableCategoria?: boolean;
+  disableDataCadastro?: boolean;
 }
 
 const FormularioItem: React.FC<FormularioItemProps> = ({
@@ -27,12 +36,12 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
   disableCategoria = false,
   disableDataCadastro = false,
 }) => {
-  const [showModal, setShowModal] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedPessoa, setSelectedPessoa] = useState<Pessoa | null>(null)
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState<Pessoa[]>([])
-  const [isSubmittingPessoa, setIsSubmittingPessoa] = useState(false)
+  const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPessoa, setSelectedPessoa] = useState<Pessoa | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<Pessoa[]>([]);
+  const [isSubmittingPessoa, setIsSubmittingPessoa] = useState(false);
 
   const [novaPessoa, setNovaPessoa] = useState<Pessoa>({
     nome: "",
@@ -45,80 +54,87 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
       numero: 0,
       estado: Estado.SC,
     },
-  })
+  });
 
   const formatarTexto = (texto: string): string => {
     return texto
       .toLowerCase()
       .split("_")
       .map((palavra) => palavra.charAt(0).toUpperCase() + palavra.slice(1))
-      .join(" ")
-  }
+      .join(" ");
+  };
 
   useEffect(() => {
     // No modo de edição vem com uma pessoa selecionada
     if (modo === "edicao" && item?.pessoa && !selectedPessoa) {
-      setSelectedPessoa(item.pessoa)
+      setSelectedPessoa(item.pessoa);
     }
-  }, [item, modo, selectedPessoa])
+  }, [item, modo, selectedPessoa]);
 
-  if (!item && modo === "edicao") return null
+  if (!item && modo === "edicao") return null;
 
-  const categorias: Categoria[] = [Categoria.ELETRONICO, Categoria.ELETRODOMESTICO, Categoria.MOVEL, Categoria.TEXTIL]
+  const categorias: Categoria[] = [
+    Categoria.ELETRONICO,
+    Categoria.ELETRODOMESTICO,
+    Categoria.MOVEL,
+    Categoria.TEXTIL,
+  ];
 
-  const estadosConservacao = Object.values(EstadoConservacao)
-  const situacoes = Object.values(Situacao)
-  const estados = Object.values(Estado)
+  const estadosConservacao = Object.values(EstadoConservacao);
+  const situacoes = Object.values(Situacao);
+  const estados = Object.values(Estado);
 
   // Busca de pessoa usando a API
   const buscarPessoa = async () => {
-    if (!searchTerm.trim()) return
+    if (!searchTerm.trim()) return;
 
-    setIsSearching(true)
+    setIsSearching(true);
     try {
-      const resultados = await PessoaService.buscar(searchTerm)
-      setSearchResults(resultados)
+      const resultados = await PessoaService.buscar(searchTerm);
+      setSearchResults(resultados);
     } catch (error) {
-      console.error("Erro ao buscar pessoa:", error)
-      setSearchResults([])
-      alert("Erro ao buscar pessoa. Tente novamente.")
+      console.error("Erro ao buscar pessoa:", error);
+      setSearchResults([]);
+      alert("Erro ao buscar pessoa. Tente novamente.");
     } finally {
-      setIsSearching(false)
+      setIsSearching(false);
     }
-  }
+  };
 
   const selecionarPessoa = (pessoa: Pessoa) => {
-    setSelectedPessoa(pessoa)
-    setSearchResults([])
-    setSearchTerm("")
-  }
+    setSelectedPessoa(pessoa);
+    setSearchResults([]);
+    setSearchTerm("");
+  };
 
-  const handleNovaPessoaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleNovaPessoaChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
 
     if (name.startsWith("endereco.")) {
-      const enderecoField = name.split(".")[1]
+      const enderecoField = name.split(".")[1];
       setNovaPessoa((prev) => ({
         ...prev,
         endereco: {
           ...prev.endereco!,
           [enderecoField]: enderecoField === "numero" ? Number(value) : value,
         },
-      }))
+      }));
     } else {
-      setNovaPessoa((prev) => ({ ...prev, [name]: value }))
+      setNovaPessoa((prev) => ({ ...prev, [name]: value }));
     }
-  }
+  };
 
   // Cadastro de pessoa usando a API
   const cadastrarNovaPessoa = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmittingPessoa(true)
+    e.preventDefault();
+    setIsSubmittingPessoa(true);
 
     try {
-      const pessoaCadastrada = await PessoaService.criar(novaPessoa)
-      setSelectedPessoa(pessoaCadastrada)
-      setShowModal(false)
+      const pessoaCadastrada = await PessoaService.criar(novaPessoa);
+      setSelectedPessoa(pessoaCadastrada);
+      setShowModal(false);
       setNovaPessoa({
         nome: "",
         cpf: "",
@@ -130,36 +146,36 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
           numero: 0,
           estado: Estado.SC,
         },
-      })
-      alert("Pessoa cadastrada com sucesso!")
+      });
+      alert("Pessoa cadastrada com sucesso!");
     } catch (error) {
-      console.error("Erro ao cadastrar pessoa:", error)
-      alert("Erro ao cadastrar pessoa. Verifique os dados e tente novamente.")
+      console.error("Erro ao cadastrar pessoa:", error);
+      alert("Erro ao cadastrar pessoa. Verifique os dados e tente novamente.");
     } finally {
-      setIsSubmittingPessoa(false)
+      setIsSubmittingPessoa(false);
     }
-  }
+  };
 
   const removerPessoa = () => {
-    setSelectedPessoa(null)
-  }
+    setSelectedPessoa(null);
+  };
 
   // Função para submeter o formulário com a pessoa selecionada
   const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!selectedPessoa) {
-      alert("Por favor, selecione uma pessoa antes de continuar.")
-      return
+      alert("Por favor, selecione uma pessoa antes de continuar.");
+      return;
     }
 
     // Adiciona a pessoa ao item antes de submeter
     if (item) {
-      item.pessoa = selectedPessoa
+      item.pessoa = selectedPessoa;
     }
 
-    onSubmit(e)
-  }
+    onSubmit(e);
+  };
 
   return (
     <>
@@ -193,13 +209,21 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                       onClick={buscarPessoa}
                       disabled={isSearching || !searchTerm.trim()}
                     >
-                      {isSearching ? <span className="spinner-border spinner-border-sm" /> : <Search size={16} />}
+                      {isSearching ? (
+                        <span className="spinner-border spinner-border-sm" />
+                      ) : (
+                        <Search size={16} />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 <div className="col-md-4 mb-3 d-flex align-items-end">
-                  <button type="button" className="btn btn-success w-100" onClick={() => setShowModal(true)}>
+                  <button
+                    type="button"
+                    className="btn btn-success w-100"
+                    onClick={() => setShowModal(true)}
+                  >
                     <UserPlus size={16} className="me-2" />
                     Cadastrar Nova Pessoa
                   </button>
@@ -210,7 +234,9 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   <div className="col-12">
                     <div className="card">
                       <div className="card-header">
-                        <small className="text-muted">Resultados encontrados:</small>
+                        <small className="text-muted">
+                          Resultados encontrados:
+                        </small>
                       </div>
                       <div className="card-body p-2">
                         {searchResults.map((pessoa) => (
@@ -228,7 +254,8 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                               </small>
                               {pessoa.endereco && <br />}
                               <small className="text-muted">
-                                {pessoa.endereco?.cidade} - {pessoa.endereco?.estado}
+                                {pessoa.endereco?.cidade} -{" "}
+                                {pessoa.endereco?.estado}
                               </small>
                             </div>
                             <button
@@ -257,12 +284,17 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                     <>
                       <br />
                       <small>
-                        {selectedPessoa.endereco.cidade} - {selectedPessoa.endereco.estado}
+                        {selectedPessoa.endereco.cidade} -{" "}
+                        {selectedPessoa.endereco.estado}
                       </small>
                     </>
                   )}
                 </div>
-                <button type="button" className="btn btn-sm btn-outline-danger" onClick={removerPessoa}>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={removerPessoa}
+                >
                   <X size={16} />
                 </button>
               </div>
@@ -305,7 +337,9 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               className="form-control"
               id="quantidade"
               name="quantidade"
-              value={item?.quantidade && item.quantidade > 0 ? item.quantidade : ""}
+              value={
+                item?.quantidade && item.quantidade > 0 ? item.quantidade : ""
+              }
               onChange={onChange}
               required
               min="1"
@@ -321,7 +355,11 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               className="form-control"
               id="valor"
               name="valor"
-              value={item?.valor !== undefined && item?.valor !== null ? item.valor.toString().replace(".", ",") : ""}
+              value={
+                item?.valor !== undefined && item?.valor !== null
+                  ? item.valor.toString().replace(".", ",")
+                  : ""
+              }
               onChange={onChange}
               inputMode="decimal"
               required
@@ -425,7 +463,10 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           {error && (
             <div className="col-12">
-              <div className="alert alert-danger d-flex align-items-center" role="alert">
+              <div
+                className="alert alert-danger d-flex align-items-center"
+                role="alert"
+              >
                 <XCircle size={20} className="me-2" />
                 <div>{error}</div>
               </div>
@@ -440,7 +481,11 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
             >
               {isSubmitting ? (
                 <>
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Salvando...
                 </>
               ) : (
@@ -461,7 +506,10 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
       {/* Modal para Cadastrar Nova Pessoa */}
       {showModal && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -469,7 +517,11 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   <UserPlus size={20} className="me-2" />
                   Cadastrar Nova Pessoa
                 </h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                ></button>
               </div>
               <form onSubmit={cadastrarNovaPessoa}>
                 <div className="modal-body">
@@ -606,10 +658,18 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowModal(false)}
+                  >
                     Cancelar
                   </button>
-                  <button type="submit" className="btn btn-success" disabled={isSubmittingPessoa}>
+                  <button
+                    type="submit"
+                    className="btn btn-success"
+                    disabled={isSubmittingPessoa}
+                  >
                     {isSubmittingPessoa ? (
                       <>
                         <span className="spinner-border spinner-border-sm me-2" />
@@ -629,7 +689,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default FormularioItem
+export default FormularioItem;

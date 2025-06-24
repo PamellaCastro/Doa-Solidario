@@ -1,45 +1,57 @@
-import type React from "react"
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { CheckCircle, User, MapPin, Package, ArrowLeft, ArrowRight } from "lucide-react"
-import { ItemService } from "../../services/ItemService"
-import { PessoaService } from "../../services/PessoaService"
-import { type Item, Categoria, EstadoConservacao, Situacao } from "../../types/Item"
-import type { Pessoa } from "../../types/Pessoa"
-import { Estado } from "../../types/Endereco"
+import type React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  CheckCircle,
+  User,
+  MapPin,
+  Package,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
+import { ItemService } from "../../services/ItemService";
+import { PessoaService } from "../../services/PessoaService";
+import {
+  type Item,
+  Categoria,
+  EstadoConservacao,
+  Situacao,
+} from "../../types/Item";
+import type { Pessoa } from "../../types/Pessoa";
+import { Estado } from "../../types/Endereco";
 
 interface FormData {
   // Dados da Pessoa
-  nome: string
-  cpf: string
-  email: string
+  nome: string;
+  cpf: string;
+  email: string;
 
   // Dados do Endereço
-  cidade: string
-  cep: string
-  rua: string
-  numero: string
-  estado: string
+  cidade: string;
+  cep: string;
+  rua: string;
+  numero: string;
+  estado: string;
 
   // Dados do Item
-  descricao: string
-  quantidade: number | string
-  data_cadastro: string
-  caminhao: string
-  valor: number | string
-  categoria: string
-  situacao: string
-  estadoConservacao: string
+  descricao: string;
+  quantidade: number | string;
+  data_cadastro: string;
+  caminhao: string;
+  valor: number | string;
+  categoria: string;
+  situacao: string;
+  estadoConservacao: string;
 }
 
-const estados = Object.values(Estado)
+const estados = Object.values(Estado);
 
 const categorias = [
   { value: Categoria.ELETRONICO, label: "Eletrônico" },
   { value: Categoria.ELETRODOMESTICO, label: "Eletrodoméstico" },
   { value: Categoria.MOVEL, label: "Móvel" },
   { value: Categoria.TEXTIL, label: "Têxtil" },
-]
+];
 
 const situacoes = [
   { value: Situacao.ABERTO, label: "Aberto" },
@@ -47,18 +59,18 @@ const situacoes = [
   { value: Situacao.DEPOSITADO, label: "Depositado" },
   { value: Situacao.SOLICITADO, label: "Solicitado" },
   { value: Situacao.DOADO, label: "Doado" },
-]
+];
 
 const estadosConservacao = [
   { value: EstadoConservacao.BOM, label: "Bom" },
   { value: EstadoConservacao.REGULAR, label: "Regular" },
   { value: EstadoConservacao.RUIM, label: "Ruim" },
-]
+];
 
 export default function QueroDoarIntegrado() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
     nome: "",
@@ -77,60 +89,69 @@ export default function QueroDoarIntegrado() {
     categoria: "",
     situacao: Situacao.ABERTO,
     estadoConservacao: "",
-  })
+  });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
 
     if (name === "valor") {
-      const numeric = value.replace(/[^\d]/g, "")
-      const valorNumber = Number(numeric) / 100
-      setFormData((prev) => ({ ...prev, [name]: valorNumber }))
+      const numeric = value.replace(/[^\d]/g, "");
+      const valorNumber = Number(numeric) / 100;
+      setFormData((prev) => ({ ...prev, [name]: valorNumber }));
     } else if (name === "quantidade") {
-      const val = value === "" ? "" : Number(value)
-      setFormData((prev) => ({ ...prev, [name]: val }))
+      const val = value === "" ? "" : Number(value);
+      setFormData((prev) => ({ ...prev, [name]: val }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  }
+  };
 
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        return !!(formData.nome && formData.cpf && formData.email)
+        return !!(formData.nome && formData.cpf && formData.email);
       case 2:
-        return !!(formData.cidade && formData.rua && formData.estado)
+        return !!(formData.cidade && formData.rua && formData.estado);
       case 3:
-        return !!(formData.descricao && formData.quantidade && formData.categoria && formData.estadoConservacao)
+        return !!(
+          formData.descricao &&
+          formData.quantidade &&
+          formData.categoria &&
+          formData.estadoConservacao
+        );
       default:
-        return false
+        return false;
     }
-  }
+  };
 
   const nextStep = () => {
     if (validateStep(currentStep) && currentStep < 3) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateStep(3)) return
+    e.preventDefault();
+    if (!validateStep(3)) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       // Primeiro, verifica se a pessoa já existe pelo CPF
-      let pessoa: Pessoa
+      let pessoa: Pessoa;
       try {
-        pessoa = await PessoaService.buscarPorCpf(formData.cpf)
-        console.log("Pessoa encontrada:", pessoa)
+        pessoa = await PessoaService.buscarPorCpf(formData.cpf);
+        console.log("Pessoa encontrada:", pessoa);
       } catch {
         // Se não existir, cria uma nova pessoa com endereço
         const novaPessoa: Pessoa = {
@@ -144,10 +165,10 @@ export default function QueroDoarIntegrado() {
             numero: formData.numero ? Number(formData.numero) : undefined,
             estado: formData.estado as Estado,
           },
-        }
+        };
 
-        pessoa = await PessoaService.criar(novaPessoa)
-        console.log("Nova pessoa criada:", pessoa)
+        pessoa = await PessoaService.criar(novaPessoa);
+        console.log("Nova pessoa criada:", pessoa);
       }
 
       // Cria o item associado à pessoa
@@ -161,25 +182,25 @@ export default function QueroDoarIntegrado() {
         estadoConservacao: formData.estadoConservacao as EstadoConservacao,
         data_cadastro: formData.data_cadastro,
         pessoa: pessoa,
-      }
+      };
 
-      await ItemService.criar(novoItem)
+      await ItemService.criar(novoItem);
 
-      alert("Doação cadastrada com sucesso! Obrigado pela sua contribuição!")
-      navigate("/login")
+      alert("Doação cadastrada com sucesso! Obrigado pela sua contribuição!");
+      navigate("/login");
     } catch (error) {
-      console.error("Erro ao cadastrar doação:", error)
-      alert("Erro ao cadastrar doação. Tente novamente.")
+      console.error("Erro ao cadastrar doação:", error);
+      alert("Erro ao cadastrar doação. Tente novamente.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const steps = [
     { number: 1, title: "Dados Pessoais", icon: User },
     { number: 2, title: "Endereço", icon: MapPin },
     { number: 3, title: "Item para Doação", icon: Package },
-  ]
+  ];
 
   return (
     <div className="container-fluid bg-light min-vh-100 py-4">
@@ -187,13 +208,21 @@ export default function QueroDoarIntegrado() {
         {/* Header */}
         <div className="text-center mb-4">
           <div className="d-flex justify-content-between align-items-center mb-3">
-            <button type="button" className="btn btn-outline-secondary" onClick={() => navigate("/login")}>
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => navigate("/login")}
+            >
               ← Voltar ao Login
             </button>
-            <h1 className="display-5 fw-bold text-dark mb-0 flex-grow-1">Formulário de Doação</h1>
+            <h1 className="display-5 fw-bold text-dark mb-0 flex-grow-1">
+              Formulário de Doação
+            </h1>
             <div style={{ width: "140px" }}></div>
           </div>
-          <p className="text-muted">Sua doação faz a diferença! Preencha os dados em etapas.</p>
+          <p className="text-muted">
+            Sua doação faz a diferença! Preencha os dados em etapas.
+          </p>
         </div>
 
         {/* Stepper */}
@@ -201,36 +230,51 @@ export default function QueroDoarIntegrado() {
           <div className="col-md-8">
             <div className="d-flex align-items-center justify-content-between">
               {steps.map((step, index) => {
-                const Icon = step.icon
-                const isCompleted = currentStep > step.number
-                const isCurrent = currentStep === step.number
+                const Icon = step.icon;
+                const isCompleted = currentStep > step.number;
+                const isCurrent = currentStep === step.number;
 
                 return (
-                  <div key={step.number} className="d-flex align-items-center flex-fill">
+                  <div
+                    key={step.number}
+                    className="d-flex align-items-center flex-fill"
+                  >
                     <div className="d-flex flex-column align-items-center">
                       <div
                         className={`rounded-circle d-flex align-items-center justify-content-center ${
                           isCompleted
                             ? "bg-success text-white"
                             : isCurrent
-                              ? "bg-primary text-white"
-                              : "bg-secondary text-white"
+                            ? "bg-primary text-white"
+                            : "bg-secondary text-white"
                         }`}
                         style={{ width: "40px", height: "40px" }}
                       >
-                        {isCompleted ? <CheckCircle size={20} /> : <Icon size={20} />}
+                        {isCompleted ? (
+                          <CheckCircle size={20} />
+                        ) : (
+                          <Icon size={20} />
+                        )}
                       </div>
-                      <small className={`mt-1 ${isCurrent ? "text-primary fw-bold" : "text-muted"}`}>
+                      <small
+                        className={`mt-1 ${
+                          isCurrent ? "text-primary fw-bold" : "text-muted"
+                        }`}
+                      >
                         {step.title}
                       </small>
                     </div>
                     {index < steps.length - 1 && (
                       <div className="flex-fill mx-3">
-                        <hr className={`${isCompleted ? "border-success" : "border-secondary"} border-2`} />
+                        <hr
+                          className={`${
+                            isCompleted ? "border-success" : "border-secondary"
+                          } border-2`}
+                        />
                       </div>
                     )}
                   </div>
-                )
+                );
               })}
             </div>
           </div>
@@ -241,7 +285,9 @@ export default function QueroDoarIntegrado() {
           <div className="col-lg-8">
             <div className="card shadow">
               <div className="card-header bg-primary text-white">
-                <h4 className="card-title mb-0">{steps[currentStep - 1].title}</h4>
+                <h4 className="card-title mb-0">
+                  {steps[currentStep - 1].title}
+                </h4>
                 <small>
                   Etapa {currentStep} de {steps.length}
                 </small>
@@ -410,9 +456,11 @@ export default function QueroDoarIntegrado() {
                           className="form-control"
                           id="quantidade"
                           name="quantidade"
-                          value={formData.quantidade === 0 ? "" : formData.quantidade}
+                          value={
+                            formData.quantidade === 0 ? "" : formData.quantidade
+                          }
                           onChange={handleInputChange}
-                          placeholder="1"
+                          placeholder="0"
                           min="1"
                           required
                         />
@@ -426,7 +474,11 @@ export default function QueroDoarIntegrado() {
                           className="form-control"
                           id="valor"
                           name="valor"
-                          value={formData.valor === 0 || formData.valor === "" ? "" : formData.valor}
+                          value={
+                            formData.valor === 0 || formData.valor === ""
+                              ? ""
+                              : formData.valor
+                          }
                           onChange={handleInputChange}
                           placeholder="0,00"
                         />
@@ -445,14 +497,20 @@ export default function QueroDoarIntegrado() {
                         >
                           <option value="">Selecione a categoria</option>
                           {categorias.map((categoria) => (
-                            <option key={categoria.value} value={categoria.value}>
+                            <option
+                              key={categoria.value}
+                              value={categoria.value}
+                            >
                               {categoria.label}
                             </option>
                           ))}
                         </select>
                       </div>
                       <div className="col-md-6">
-                        <label htmlFor="estadoConservacao" className="form-label">
+                        <label
+                          htmlFor="estadoConservacao"
+                          className="form-label"
+                        >
                           Estado de Conservação *
                         </label>
                         <select
@@ -571,5 +629,5 @@ export default function QueroDoarIntegrado() {
         </div>
       </div>
     </div>
-  )
+  );
 }
