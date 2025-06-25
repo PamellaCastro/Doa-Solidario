@@ -57,7 +57,6 @@ const CadastroEletrodomestico: React.FC = () => {
       if (
         !item.descricao ||
         item.quantidade <= 0 ||
-        item.valor <= 0 ||
         !item.estadoConservacao ||
         !item.situacao
       ) {

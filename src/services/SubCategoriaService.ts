@@ -1,5 +1,6 @@
 import api from "../../api"
-import type { SubCategoria } from "../types/SubCategoria"
+import { Categoria } from "../types/Categoria"
+import type { SubCategoria, } from "../types/SubCategoria"
 
 export class SubCategoriaService {
   private static readonly BASE_URL = "/sub"
@@ -7,6 +8,12 @@ export class SubCategoriaService {
   static async listarTodos(): Promise<SubCategoria[]> {
     const response = await api.get(this.BASE_URL)
     return response.data
+  }
+
+    static async listarPorCategoria(categoria: Categoria): Promise<SubCategoria[]> {
+    // Exemplo: se você tiver um endpoint como /api/sub?categoria=ELETRONICO
+    const response = await api.get(`${this.BASE_URL}?categoria=${categoria}`);
+    return response.data;
   }
 
   static async buscarPorId(id: number): Promise<SubCategoria> {

@@ -84,7 +84,7 @@ const EditarEletronico: React.FC = () => {
       if (
         !item.descricao ||
         item.quantidade <= 0 ||
-        item.valor <= 0 ||
+        item.valor ||
         !item.estadoConservacao ||
         !item.situacao
       ) {
@@ -94,7 +94,7 @@ const EditarEletronico: React.FC = () => {
         return;
       }
 
-      if (!item.pessoa) {
+      if (!item.pessoadoador) {
         setError("Por favor, selecione uma pessoa.");
         return;
       }

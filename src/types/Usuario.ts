@@ -10,9 +10,9 @@ export interface Usuario {
 
 export enum PerfilAcesso {
   ADMIN = "ADMIN",
-  MD_ELETRONICO = "MD_ELETRONICO",
+  MD_ELETRONICO = "MD_ELETRONICO", 
   MD_ELETRODOMESTICO = "MD_ELETRODOMESTICO",
-  MD_TEXIL = "MD_TEXIL",
+  MD_TEXTIL = "MD_TEXTIL", // Corrigir: era MD_TEXIL, agora MD_TEXTIL
   MD_MOVEL = "MD_MOVEL",
   MD_SOCIAL = "MD_SOCIAL",
 }

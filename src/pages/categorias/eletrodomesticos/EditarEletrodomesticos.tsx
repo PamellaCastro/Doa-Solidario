@@ -82,7 +82,7 @@ const EditarEletrodomestico: React.FC = () => {
       if (
         !item.descricao ||
         item.quantidade <= 0 ||
-        item.valor <= 0 ||
+        item.valor ||
         !item.estadoConservacao ||
         !item.situacao
       ) {

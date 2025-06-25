@@ -29,18 +29,19 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({
   }, [categoria]);
 
   const carregarItens = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await ItemService.listarTodos(categoria);
-      setItens(data);
-    } catch (err) {
-      setError(`Erro ao carregar ${titulo.toLowerCase()}`);
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  setError(null);
+  try {
+    const data = await ItemService.listarTodos(); 
+    const itensFiltrados = data.filter((item) => item.categoria === categoria);
+    setItens(itensFiltrados);
+  } catch (err) {
+    setError(`Erro ao carregar ${titulo.toLowerCase()}`);
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleDelete = async (id: number) => {
     if (
@@ -66,7 +67,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({
   const filteredItens = itens.filter(
     (item) =>
       item.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.pessoa?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.pessoadoador?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.situacao.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -236,11 +237,11 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({
                         </div>
                       </td>
                       <td>
-                        {item.pessoa ? (
+                        {item.pessoadoador ? (
                           <div>
-                            <div>{item.pessoa.nome}</div>
+                            <div>{item.pessoadoador.nome}</div>
                             <small className="text-muted">
-                              {item.pessoa.email}
+                              {item.pessoadoador.email}
                             </small>
                           </div>
                         ) : (

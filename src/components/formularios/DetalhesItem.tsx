@@ -246,31 +246,31 @@ const DetalhesItem: React.FC<DetalhesItemProps> = ({ categoria, titulo }) => {
               </h5>
             </div>
             <div className="card-body">
-              {item.pessoa ? (
+              {item.pessoadoador ? (
                 <div className="row g-3">
                   <div className="col-12">
                     <label className="form-label fw-bold">Nome</label>
-                    <p className="form-control-plaintext">{item.pessoa.nome}</p>
+                    <p className="form-control-plaintext">{item.pessoadoador.nome}</p>
                   </div>
 
                   <div className="col-12">
                     <label className="form-label fw-bold">CPF</label>
-                    <p className="form-control-plaintext">{item.pessoa.cpf}</p>
+                    <p className="form-control-plaintext">{item.pessoadoador.cpf}</p>
                   </div>
 
                   <div className="col-12">
                     <label className="form-label fw-bold">E-mail</label>
                     <p className="form-control-plaintext">
                       <a
-                        href={`mailto:${item.pessoa.email}`}
+                        href={`mailto:${item.pessoadoador.email}`}
                         className="text-decoration-none"
                       >
-                        {item.pessoa.email}
+                        {item.pessoadoador.email}
                       </a>
                     </p>
                   </div>
 
-                  {item.pessoa.endereco && (
+                  {item.pessoadoador.endereco && (
                     <>
                       <div className="col-12 mt-3">
                         <h6 className="text-secondary">
@@ -282,31 +282,31 @@ const DetalhesItem: React.FC<DetalhesItemProps> = ({ categoria, titulo }) => {
                       <div className="col-12">
                         <label className="form-label fw-bold">Cidade</label>
                         <p className="form-control-plaintext">
-                          {item.pessoa.endereco.cidade}
+                          {item.pessoadoador.endereco.cidade}
                         </p>
                       </div>
 
                       <div className="col-12">
                         <label className="form-label fw-bold">Estado</label>
                         <p className="form-control-plaintext">
-                          {item.pessoa.endereco.estado}
+                          {item.pessoadoador.endereco.estado}
                         </p>
                       </div>
 
                       <div className="col-12">
                         <label className="form-label fw-bold">Rua</label>
                         <p className="form-control-plaintext">
-                          {item.pessoa.endereco.rua}
-                          {item.pessoa.endereco.numero &&
-                            `, ${item.pessoa.endereco.numero}`}
+                          {item.pessoadoador.endereco.rua}
+                          {item.pessoadoador.endereco.numero &&
+                            `, ${item.pessoadoador.endereco.numero}`}
                         </p>
                       </div>
 
-                      {item.pessoa.endereco.cep && (
+                      {item.pessoadoador.endereco.cep && (
                         <div className="col-12">
                           <label className="form-label fw-bold">CEP</label>
                           <p className="form-control-plaintext">
-                            {item.pessoa.endereco.cep}
+                            {item.pessoadoador.endereco.cep}
                           </p>
                         </div>
                       )}

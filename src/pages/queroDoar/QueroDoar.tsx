@@ -1,5 +1,4 @@
-import type React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   CheckCircle,
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import { ItemService } from "../../services/ItemService";
 import { PessoaService } from "../../services/PessoaService";
+import { SubCategoriaService } from "../../services/SubCategoriaService"; 
 import {
   type Item,
   Categoria,
@@ -18,6 +18,7 @@ import {
   Situacao,
 } from "../../types/Item";
 import type { Pessoa } from "../../types/Pessoa";
+import type { SubCategoria } from "../../types/SubCategoria"; 
 import { Estado } from "../../types/Endereco";
 
 interface FormData {
@@ -42,6 +43,7 @@ interface FormData {
   categoria: string;
   situacao: string;
   estadoConservacao: string;
+  subCategoriaId: string; // Para armazenar o ID da subcategoria selecionada
 }
 
 const estados = Object.values(Estado);
@@ -89,18 +91,60 @@ export default function QueroDoarIntegrado() {
     categoria: "",
     situacao: Situacao.ABERTO,
     estadoConservacao: "",
+    subCategoriaId: "", // Inicializado vazio
   });
+
+  const [todasSubCategorias, setTodasSubCategorias] = useState<SubCategoria[]>(
+    [],
+  ); // Estado para todas as subcategorias
+  const [subCategoriasDisponiveis, setSubCategoriasDisponiveis] = useState<
+    SubCategoria[]
+  >([]); // Estado para subcategorias filtradas
+
+  // Efeito para carregar TODAS as subcategorias uma única vez no carregamento do componente
+  useEffect(() => {
+    const fetchTodasSubCategorias = async () => {
+      try {
+        const fetchedSubCategorias = await SubCategoriaService.listarTodos();
+        setTodasSubCategorias(fetchedSubCategorias);
+      } catch (error) {
+        console.error("Erro ao carregar todas as subcategorias:", error);
+        setTodasSubCategorias([]);
+      }
+    };
+    fetchTodasSubCategorias();
+  }, []); // Dependência vazia: executa apenas uma vez
+
+  // Efeito para filtrar as subcategorias disponíveis sempre que a categoria ou a lista completa muda
+  useEffect(() => {
+    if (formData.categoria && todasSubCategorias.length > 0) {
+      const filtered = todasSubCategorias.filter(
+        (subCat) => subCat.categoria === formData.categoria,
+      );
+      setSubCategoriasDisponiveis(filtered);
+      // Reseta a subcategoria selecionada se ela não estiver mais na lista filtrada
+      if (
+        !filtered.some((sc) => sc.id === Number(formData.subCategoriaId)) &&
+        formData.subCategoriaId !== ""
+      ) {
+        setFormData((prev) => ({ ...prev, subCategoriaId: "" }));
+      }
+    } else {
+      setSubCategoriasDisponiveis([]);
+      setFormData((prev) => ({ ...prev, subCategoriaId: "" }));
+    }
+  }, [formData.categoria, todasSubCategorias]); // Dependências: categoria selecionada e a lista completa
 
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
 
     if (name === "valor") {
-      const numeric = value.replace(/[^\d]/g, "");
-      const valorNumber = Number(numeric) / 100;
+      const numeric = value.replace(/[^\d,]/g, "").replace(",", "."); // Permite vírgula para decimal
+      const valorNumber = Number(numeric);
       setFormData((prev) => ({ ...prev, [name]: valorNumber }));
     } else if (name === "quantidade") {
       const val = value === "" ? "" : Number(value);
@@ -117,12 +161,26 @@ export default function QueroDoarIntegrado() {
       case 2:
         return !!(formData.cidade && formData.rua && formData.estado);
       case 3:
-        return !!(
-          formData.descricao &&
-          formData.quantidade &&
-          formData.categoria &&
-          formData.estadoConservacao
-        );
+        // A validação da subCategoriaId só é necessária se houver subcategorias disponíveis para a categoria selecionada
+        const isSubCategoriaRequired =
+          formData.categoria && subCategoriasDisponiveis.length > 0;
+
+        if (isSubCategoriaRequired) {
+          return !!(
+            formData.descricao &&
+            formData.quantidade &&
+            formData.categoria &&
+            formData.estadoConservacao &&
+            formData.subCategoriaId
+          ); // Valida a subcategoria
+        } else {
+          return !!(
+            formData.descricao &&
+            formData.quantidade &&
+            formData.categoria &&
+            formData.estadoConservacao
+          );
+        }
       default:
         return false;
     }
@@ -131,6 +189,8 @@ export default function QueroDoarIntegrado() {
   const nextStep = () => {
     if (validateStep(currentStep) && currentStep < 3) {
       setCurrentStep(currentStep + 1);
+    } else if (!validateStep(currentStep)) {
+      alert("Por favor, preencha todos os campos obrigatórios.");
     }
   };
 
@@ -142,7 +202,10 @@ export default function QueroDoarIntegrado() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateStep(3)) return;
+    if (!validateStep(3)) {
+      alert("Por favor, preencha todos os campos obrigatórios da etapa atual.");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -152,8 +215,9 @@ export default function QueroDoarIntegrado() {
       try {
         pessoa = await PessoaService.buscarPorCpf(formData.cpf);
         console.log("Pessoa encontrada:", pessoa);
-      } catch {
+      } catch (error) {
         // Se não existir, cria uma nova pessoa com endereço
+        console.warn("Pessoa não encontrada, criando nova...", error); 
         const novaPessoa: Pessoa = {
           nome: formData.nome,
           cpf: formData.cpf,
@@ -181,16 +245,33 @@ export default function QueroDoarIntegrado() {
         situacao: (formData.situacao as Situacao) || Situacao.ABERTO,
         estadoConservacao: formData.estadoConservacao as EstadoConservacao,
         data_cadastro: formData.data_cadastro,
-        pessoa: pessoa,
+        pessoadoador: pessoa, // Usando pessoadoador conforme o backend
+        pessoabeneficiario: undefined, // <-- NOVO: Explicitamente enviando null para o beneficiário
+        subCategoria: {
+          id: Number(formData.subCategoriaId),
+        } as SubCategoria,
       };
 
       await ItemService.criar(novoItem);
 
       alert("Doação cadastrada com sucesso! Obrigado pela sua contribuição!");
       navigate("/login");
-    } catch (error) {
+    } catch (error: any) {
+      // Use 'any' para lidar com a tipagem de erro do Axios
       console.error("Erro ao cadastrar doação:", error);
-      alert("Erro ao cadastrar doação. Tente novamente.");
+      let errorMessage = "Erro ao cadastrar doação. Tente novamente.";
+
+      if (error.response && error.response.data) {
+        // Tenta pegar uma mensagem de erro mais específica do backend
+        if (error.response.data.message) {
+          errorMessage = `Erro: ${error.response.data.message}`;
+        } else if (typeof error.response.data === "string") {
+          errorMessage = `Erro do servidor: ${error.response.data}`;
+        }
+      } else if (error.message) {
+        errorMessage = `Erro: ${error.message}`;
+      }
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -245,8 +326,8 @@ export default function QueroDoarIntegrado() {
                           isCompleted
                             ? "bg-success text-white"
                             : isCurrent
-                            ? "bg-primary text-white"
-                            : "bg-secondary text-white"
+                              ? "bg-primary text-white"
+                              : "bg-secondary text-white"
                         }`}
                         style={{ width: "40px", height: "40px" }}
                       >
@@ -477,7 +558,10 @@ export default function QueroDoarIntegrado() {
                           value={
                             formData.valor === 0 || formData.valor === ""
                               ? ""
-                              : formData.valor
+                              : formData.valor.toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                }) // Formata para BRL
                           }
                           onChange={handleInputChange}
                           placeholder="0,00"
@@ -506,6 +590,33 @@ export default function QueroDoarIntegrado() {
                           ))}
                         </select>
                       </div>
+
+                      {/* CAMPO Subcategoria */}
+                      {formData.categoria &&
+                        subCategoriasDisponiveis.length > 0 && (
+                          <div className="col-md-6">
+                            <label htmlFor="subCategoriaId" className="form-label">
+                              Subcategoria *
+                            </label>
+                            <select
+                              className="form-select"
+                              id="subCategoriaId"
+                              name="subCategoriaId"
+                              value={formData.subCategoriaId}
+                              onChange={handleInputChange}
+                              required
+                            >
+                              <option value="">Selecione a subcategoria</option>
+                              {subCategoriasDisponiveis.map((subCat) => (
+                                <option key={subCat.id} value={subCat.id}>
+                                  {subCat.descricao}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      {/* FIM DO CAMPO Subcategoria */}
+
                       <div className="col-md-6">
                         <label
                           htmlFor="estadoConservacao"

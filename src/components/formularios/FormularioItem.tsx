@@ -66,8 +66,8 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
   useEffect(() => {
     // No modo de edição vem com uma pessoa selecionada
-    if (modo === "edicao" && item?.pessoa && !selectedPessoa) {
-      setSelectedPessoa(item.pessoa);
+    if (modo === "edicao" && item?.pessoadoador && !selectedPessoa) {
+      setSelectedPessoa(item.pessoadoador);
     }
   }, [item, modo, selectedPessoa]);
 
@@ -171,7 +171,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
     // Adiciona a pessoa ao item antes de submeter
     if (item) {
-      item.pessoa = selectedPessoa;
+      item.pessoadoador = selectedPessoa;
     }
 
     onSubmit(e);
@@ -239,29 +239,29 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                         </small>
                       </div>
                       <div className="card-body p-2">
-                        {searchResults.map((pessoa) => (
+                        {searchResults.map((pessoadoador) => (
                           <div
-                            key={pessoa.id}
+                            key={pessoadoador.id}
                             className="d-flex justify-content-between align-items-center p-2 border-bottom cursor-pointer hover-bg-light"
-                            onClick={() => selecionarPessoa(pessoa)}
+                            onClick={() => selecionarPessoa(pessoadoador)}
                             style={{ cursor: "pointer" }}
                           >
                             <div>
-                              <strong>{pessoa.nome}</strong>
+                              <strong>{pessoadoador.nome}</strong>
                               <br />
                               <small className="text-muted">
-                                CPF: {pessoa.cpf} | Email: {pessoa.email}
+                                CPF: {pessoadoador.cpf} | Email: {pessoadoador.email}
                               </small>
-                              {pessoa.endereco && <br />}
+                              {pessoadoador.endereco && <br />}
                               <small className="text-muted">
-                                {pessoa.endereco?.cidade} -{" "}
-                                {pessoa.endereco?.estado}
+                                {pessoadoador.endereco?.cidade} -{" "}
+                                {pessoadoador.endereco?.estado}
                               </small>
                             </div>
                             <button
                               type="button"
                               className="btn btn-sm btn-primary"
-                              onClick={() => selecionarPessoa(pessoa)}
+                              onClick={() => selecionarPessoa(pessoadoador)}
                             >
                               Selecionar
                             </button>
