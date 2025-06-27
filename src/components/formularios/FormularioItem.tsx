@@ -12,7 +12,7 @@ import { SubCategoriaService } from "../../services/SubCategoriaService"
 interface FormularioItemProps {
   item: Item | null
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void
-  onSubmit: (e: React.FormEvent) => void
+  onSubmit: (e: React.FormEvent, itemAtualizado?: Item) => void
   modo: "cadastro" | "edicao"
   error: string | null
   isSubmitting: boolean
@@ -189,36 +189,27 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
   }
 
   // Função para submeter o formulário com a pessoa selecionada
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+ const handleFormSubmit = (e: React.FormEvent) => {
+  e.preventDefault()
 
-    if (!selectedPessoa) {
-      alert("Por favor, selecione uma pessoa antes de continuar.")
-      return
-    }
-
-    if (!item?.subCategoria) {
-      alert("Por favor, selecione uma subcategoria.")
-      return
-    }
-
-    // Criar evento sintético para atualizar o item com a pessoa selecionada
-    const syntheticEventPessoa = {
-      target: {
-        name: "pessoadoador",
-        value: selectedPessoa,
-      },
-    } as any
-
-    // Atualizar o item com a pessoa selecionada
-    onChange(syntheticEventPessoa)
-
-    // Aguardar um pouco para garantir que o estado foi atualizado
-    setTimeout(() => {
-      console.log("Submetendo formulário com item:", { ...item, pessoadoador: selectedPessoa })
-      onSubmit(e)
-    }, 100)
+  if (!selectedPessoa) {
+    alert("Por favor, selecione uma pessoa antes de continuar.")
+    return
   }
+
+  if (!item?.subCategoria) {
+    alert("Por favor, selecione uma subcategoria.")
+    return
+  }
+
+  const itemAtualizado: Item = {
+    ...item,
+    pessoadoador: selectedPessoa,
+  }
+
+  onSubmit(e, itemAtualizado) // envia item completo com pessoadoador
+}
+
 
   return (
     <>

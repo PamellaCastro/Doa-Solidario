@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -54,17 +52,19 @@ const CadastroTexteis: React.FC = () => {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, itemAtualizado?:Item) => {
     e.preventDefault()
+    const finalItem  = itemAtualizado || item
+
     setIsSubmitting(true)
     setError(null)
 
-    // DAVA ERRO, INVESTIGAR NO FUTURO (NÃO APAGAR)
-    // if (!item.pessoadoador || !item.pessoadoador.id) {
-    //   setError("Por favor, selecione uma pessoa doadora válida.")
-    //   setIsSubmitting(true)
-    //   return
-    // }
+    // DAVA ERRO, INVESTIGAR NO FUTURO (NÃO APAGAR)(corrigido)
+    if (!finalItem.pessoadoador || !finalItem.pessoadoador.id) {
+      setError("Por favor, selecione uma pessoa doadora válida.")
+      setIsSubmitting(false)
+      return
+    }
 
     try {
       await ItemService.criar(item)
@@ -72,7 +72,7 @@ const CadastroTexteis: React.FC = () => {
 
       setItem({
         descricao: "",
-        quantidade: 1,
+        quantidade: 0,
         valor: 0,
         caminhao: false,
         categoria: "TEXTIL" as Categoria,

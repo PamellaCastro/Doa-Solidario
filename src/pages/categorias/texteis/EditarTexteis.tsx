@@ -65,12 +65,13 @@ const EditarTextil: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, itemAtualizado?: Item) => {
     e.preventDefault();
+    const finalItem = itemAtualizado || item
     setIsSubmitting(true);
     setError(null);
 
-    if (!item || !item.id) {
+    if (!finalItem || !finalItem.id) {
       setError("Item inválido para atualização.");
       setIsSubmitting(false);
       return;
@@ -78,21 +79,21 @@ const EditarTextil: React.FC = () => {
 
     try {
       if (
-        !item.descricao ||
-        item.quantidade <= 0 ||
-        !item.estadoConservacao ||
-        !item.situacao
+        !finalItem.descricao ||
+        finalItem.quantidade <= 0 ||
+        !finalItem.estadoConservacao ||
+        !finalItem.situacao
       ) {
         setError("Por favor, preencha todos os campos obrigatórios.");
         return;
       }
 
-      if (!item.pessoadoador) {
+      if (!finalItem.pessoadoador) {
         setError("Por favor, selecione uma pessoa.");
         return;
       }
 
-      await ItemService.atualizar(item.id, item);
+      await ItemService.atualizar(finalItem.id, finalItem);
       alert("Têxtil atualizado com sucesso!");
       navigate("/categorias/texteis");
     } catch (err) {

@@ -62,26 +62,27 @@ const CadastroEletronicos: React.FC = () => {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, itemAtualizado?: Item) => {
+    const finalItem = itemAtualizado || item
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
 
-    // DAVA ERRO, INVESTIGAR NO FUTURO (NÃO APAGAR)
+    // DAVA ERRO, INVESTIGAR NO FUTURO (NÃO APAGAR)(corrigido)
     // Validação adicional antes de enviar
-    if (!item.pessoadoador || typeof item.pessoadoador.id !== 'number' || item.pessoadoador.id <= 0) {
+    if (!finalItem.pessoadoador || !finalItem.pessoadoador.id) {
       setError("Por favor, selecione uma pessoa doadora válida.")
-      setIsSubmitting(true)
+      setIsSubmitting(false)
       return
     }
 
     try {
-      await ItemService.criar(item)
+      await ItemService.criar(finalItem)
       alert("Eletrônico cadastrado com sucesso!")
 
       setItem({
         descricao: "",
-        quantidade: 1,
+        quantidade: 0,
         valor: 0,
         caminhao: false,
         categoria: "ELETRONICO" as Categoria,

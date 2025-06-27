@@ -52,20 +52,21 @@ const CadastroEletrodomesticos: React.FC = () => {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, itemAtualizado?: Item) => {
+    const finalItem = itemAtualizado || item
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
 
     // DAVA ERRO, INVESTIGAR NO FUTURO (NÃO APAGAR)
-    // if (!item.pessoadoador || !item.pessoadoador.id) {
-    //   setError("Por favor, selecione uma pessoa doadora válida.")
-    //   setIsSubmitting(true)
-    //   return
-    // }
+    if (!finalItem.pessoadoador || !finalItem.pessoadoador.id) {
+      setError("Por favor, selecione uma pessoa doadora válida.")
+      setIsSubmitting(false)
+      return
+    }
 
     try {
-      await ItemService.criar(item)
+      await ItemService.criar(finalItem)
       alert("Eletrodoméstico cadastrado com sucesso!")
 
       setItem({

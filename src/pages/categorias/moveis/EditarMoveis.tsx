@@ -65,12 +65,13 @@ const EditarMovel: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, itemAtualizado?: Item) => {
     e.preventDefault();
+    const finalItem = itemAtualizado || item
     setIsSubmitting(true);
     setError(null);
 
-    if (!item || !item.id) {
+    if (!finalItem || !finalItem.id) {
       setError("Item inválido para atualização.");
       setIsSubmitting(false);
       return;
@@ -78,10 +79,10 @@ const EditarMovel: React.FC = () => {
 
     
     if (
-      !item.descricao ||
-      item.quantidade <= 0 ||
-      !item.estadoConservacao ||
-      !item.situacao
+      !finalItem.descricao ||
+      finalItem.quantidade <= 0 ||
+      !finalItem.estadoConservacao ||
+      !finalItem.situacao
     ) {
       setError("Por favor, preencha todos os campos obrigatórios.");
       setIsSubmitting(false);
@@ -89,14 +90,14 @@ const EditarMovel: React.FC = () => {
     }
 
   
-    if (!item.pessoadoador) {
+    if (!finalItem.pessoadoador) {
       setError("Por favor, selecione uma pessoa.");
       setIsSubmitting(false);
       return;
     }
 
     try {
-      await ItemService.atualizar(item.id, item);
+      await ItemService.atualizar(finalItem.id, finalItem);
       alert("Móvel atualizado com sucesso!");
       navigate("/categorias/moveis");
     } catch (err) {

@@ -52,25 +52,26 @@ const CadastroMoveis: React.FC = () => {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, itemAtualizado?: Item) => {
+    const finalItem = itemAtualizado || item
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
 
-    // DAVA ERRO, INVESTIGAR NO FUTURO (NÃO APAGAR)
-    if (!item.pessoadoador || !item.pessoadoador.id) {
+    // DAVA ERRO, INVESTIGAR NO FUTURO (NÃO APAGAR)(corrigido)
+    if (!finalItem.pessoadoador || !finalItem.pessoadoador.id) {
       setError("Por favor, selecione uma pessoa doadora válida.")
       setIsSubmitting(false)
       return
     }
 
     try {
-      await ItemService.criar(item)
+      await ItemService.criar(finalItem)
       alert("Móvel cadastrado com sucesso!")
 
       setItem({
         descricao: "",
-        quantidade: 1,
+        quantidade: 0,
         valor: 0,
         caminhao: false,
         categoria: "MOVEL" as Categoria,
