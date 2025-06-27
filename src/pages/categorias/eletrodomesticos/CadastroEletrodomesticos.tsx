@@ -1,117 +1,115 @@
-import type React from "react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import FormularioItemIntegrado from "../../../components/formularios/FormularioItem";
-import { ItemService } from "../../../services/ItemService";
-import {
-  type Item,
-  Categoria,
-  EstadoConservacao,
-  Situacao,
-} from "../../../types/Item";
+import type React from "react"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import FormularioItem from "../../../components/formularios/FormularioItem"
+import { ItemService } from "../../../services/ItemService"
+import type { Item, Categoria, EstadoConservacao, Situacao } from "../../../types/Item"
 
-const initialItemState: Item = {
-  descricao: "",
-  quantidade: 1,
-  valor: 0,
-  caminhao: false,
-  categoria: Categoria.ELETRODOMESTICO,
-  estadoConservacao: EstadoConservacao.BOM,
-  situacao: Situacao.ABERTO,
-  data_cadastro: new Date().toISOString().split("T")[0],
-};
+const CadastroEletrodomesticos: React.FC = () => {
+  const navigate = useNavigate()
 
-const CadastroEletrodomestico: React.FC = () => {
-  const [item, setItem] = useState<Item>(initialItemState);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const navigate = useNavigate();
+  const [item, setItem] = useState<Item>({
+    descricao: "",
+    quantidade: 1,
+    valor: 0,
+    caminhao: false,
+    categoria: "ELETRODOMESTICO" as Categoria,
+    estadoConservacao: "" as EstadoConservacao,
+    situacao: "ABERTO" as Situacao,
+    data_cadastro: new Date().toISOString().split("T")[0],
+    subCategoria: undefined,
+    pessoadoador: undefined,
+    pessoabeneficiario: undefined,
+  })
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value, type } = e.target;
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-    if (name === "valor") {
-      const onlyNumbers = value.replace(/[^\d]/g, "");
-      const numericValue = Number(onlyNumbers) / 100;
-      setItem((prev) => ({ ...prev, valor: numericValue }));
+  const handleChange = (e: any) => {
+    const { name, value } = e.target
+
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".")
+      setItem((prev) => ({
+        ...prev,
+        [parent]: {
+          ...(prev as any)[parent],
+          [child]: value,
+        },
+      }))
     } else if (name === "caminhao") {
-      setItem((prev) => ({ ...prev, caminhao: value === "true" }));
-    } else if (type === "number" || name === "quantidade") {
-      setItem((prev) => ({ ...prev, [name]: Number.parseFloat(value) || 0 }));
+      setItem((prev) => ({
+        ...prev,
+        [name]: value === "true" || value === true,
+      }))
+    } else if (name === "quantidade" || name === "valor") {
+      setItem((prev) => ({
+        ...prev,
+        [name]: Number(value),
+      }))
     } else {
-      setItem((prev) => ({ ...prev, [name]: value }));
+      setItem((prev) => ({ ...prev, [name]: value }))
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
+
+    // DAVA ERRO, INVESTIGAR NO FUTURO (NÃO APAGAR)
+    // if (!item.pessoadoador || !item.pessoadoador.id) {
+    //   setError("Por favor, selecione uma pessoa doadora válida.")
+    //   setIsSubmitting(true)
+    //   return
+    // }
 
     try {
-      // Validações
-      if (
-        !item.descricao ||
-        item.quantidade <= 0 ||
-        !item.estadoConservacao ||
-        !item.situacao
-      ) {
-        setError("Por favor, preencha todos os campos obrigatórios.");
-        return;
-      }
+      await ItemService.criar(item)
+      alert("Eletrodoméstico cadastrado com sucesso!")
 
-      if (!item.pessoa) {
-        setError("Por favor, selecione uma pessoa.");
-        return;
-      }
+      setItem({
+        descricao: "",
+        quantidade: 1,
+        valor: 0,
+        caminhao: false,
+        categoria: "ELETRODOMESTICO" as Categoria,
+        estadoConservacao: "" as EstadoConservacao,
+        situacao: "ABERTO" as Situacao,
+        data_cadastro: new Date().toISOString().split("T")[0],
+        subCategoria: undefined,
+        pessoadoador: undefined,
+        pessoabeneficiario: undefined,
+      })
 
-      await ItemService.criar(item);
-      alert("Eletrodoméstico cadastrado com sucesso!");
-      navigate("/categorias/eletrodomesticos");
+      navigate("/categorias/eletrodomesticos")
     } catch (err) {
-      console.error("Erro ao cadastrar eletrodoméstico:", err);
-      setError(
-        "Erro ao cadastrar eletrodoméstico. Verifique os dados e tente novamente."
-      );
+      console.error("Erro ao cadastrar eletrodoméstico:", err)
+      setError("Erro ao cadastrar eletrodoméstico. Verifique os dados e tente novamente.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-2xl font-bold text-primary">
-          Cadastrar Novo Eletrodoméstico
-        </h1>
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() => navigate("/categorias/eletrodomesticos")}
-        >
+        <h2 className="text-primary">Cadastrar Novo Eletrodoméstico</h2>
+        <button className="btn btn-outline-secondary" onClick={() => navigate("/categorias/eletrodomesticos")}>
           Voltar para Lista
         </button>
       </div>
 
-      <div className="row justify-content-center">
-        <div className="col-12">
-          <FormularioItemIntegrado
-            item={item}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            modo="cadastro"
-            error={error}
-            isSubmitting={isSubmitting}
-            disableCategoria={true}
-            disableDataCadastro={true}
-          />
-        </div>
-      </div>
+      <FormularioItem
+        item={item}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+        modo="cadastro"
+        error={error}
+        isSubmitting={isSubmitting}
+      />
     </div>
-  );
-};
+  )
+}
 
-export default CadastroEletrodomestico;
+export default CadastroEletrodomesticos

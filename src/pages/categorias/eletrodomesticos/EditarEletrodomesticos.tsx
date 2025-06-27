@@ -9,51 +9,38 @@ const EditarEletrodomestico: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [item, setItem] = useState<Item | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchItem = async () => {
       if (id) {
         try {
           const data = await ItemService.buscarPorId(Number(id));
-
           if (data.data_cadastro) {
             data.data_cadastro = new Date(data.data_cadastro)
               .toISOString()
               .split("T")[0];
           }
-
           setItem(data);
-          setError(null);
         } catch (err) {
           console.error("Erro ao buscar eletrodoméstico:", err);
-          setError(
-            "Não foi possível carregar os dados do eletrodoméstico para edição."
-          );
-          setItem(null);
+          setError("Não foi possível carregar os dados para edição.");
         } finally {
           setLoading(false);
         }
       } else {
-        setError("ID do eletrodoméstico não fornecido.");
+        setError("ID não fornecido.");
         setLoading(false);
       }
     };
-
     fetchItem();
   }, [id]);
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-
     if (!item) return;
-
     if (name === "valor") {
       const numericString = value.replace(/[^\d]/g, "");
       const numericValue = Number(numericString) / 100;
@@ -61,7 +48,7 @@ const EditarEletrodomestico: React.FC = () => {
     } else if (name === "caminhao") {
       setItem((prev) => ({ ...prev!, caminhao: value === "true" }));
     } else if (type === "number" || name === "quantidade") {
-      setItem((prev) => ({ ...prev!, [name]: Number.parseFloat(value) || 0 }));
+      setItem((prev) => ({ ...prev!, [name]: Number(value) }));
     } else {
       setItem((prev) => ({ ...prev!, [name]: value }));
     }
@@ -73,100 +60,58 @@ const EditarEletrodomestico: React.FC = () => {
     setError(null);
 
     if (!item || !item.id) {
-      setError("Item inválido para atualização.");
+      setError("Item inválido.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (
+      !item.descricao ||
+      item.quantidade <= 0 ||
+      !item.estadoConservacao ||
+      !item.situacao
+    ) {
+      setError("Preencha todos os campos obrigatórios.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!item.pessoadoador) {
+      setError("Por favor, selecione uma pessoa.");
       setIsSubmitting(false);
       return;
     }
 
     try {
-      if (
-        !item.descricao ||
-        item.quantidade <= 0 ||
-        item.valor ||
-        !item.estadoConservacao ||
-        !item.situacao
-      ) {
-        setError("Por favor, preencha todos os campos obrigatórios.");
-        return;
-      }
-
-      if (!item.pessoa) {
-        setError("Por favor, selecione uma pessoa.");
-        return;
-      }
-
       await ItemService.atualizar(item.id, item);
       alert("Eletrodoméstico atualizado com sucesso!");
       navigate("/categorias/eletrodomesticos");
     } catch (err) {
-      console.error("Erro ao atualizar eletrodoméstico:", err);
-      setError(
-        "Erro ao atualizar eletrodoméstico. Verifique os dados e tente novamente."
-      );
+      console.error("Erro ao atualizar:", err);
+      setError("Erro ao atualizar. Verifique os dados.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "200px" }}
-      >
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Carregando...</span>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="text-center p-4">Carregando...</div>;
 
-  if (error || !item) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="alert alert-danger" role="alert">
-          <h4>Erro ao carregar eletrodoméstico</h4>
-          <p>{error || "Eletrodoméstico não encontrado."}</p>
-          <button
-            className="btn btn-outline-primary mt-3"
-            onClick={() => navigate("/categorias/eletrodomesticos")}
-          >
-            Voltar para a Lista
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  return item ? (
     <div className="container mx-auto p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-2xl font-bold text-primary">
-          Editar Eletrodoméstico
-        </h1>
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() => navigate("/categorias/eletrodomesticos")}
-        >
-          Voltar para Lista
-        </button>
-      </div>
-
-      <div className="row justify-content-center">
-        <div className="col-12">
-          <FormularioItemIntegrado
-            item={item}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            modo="edicao"
-            error={error}
-            isSubmitting={isSubmitting}
-            disableCategoria={true}
-            disableDataCadastro={true}
-          />
-        </div>
-      </div>
+      <h1 className="mb-4 text-primary">Editar Eletrodoméstico</h1>
+      <FormularioItemIntegrado
+        item={item}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+        modo="edicao"
+        error={error}
+        isSubmitting={isSubmitting}
+        disableCategoria
+        disableDataCadastro
+      />
     </div>
+  ) : (
+    <div className="alert alert-danger m-4">{error || "Item não encontrado."}</div>
   );
 };
 

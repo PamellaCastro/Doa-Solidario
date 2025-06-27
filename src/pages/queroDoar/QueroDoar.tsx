@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { ItemService } from "../../services/ItemService";
 import { PessoaService } from "../../services/PessoaService";
-import { SubCategoriaService } from "../../services/SubCategoriaService"; 
+import { SubCategoriaService } from "../../services/SubCategoriaService";
 import {
   type Item,
   Categoria,
@@ -18,7 +18,7 @@ import {
   Situacao,
 } from "../../types/Item";
 import type { Pessoa } from "../../types/Pessoa";
-import type { SubCategoria } from "../../types/SubCategoria"; 
+import type { SubCategoria } from "../../types/SubCategoria";
 import { Estado } from "../../types/Endereco";
 
 interface FormData {
@@ -95,7 +95,7 @@ export default function QueroDoarIntegrado() {
   });
 
   const [todasSubCategorias, setTodasSubCategorias] = useState<SubCategoria[]>(
-    [],
+    []
   ); // Estado para todas as subcategorias
   const [subCategoriasDisponiveis, setSubCategoriasDisponiveis] = useState<
     SubCategoria[]
@@ -119,7 +119,7 @@ export default function QueroDoarIntegrado() {
   useEffect(() => {
     if (formData.categoria && todasSubCategorias.length > 0) {
       const filtered = todasSubCategorias.filter(
-        (subCat) => subCat.categoria === formData.categoria,
+        (subCat) => subCat.categoria === formData.categoria
       );
       setSubCategoriasDisponiveis(filtered);
       // Reseta a subcategoria selecionada se ela não estiver mais na lista filtrada
@@ -138,7 +138,7 @@ export default function QueroDoarIntegrado() {
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    >
   ) => {
     const { name, value } = e.target;
 
@@ -217,7 +217,7 @@ export default function QueroDoarIntegrado() {
         console.log("Pessoa encontrada:", pessoa);
       } catch (error) {
         // Se não existir, cria uma nova pessoa com endereço
-        console.warn("Pessoa não encontrada, criando nova...", error); 
+        console.warn("Pessoa não encontrada, criando nova...", error);
         const novaPessoa: Pessoa = {
           nome: formData.nome,
           cpf: formData.cpf,
@@ -326,8 +326,8 @@ export default function QueroDoarIntegrado() {
                           isCompleted
                             ? "bg-success text-white"
                             : isCurrent
-                              ? "bg-primary text-white"
-                              : "bg-secondary text-white"
+                            ? "bg-primary text-white"
+                            : "bg-secondary text-white"
                         }`}
                         style={{ width: "40px", height: "40px" }}
                       >
@@ -595,7 +595,10 @@ export default function QueroDoarIntegrado() {
                       {formData.categoria &&
                         subCategoriasDisponiveis.length > 0 && (
                           <div className="col-md-6">
-                            <label htmlFor="subCategoriaId" className="form-label">
+                            <label
+                              htmlFor="subCategoriaId"
+                              className="form-label"
+                            >
                               Subcategoria *
                             </label>
                             <select

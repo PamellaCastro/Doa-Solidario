@@ -76,23 +76,26 @@ const EditarMovel: React.FC = () => {
       return;
     }
 
+    
+    if (
+      !item.descricao ||
+      item.quantidade <= 0 ||
+      !item.estadoConservacao ||
+      !item.situacao
+    ) {
+      setError("Por favor, preencha todos os campos obrigatórios.");
+      setIsSubmitting(false);
+      return;
+    }
+
+  
+    if (!item.pessoadoador) {
+      setError("Por favor, selecione uma pessoa.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      if (
-        !item.descricao ||
-        item.quantidade <= 0 ||
-        item.valor ||
-        !item.estadoConservacao ||
-        !item.situacao
-      ) {
-        setError("Por favor, preencha todos os campos obrigatórios.");
-        return;
-      }
-
-      if (!item.pessoa) {
-        setError("Por favor, selecione uma pessoa.");
-        return;
-      }
-
       await ItemService.atualizar(item.id, item);
       alert("Móvel atualizado com sucesso!");
       navigate("/categorias/moveis");

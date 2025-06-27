@@ -19,7 +19,6 @@ const EditarEletronico: React.FC = () => {
         try {
           const data = await ItemService.buscarPorId(Number(id));
 
-          // Formatar data
           if (data.data_cadastro) {
             data.data_cadastro = new Date(data.data_cadastro)
               .toISOString()
@@ -84,7 +83,6 @@ const EditarEletronico: React.FC = () => {
       if (
         !item.descricao ||
         item.quantidade <= 0 ||
-        item.valor ||
         !item.estadoConservacao ||
         !item.situacao
       ) {

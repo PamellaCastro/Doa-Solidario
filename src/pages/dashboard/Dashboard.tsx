@@ -1,201 +1,215 @@
-import type React from "react";
-import { useEffect, useState } from "react";
+import type React from "react"
+import { useState, useEffect } from "react"
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { ItemService } from "../../services/ItemService";
-import { Categoria, Item } from "../../types/Item";
-import { Package, TrendingUp, Users, DollarSign } from "lucide-react";
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, LineChart, Line, Legend 
+} from "recharts"
+import { Package, DollarSign, Users, TrendingUp, Monitor, ShoppingBag, Sofa, Shirt } from "lucide-react"
+import { ItemService } from "../../services/ItemService"
+import { PessoaService } from "../../services/PessoaService"
+import type { Item } from "../../types/Item"
+import type { Pessoa } from "../../types/Pessoa"
+import "./Dashboard.module.css"
 
-const cores = ["#007BFF", "#28A745", "#FFC107", "#DC3545"];
-
-const nomesCategoria: Record<Categoria, string> = {
-  [Categoria.ELETRONICO]: "Eletrônico",
-  [Categoria.ELETRODOMESTICO]: "Eletrodoméstico",
-  [Categoria.MOVEL]: "Móvel",
-  [Categoria.TEXTIL]: "Têxtil",
-};
-
-interface DadosEstatisticas {
-  totalItens: number;
-  totalValor: number;
-  totalPessoas: number;
-  categoriaComMaisItens: string;
+interface DashboardStats {
+  totalItens: number
+  totalPessoas: number
+  valorTotal: number
+  itensPorCategoria: { categoria: string; quantidade: number; valor: number }[]
+  itensPorSituacao: { situacao: string; quantidade: number }[]
+  itensDoados: number
+  itensVendidos: number
+  itensDepositados: number
+  valorVendidos: number
 }
 
 const Dashboard: React.FC = () => {
-  const [dadosGrafico, setDadosGrafico] = useState<
-    { name: string; value: number; quantidade: number }[]
-  >([]);
-  const [estatisticas, setEstatisticas] = useState<DadosEstatisticas>({
+  const [stats, setStats] = useState<DashboardStats>({
     totalItens: 0,
-    totalValor: 0,
     totalPessoas: 0,
-    categoriaComMaisItens: "",
-  });
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState<string | null>(null);
+    valorTotal: 0,
+    itensPorCategoria: [],
+    itensPorSituacao: [],
+    itensDoados: 0,
+    itensVendidos: 0,
+    itensDepositados: 0,
+    valorVendidos: 0,
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        const categorias: Categoria[] = Object.values(Categoria);
+    carregarDados()
+  }, [])
 
-        const resultados = await Promise.all(
-          categorias.map(async (categoria) => {
-            const itens: Item[] = await ItemService.listarTodos(categoria);
-            const quantidade = itens.reduce(
-              (acc, item) => acc + item.quantidade,
-              0
-            );
-            const valor = itens.reduce(
-              (acc, item) => acc + (item.valor || 0),
-              0
-            );
-            return {
-              categoria,
-              name: nomesCategoria[categoria],
-              value: valor,
-              quantidade,
-              itens,
-            };
-          })
-        );
+  const carregarDados = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [itens, pessoas] = await Promise.all([ItemService.listarTodos(), PessoaService.listarTodos()])
 
-        const dadosPizza = resultados.map((r) => ({
-          name: r.name,
-          value: r.value,
-          quantidade: r.quantidade,
-        }));
+      const statsCalculadas = calcularEstatisticas(itens, pessoas)
+      setStats(statsCalculadas)
+    } catch (err) {
+      setError("Erro ao carregar dados do dashboard")
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-        const totalItens = resultados.reduce((acc, r) => acc + r.quantidade, 0);
-        const totalValor = resultados.reduce((acc, r) => acc + r.value, 0);
+  const calcularEstatisticas = (itens: Item[], pessoas: Pessoa[]): DashboardStats => {
+    const totalItens = itens.reduce((acc, item) => acc + item.quantidade, 0)
+    const valorTotal = itens.reduce((acc, item) => acc + (item.valor || 0), 0)
 
-        const pessoasUnicas = new Set<number>();
-        resultados.forEach((r) => {
-          r.itens.forEach((item) => {
-            if (item.pessoa?.id) {
-              pessoasUnicas.add(item.pessoa.id);
-            }
-          });
-        });
-
-        const categoriaComMaisItens = resultados.reduce((max, current) =>
-          current.quantidade > max.quantidade ? current : max
-        ).name;
-
-        setDadosGrafico(dadosPizza);
-        setEstatisticas({
-          totalItens,
-          totalValor,
-          totalPessoas: pessoasUnicas.size,
-          categoriaComMaisItens,
-        });
-      } catch (error) {
-        console.error(error);
-        setErro("Erro ao carregar dados do dashboard.");
-      } finally {
-        setLoading(false);
+    // Itens por categoria
+    const categorias = ["ELETRONICO", "ELETRODOMESTICO", "MOVEL", "TEXTIL"]
+    const itensPorCategoria = categorias.map((categoria) => {
+      const itensCategoria = itens.filter((item) => item.categoria === categoria)
+      return {
+        categoria: formatarCategoria(categoria),
+        quantidade: itensCategoria.reduce((acc, item) => acc + item.quantidade, 0),
+        valor: itensCategoria.reduce((acc, item) => acc + (item.valor || 0), 0),
       }
-    };
+    })
 
-    carregarDados();
-  }, []);
+    // Itens por situação
+    const situacoes = ["ABERTO", "EM_ANDAMENTO", "DEPOSITADO", "VENDIDO", "DOADO", "SOLICITADO"]
+    const itensPorSituacao = situacoes
+      .map((situacao) => {
+        const itensSituacao = itens.filter((item) => item.situacao === situacao)
+        return {
+          situacao: formatarSituacao(situacao),
+          quantidade: itensSituacao.reduce((acc, item) => acc + item.quantidade, 0),
+        }
+      })
+      .filter((item) => item.quantidade > 0) // Filtra situações sem itens para não aparecer no gráfico
+
+    // Métricas específicas solicitadas
+    const itensDoados = itens
+      .filter((item) => item.situacao === "DOADO")
+      .reduce((acc, item) => acc + item.quantidade, 0)
+
+    const itensVendidos = itens
+      .filter((item) => item.situacao === "VENDIDO")
+      .reduce((acc, item) => acc + item.quantidade, 0)
+
+    const itensDepositados = itens
+      .filter((item) => item.situacao === "DEPOSITADO")
+      .reduce((acc, item) => acc + item.quantidade, 0)
+
+    const valorVendidos = itens
+      .filter((item) => item.situacao === "VENDIDO")
+      .reduce((acc, item) => acc + (item.valor || 0), 0)
+
+    return {
+      totalItens,
+      totalPessoas: pessoas.length,
+      valorTotal,
+      itensPorCategoria,
+      itensPorSituacao,
+      itensDoados,
+      itensVendidos,
+      itensDepositados,
+      valorVendidos,
+    }
+  }
+
+  const formatarCategoria = (categoria: string): string => {
+    const nomes: Record<string, string> = {
+      ELETRONICO: "Eletrônicos",
+      ELETRODOMESTICO: "Eletrodomésticos",
+      MOVEL: "Móveis",
+      TEXTIL: "Têxteis",
+    }
+    return nomes[categoria] || categoria
+  }
+
+  const formatarSituacao = (situacao: string): string => {
+    const nomes: Record<string, string> = {
+      ABERTO: "Aberto",
+      EM_ANDAMENTO: "Em Andamento",
+      DEPOSITADO: "Depositado",
+      VENDIDO: "Vendido",
+      DOADO: "Doado",
+      SOLICITADO: "Solicitado",
+    }
+    return nomes[situacao] || situacao
+  }
+
+  const formatCurrency = (value: number): string => {
+    return value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    })
+  }
+
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"]
+
+  // Dados para o gráfico de barras de "Situação de Itens Específicos"
+  const situacoesEspecificasData = [
+    { name: "Itens Doados", quantidade: stats.itensDoados },
+    { name: "Itens Vendidos", quantidade: stats.itensVendidos },
+    { name: "Itens Depositados", quantidade: stats.itensDepositados },
+  ]
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "400px" }}
-      >
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Carregando gráficos...</span>
+          <span className="visually-hidden">Carregando dashboard...</span>
         </div>
       </div>
-    );
+    )
   }
 
-  if (erro) {
+  if (error) {
     return (
       <div className="alert alert-danger text-center" role="alert">
-        {erro}
+        <h4>Erro ao carregar gráficos</h4>
+        <p>{error}</p>
+        <button className="btn btn-outline-danger" onClick={carregarDados}>
+          Tentar Novamente
+        </button>
       </div>
-    );
+    )
   }
 
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h2 text-primary mb-0">Gráficos - Visão Geral</h1>
-        <small className="text-muted">
-          Última atualização: {new Date().toLocaleString("pt-BR")}
-        </small>
+        <h1 className="h2 text-primary mb-0">Dashboard</h1>
+        <button className="btn btn-outline-primary" onClick={carregarDados}>
+          Atualizar Dados
+        </button>
       </div>
 
-      {/* Cards de Estatísticas */}
-      <div className="row mb-4">
-        <div className="col-md-3 mb-3">
-          <div className="card bg-primary text-white h-100">
-            <div className="card-body d-flex align-items-center">
-              <Package size={40} className="me-3" />
-              <div>
-                <h5 className="card-title mb-1">Total de Itens</h5>
-                <h3 className="mb-0">
-                  {estatisticas.totalItens.toLocaleString("pt-BR")}
-                </h3>
-              </div>
-            </div>
-          </div>
+      {/* Seção de Resumo Principal - Menos "quadradona" */}
+      <div className="card shadow-sm mb-4">
+        <div className="card-header">
+          <h5 className="card-title mb-0">Visão Geral das Estatísticas</h5>
         </div>
-
-        <div className="col-md-3 mb-3">
-          <div className="card bg-success text-white h-100">
-            <div className="card-body d-flex align-items-center">
-              <DollarSign size={40} className="me-3" />
-              <div>
-                <h5 className="card-title mb-1">Valor Total</h5>
-                <h3 className="mb-0">
-                  {estatisticas.totalValor.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                </h3>
-              </div>
+        <div className="card-body">
+          <div className="row text-center">
+            <div className="col-md-3 border-end py-2">
+              <Package size={30} className="text-primary mb-2" />
+              <h6 className="text-muted mb-0">Total de Itens</h6>
+              <h4 className="mb-0 text-primary">{stats.totalItens}</h4>
             </div>
-          </div>
-        </div>
-
-        <div className="col-md-3 mb-3">
-          <div className="card bg-info text-white h-100">
-            <div className="card-body d-flex align-items-center">
-              <Users size={40} className="me-3" />
-              <div>
-                <h5 className="card-title mb-1">Doadores</h5>
-                <h3 className="mb-0">
-                  {estatisticas.totalPessoas.toLocaleString("pt-BR")}
-                </h3>
-              </div>
+            <div className="col-md-3 border-end py-2">
+              <DollarSign size={30} className="text-success mb-2" />
+              <h6 className="text-muted mb-0">Valor Total</h6>
+              <h4 className="mb-0 text-success">{formatCurrency(stats.valorTotal)}</h4>
             </div>
-          </div>
-        </div>
-
-        <div className="col-md-3 mb-3">
-          <div className="card bg-warning text-white h-100">
-            <div className="card-body d-flex align-items-center">
-              <TrendingUp size={40} className="me-3" />
-              <div>
-                <h5 className="card-title mb-1">Categoria Líder</h5>
-                <h6 className="mb-0">{estatisticas.categoriaComMaisItens}</h6>
-              </div>
+            <div className="col-md-3 border-end py-2">
+              <Users size={30} className="text-info mb-2" />
+              <h6 className="text-muted mb-0">Total de Pessoas</h6>
+              <h4 className="mb-0 text-info">{stats.totalPessoas}</h4>
+            </div>
+            <div className="col-md-3 py-2">
+              <TrendingUp size={30} className="text-warning mb-2" />
+              <h6 className="text-muted mb-0">Valor Vendidos</h6>
+              <h4 className="mb-0 text-warning">{formatCurrency(stats.valorVendidos)}</h4>
             </div>
           </div>
         </div>
@@ -203,71 +217,79 @@ const Dashboard: React.FC = () => {
 
       {/* Gráficos */}
       <div className="row">
-        <div className="col-lg-6 mb-4">
-          <div className="card h-100">
+        <div className="col-lg-8 mb-4">
+          <div className="card h-100 shadow-sm">
             <div className="card-header">
-              <h5 className="card-title mb-0">Distribuição por Valor (R$)</h5>
+              <h5 className="card-title mb-0">Itens por Categoria (Quantidade e Valor)</h5>
             </div>
             <div className="card-body">
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={dadosGrafico}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    fill="#8884d8"
-                    label={({ name, value }) =>
-                      `${name}: ${value.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}`
-                    }
-                  >
-                    {dadosGrafico.map((_, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={cores[index % cores.length]}
-                      />
-                    ))}
-                  </Pie>
+                <BarChart data={stats.itensPorCategoria}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="categoria" />
+                  <YAxis />
                   <Tooltip
-                    formatter={(value: number) => [
-                      value.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      }),
-                      "Valor",
+                    formatter={(value, name) => [
+                      name === "quantidade" ? value : formatCurrency(Number(value)),
+                      name === "quantidade" ? "Quantidade" : "Valor",
                     ]}
                   />
-                  <Legend />
-                </PieChart>
+                  <Legend /> {/* Adicionado Legend para BarChart */}
+                  <Bar dataKey="quantidade" fill="#8884d8" name="Quantidade" />
+                  <Bar dataKey="valor" fill="#82ca9d" name="Valor" />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
         </div>
 
-        <div className="col-lg-6 mb-4">
-          <div className="card h-100">
+        <div className="col-lg-4 mb-4">
+          <div className="card h-100 shadow-sm">
             <div className="card-header">
-              <h5 className="card-title mb-0">
-                Quantidade de Itens por Categoria
-              </h5>
+              <h5 className="card-title mb-0">Distribuição da Situação dos Itens</h5>
             </div>
             <div className="card-body">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={dadosGrafico}>
+                <PieChart>
+                  <Pie
+                    data={stats.itensPorSituacao}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ situacao, quantidade }) => `${situacao}: ${quantidade}`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="quantidade"
+                  >
+                    {stats.itensPorSituacao.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend /> 
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Novo Gráfico: Itens por Situações Específicas (Doados, Vendidos, Depositados) */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card h-100 shadow-sm">
+            <div className="card-header">
+              <h5 className="card-title mb-0">Itens por Tipo de Operação (Doados, Vendidos, Depositados)</h5>
+            </div>
+            <div className="card-body">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={situacoesEspecificasData}>
+                  <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip
-                    formatter={(value: number) => [
-                      value.toLocaleString("pt-BR"),
-                      "Quantidade",
-                    ]}
-                  />
-                  <Bar dataKey="quantidade" fill="#007BFF" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="quantidade" fill="#ffc658" name="Quantidade de Itens" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -275,16 +297,16 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabela Resumo */}
+      {/* Resumo por Categoria */}
       <div className="row">
         <div className="col-12">
-          <div className="card">
+          <div className="card shadow-sm">
             <div className="card-header">
-              <h5 className="card-title mb-0">Resumo por Categoria</h5>
+              <h5 className="card-title mb-0">Resumo Detalhado por Categoria</h5>
             </div>
             <div className="card-body">
               <div className="table-responsive">
-                <table className="table table-striped">
+                <table className="table table-striped table-hover"> {/* Adicionado table-hover */}
                   <thead>
                     <tr>
                       <th>Categoria</th>
@@ -294,35 +316,22 @@ const Dashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {dadosGrafico.map((item, index) => (
-                      <tr key={item.name}>
+                    {stats.itensPorCategoria.map((categoria, index) => (
+                      <tr key={index}>
                         <td>
-                          <span
-                            className="badge me-2"
-                            style={{
-                              backgroundColor: cores[index % cores.length],
-                            }}
-                          >
-                            ●
-                          </span>
-                          {item.name}
+                          <div className="d-flex align-items-center">
+                            {categoria.categoria === "Eletrônicos" && <Monitor size={20} className="me-2 text-primary" />}
+                            {categoria.categoria === "Eletrodomésticos" && <ShoppingBag size={20} className="me-2 text-success" />}
+                            {categoria.categoria === "Móveis" && <Sofa size={20} className="me-2 text-info" />}
+                            {categoria.categoria === "Têxteis" && <Shirt size={20} className="me-2 text-warning" />}
+                            {categoria.categoria}
+                          </div>
                         </td>
-                        <td>{item.quantidade.toLocaleString("pt-BR")}</td>
+                        <td>{categoria.quantidade}</td>
+                        <td>{formatCurrency(categoria.valor)}</td>
                         <td>
-                          {item.value.toLocaleString("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          })}
-                        </td>
-                        <td>
-                          {item.quantidade > 0
-                            ? (item.value / item.quantidade).toLocaleString(
-                                "pt-BR",
-                                {
-                                  style: "currency",
-                                  currency: "BRL",
-                                }
-                              )
+                          {categoria.quantidade > 0
+                            ? formatCurrency(categoria.valor / categoria.quantidade)
                             : "R$ 0,00"}
                         </td>
                       </tr>
@@ -335,7 +344,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

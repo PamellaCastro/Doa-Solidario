@@ -6,18 +6,15 @@ export interface Item {
   descricao: string
   data_cadastro?: string
   quantidade: number
-  valor?: number // Agora opcional
+  valor?: number
   caminhao?: boolean
   anexo?: string
   categoria: Categoria
   estadoConservacao: EstadoConservacao
   situacao: Situacao
-  subCategoria?: SubCategoria // Backend tem relacionamento obrigatório
-  pessoadoador?: Pessoa // Nova estrutura do backend
-  pessoabeneficiario?: Pessoa // Nova estrutura do backend
-
-  // Manter compatibilidade temporária
-  pessoa?: Pessoa
+  subCategoria?: SubCategoria
+  pessoadoador?: Pessoa // Pessoa que doa o item
+  pessoabeneficiario?: Pessoa // Pessoa que recebe o item (quando doado/vendido)
 }
 
 export enum Categoria {
