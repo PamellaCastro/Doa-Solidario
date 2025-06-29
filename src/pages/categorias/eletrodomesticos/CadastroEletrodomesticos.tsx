@@ -10,8 +10,8 @@ const CadastroEletrodomesticos: React.FC = () => {
 
   const [item, setItem] = useState<Item>({
     descricao: "",
-    quantidade: 1,
-    valor: 0,
+    quantidade: 0,
+    //valor: 0,
     caminhao: false,
     categoria: "ELETRODOMESTICO" as Categoria,
     estadoConservacao: "" as EstadoConservacao,
@@ -71,8 +71,8 @@ const CadastroEletrodomesticos: React.FC = () => {
 
       setItem({
         descricao: "",
-        quantidade: 1,
-        valor: 0,
+        quantidade: 0,
+        //valor: 0,
         caminhao: false,
         categoria: "ELETRODOMESTICO" as Categoria,
         estadoConservacao: "" as EstadoConservacao,

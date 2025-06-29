@@ -10,7 +10,7 @@ const CadastroTexteis: React.FC = () => {
 
   const [item, setItem] = useState<Item>({
     descricao: "",
-    quantidade: 1,
+    quantidade: 0,
     valor: 0,
     caminhao: false,
     categoria: "TEXTIL" as Categoria,

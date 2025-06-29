@@ -4,6 +4,7 @@ import type { Item, Categoria, Situacao } from "../types/Item"
 export class SocialService {
   private static readonly BASE_URL = "/item"
 
+
   // Listar apenas itens DEPOSITADOS para doação/venda
   static async listarItensDisponiveis(categoria?: Categoria): Promise<Item[]> {
     try {
@@ -53,6 +54,32 @@ export class SocialService {
       throw error
     }
   }
+
+  // NOVO: Listar itens já VENDIDOS para histórico
+  static async listarItensVendidos(categoria?: Categoria): Promise<Item[]> {
+    try {
+      let url = this.BASE_URL
+      const params = new URLSearchParams()
+
+      if (categoria) {
+        params.append("categoria", categoria)
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`
+      }
+
+      const response = await api.get(url)
+
+      // Filtrar apenas itens VENDIDOS no frontend
+      const itensVendidos = response.data.filter((item: Item) => item.situacao === "VENDIDO")
+      return itensVendidos
+    } catch (error) {
+      console.error("Erro ao listar itens vendidos:", error)
+      throw error
+    }
+  }
+
 
   // Doar item (atualizar situação para DOADO e adicionar beneficiário)
   static async doarItem(id: number, pessoabeneficiario: any): Promise<Item> {

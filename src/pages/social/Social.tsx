@@ -1,33 +1,48 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Search, Package, User, MapPin, Gift, ShoppingCart, Filter, UserPlus, X } from "lucide-react"
-import { SocialService } from "../../services/SocialService"
-import { PessoaService } from "../../services/PessoaService"
-import type { Item, Categoria } from "../../types/Item"
-import type { Pessoa } from "../../types/Pessoa"
-import { Estado } from "../../types/Endereco"
+import type React from "react";
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Package,
+  User,
+  MapPin,
+  Gift,
+  ShoppingCart,
+  Filter,
+  UserPlus,
+  X,
+} from "lucide-react";
+import { SocialService } from "../../services/SocialService";
+import { PessoaService } from "../../services/PessoaService";
+import type { Item, Categoria } from "../../types/Item";
+import type { Pessoa } from "../../types/Pessoa";
+import { Estado } from "../../types/Endereco";
 
 const Social: React.FC = () => {
-  const [itensDisponiveis, setItensDisponiveis] = useState<Item[]>([])
-  const [itensDoados, setItensDoados] = useState<Item[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria | "">("")
-  const [abaSelecionada, setAbaSelecionada] = useState<"disponiveis" | "doados">("disponiveis")
+  const [itensDisponiveis, setItensDisponiveis] = useState<Item[]>([]);
+  const [itensDoados, setItensDoados] = useState<Item[]>([]);
+  const [itensVendidos, setItensVendidos] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria | "">("");
+  const [abaSelecionada, setAbaSelecionada] = useState<
+    "disponiveis" | "doados" | "vendidos"
+  >("disponiveis");
 
   // Modal states
-  const [showModal, setShowModal] = useState(false)
-  const [itemSelecionado, setItemSelecionado] = useState<Item | null>(null)
-  const [tipoAcao, setTipoAcao] = useState<"doar" | "vender">("doar")
-  const [searchPessoa, setSearchPessoa] = useState("")
-  const [pessoasSugeridas, setPessoasSugeridas] = useState<Pessoa[]>([])
-  const [pessoaSelecionada, setPessoaSelecionada] = useState<Pessoa | null>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [showModal, setShowModal] = useState(false);
+  const [itemSelecionado, setItemSelecionado] = useState<Item | null>(null);
+  const [tipoAcao, setTipoAcao] = useState<"doar" | "vender">("doar");
+  const [searchPessoa, setSearchPessoa] = useState("");
+  const [pessoasSugeridas, setPessoasSugeridas] = useState<Pessoa[]>([]);
+  const [pessoaSelecionada, setPessoaSelecionada] = useState<Pessoa | null>(
+    null
+  );
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Cadastro de nova pessoa
-  const [showCadastroPessoa, setShowCadastroPessoa] = useState(false)
-  const [isSubmittingPessoa, setIsSubmittingPessoa] = useState(false)
+  const [showCadastroPessoa, setShowCadastroPessoa] = useState(false);
+  const [isSubmittingPessoa, setIsSubmittingPessoa] = useState(false);
   const [novaPessoa, setNovaPessoa] = useState<Pessoa>({
     nome: "",
     cpf: "",
@@ -39,82 +54,86 @@ const Social: React.FC = () => {
       numero: 0,
       estado: Estado.SC,
     },
-  })
+  });
 
   useEffect(() => {
-    carregarItens()
-  }, [categoriaFiltro])
+    carregarItens();
+  }, [categoriaFiltro]);
 
   const carregarItens = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const [disponiveis, doados] = await Promise.all([
+      const [disponiveis, doados, vendidos] = await Promise.all([
         SocialService.listarItensDisponiveis(categoriaFiltro || undefined),
         SocialService.listarItensDoados(categoriaFiltro || undefined),
-      ])
+        SocialService.listarItensVendidos(categoriaFiltro || undefined),
+      ]);
 
-      setItensDisponiveis(disponiveis)
-      setItensDoados(doados)
+      setItensDisponiveis(disponiveis);
+      setItensDoados(doados);
+      setItensVendidos(vendidos);
     } catch (err) {
-      setError("Erro ao carregar itens")
-      console.error(err)
+      setError("Erro ao carregar itens");
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const buscarPessoas = async (termo: string) => {
     if (termo.length < 2) {
-      setPessoasSugeridas([])
-      return
+      setPessoasSugeridas([]);
+      return;
     }
 
     try {
-      const pessoas = await PessoaService.buscar(termo)
-      setPessoasSugeridas(pessoas.slice(0, 5))
+      const pessoas = await PessoaService.buscar(termo);
+      setPessoasSugeridas(pessoas.slice(0, 5));
     } catch (error) {
-      console.error("Erro ao buscar pessoas:", error)
-      setPessoasSugeridas([])
+      console.error("Erro ao buscar pessoas:", error);
+      setPessoasSugeridas([]);
     }
-  }
+  };
 
   const handleSearchPessoa = (valor: string) => {
-    setSearchPessoa(valor)
-    buscarPessoas(valor)
-  }
+    setSearchPessoa(valor);
+    buscarPessoas(valor);
+  };
 
   const selecionarPessoa = (pessoa: Pessoa) => {
-    setPessoaSelecionada(pessoa)
-    setSearchPessoa(pessoa.nome)
-    setPessoasSugeridas([])
-    setShowCadastroPessoa(false)
-  }
+    setPessoaSelecionada(pessoa);
+    setSearchPessoa(pessoa.nome);
+    setPessoasSugeridas([]);
+    setShowCadastroPessoa(false);
+  };
 
-  const handleNovaPessoaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleNovaPessoaChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
 
     if (name.startsWith("endereco.")) {
-      const enderecoField = name.split(".")[1]
+      const enderecoField = name.split(".")[1];
       setNovaPessoa((prev) => ({
         ...prev,
         endereco: {
           ...prev.endereco!,
           [enderecoField]: enderecoField === "numero" ? Number(value) : value,
         },
-      }))
+      }));
     } else {
-      setNovaPessoa((prev) => ({ ...prev, [name]: value }))
+      setNovaPessoa((prev) => ({ ...prev, [name]: value }));
     }
-  }
+  };
 
   const cadastrarNovaPessoa = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmittingPessoa(true)
+    e.preventDefault();
+    setIsSubmittingPessoa(true);
 
     try {
-      const pessoaCadastrada = await PessoaService.criar(novaPessoa)
-      selecionarPessoa(pessoaCadastrada)
+      const pessoaCadastrada = await PessoaService.criar(novaPessoa);
+      selecionarPessoa(pessoaCadastrada);
 
       // Reset form
       setNovaPessoa({
@@ -128,81 +147,86 @@ const Social: React.FC = () => {
           numero: 0,
           estado: Estado.SC,
         },
-      })
+      });
 
-      alert("Pessoa cadastrada com sucesso!")
+      alert("Pessoa cadastrada com sucesso!");
     } catch (error) {
-      console.error("Erro ao cadastrar pessoa:", error)
-      alert("Erro ao cadastrar pessoa. Verifique os dados e tente novamente.")
+      console.error("Erro ao cadastrar pessoa:", error);
+      alert("Erro ao cadastrar pessoa. Verifique os dados e tente novamente.");
     } finally {
-      setIsSubmittingPessoa(false)
+      setIsSubmittingPessoa(false);
     }
-  }
+  };
 
   const abrirModal = (item: Item, acao: "doar" | "vender") => {
-    setItemSelecionado(item)
-    setTipoAcao(acao)
-    setShowModal(true)
-    setPessoaSelecionada(null)
-    setSearchPessoa("")
-    setPessoasSugeridas([])
-    setShowCadastroPessoa(false)
-  }
+    setItemSelecionado(item);
+    setTipoAcao(acao);
+    setShowModal(true);
+    setPessoaSelecionada(null);
+    setSearchPessoa("");
+    setPessoasSugeridas([]);
+    setShowCadastroPessoa(false);
+  };
 
   const fecharModal = () => {
-    setShowModal(false)
-    setItemSelecionado(null)
-    setPessoaSelecionada(null)
-    setSearchPessoa("")
-    setPessoasSugeridas([])
-    setShowCadastroPessoa(false)
-  }
+    setShowModal(false);
+    setItemSelecionado(null);
+    setPessoaSelecionada(null);
+    setSearchPessoa("");
+    setPessoasSugeridas([]);
+    setShowCadastroPessoa(false);
+  };
 
   const confirmarAcao = async () => {
     if (!itemSelecionado || !pessoaSelecionada) {
-      alert("Por favor, selecione uma pessoa")
-      return
+      alert("Por favor, selecione uma pessoa");
+      return;
     }
 
-    setIsProcessing(true)
+    setIsProcessing(true);
     try {
       if (tipoAcao === "doar") {
-        await SocialService.doarItem(itemSelecionado.id!, pessoaSelecionada)
-        alert("Item doado com sucesso!")
+        await SocialService.doarItem(itemSelecionado.id!, pessoaSelecionada);
+        alert("Item doado com sucesso!");
       } else {
-        await SocialService.venderItem(itemSelecionado.id!, pessoaSelecionada)
-        alert("Item vendido com sucesso!")
+        await SocialService.venderItem(itemSelecionado.id!, pessoaSelecionada);
+        alert("Item vendido com sucesso!");
       }
 
-      await carregarItens()
-      fecharModal()
+      await carregarItens();
+      fecharModal();
     } catch (error) {
-      console.error(`Erro ao ${tipoAcao} item:`, error)
-      alert(`Erro ao ${tipoAcao} item. Tente novamente.`)
+      console.error(`Erro ao ${tipoAcao} item:`, error);
+      alert(`Erro ao ${tipoAcao} item. Tente novamente.`);
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
-  const itensParaExibir = abaSelecionada === "disponiveis" ? itensDisponiveis : itensDoados
+  const itensParaExibir =
+    abaSelecionada === "disponiveis"
+      ? itensDisponiveis
+      : abaSelecionada === "doados"
+      ? itensDoados
+      : itensVendidos;
 
   const filteredItens = itensParaExibir.filter(
     (item) =>
       item.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.pessoadoador?.nome.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      item.pessoadoador?.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formatCurrency = (value: number): string => {
     return value.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
-    })
-  }
+    });
+  };
 
   const formatDate = (dateString?: string): string => {
-    if (!dateString) return "N/A"
-    return new Date(dateString).toLocaleDateString("pt-BR")
-  }
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("pt-BR");
+  };
 
   const formatarCategoria = (categoria: string): string => {
     const nomes: Record<string, string> = {
@@ -210,18 +234,21 @@ const Social: React.FC = () => {
       ELETRODOMESTICO: "Eletrodoméstico",
       MOVEL: "Móvel",
       TEXTIL: "Têxtil",
-    }
-    return nomes[categoria] || categoria
-  }
+    };
+    return nomes[categoria] || categoria;
+  };
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "400px" }}
+      >
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Carregando itens...</span>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -233,7 +260,7 @@ const Social: React.FC = () => {
           Tentar Novamente
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -245,8 +272,15 @@ const Social: React.FC = () => {
           Página Social
         </h1>
         <div className="d-flex gap-2">
-          <div className="badge bg-info text-white fs-6">{itensDisponiveis.length} disponíveis</div>
-          <div className="badge bg-success text-white fs-6">{itensDoados.length} doados</div>
+          <div className="badge bg-info text-white fs-6">
+            {itensDisponiveis.length} disponíveis
+          </div>
+          <div className="badge bg-success text-white fs-6">
+            {itensDoados.length} doados
+          </div>
+          <div className="badge bg-warning text-dark fs-6">
+            {itensVendidos.length} vendidos
+          </div>
         </div>
       </div>
 
@@ -254,7 +288,9 @@ const Social: React.FC = () => {
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
           <button
-            className={`nav-link ${abaSelecionada === "disponiveis" ? "active" : ""}`}
+            className={`nav-link ${
+              abaSelecionada === "disponiveis" ? "active" : ""
+            }`}
             onClick={() => setAbaSelecionada("disponiveis")}
           >
             <Package size={16} className="me-2" />
@@ -263,11 +299,24 @@ const Social: React.FC = () => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link ${abaSelecionada === "doados" ? "active" : ""}`}
+            className={`nav-link ${
+              abaSelecionada === "doados" ? "active" : ""
+            }`}
             onClick={() => setAbaSelecionada("doados")}
           >
             <Gift size={16} className="me-2" />
             Itens Doados ({itensDoados.length})
+          </button>
+        </li>
+        <li className="nav-item">
+          <button
+            className={`nav-link ${
+              abaSelecionada === "vendidos" ? "active" : ""
+            }`}
+            onClick={() => setAbaSelecionada("vendidos")}
+          >
+            <ShoppingCart size={16} className="me-2" />
+            Itens Vendidos ({itensVendidos.length})
           </button>
         </li>
       </ul>
@@ -296,7 +345,9 @@ const Social: React.FC = () => {
             <select
               className="form-select"
               value={categoriaFiltro}
-              onChange={(e) => setCategoriaFiltro(e.target.value as Categoria | "")}
+              onChange={(e) =>
+                setCategoriaFiltro(e.target.value as Categoria | "")
+              }
             >
               <option value="">Todas as categorias</option>
               <option value="ELETRONICO">Eletrônicos</option>
@@ -307,7 +358,10 @@ const Social: React.FC = () => {
           </div>
         </div>
         <div className="col-md-2">
-          <button className="btn btn-outline-primary w-100" onClick={carregarItens}>
+          <button
+            className="btn btn-outline-primary w-100"
+            onClick={carregarItens}
+          >
             Atualizar
           </button>
         </div>
@@ -315,90 +369,118 @@ const Social: React.FC = () => {
 
       {/* Lista de Itens */}
       {filteredItens.length > 0 ? (
-        <div className="row">
+        <div className="list-group">
           {filteredItens.map((item) => (
-            <div key={item.id} className="col-lg-4 col-md-6 mb-4">
-              <div className="card h-100 shadow-sm">
-                <div className="card-header d-flex justify-content-between align-items-center">
-                  <span className="badge bg-primary">{formatarCategoria(item.categoria)}</span>
-                  <span className={`badge ${abaSelecionada === "disponiveis" ? "bg-info" : "bg-success"}`}>
-                    {abaSelecionada === "disponiveis" ? "DEPOSITADO" : "DOADO"}
+            <div
+              key={item.id}
+              className="list-group-item list-group-item-action mb-2 shadow-sm rounded"
+            >
+              <div className="d-flex w-100 justify-content-between align-items-center">
+                <h5 className="mb-1">{item.descricao}</h5>
+                <div>
+                  <span className="badge bg-primary me-2">
+                    {formatarCategoria(item.categoria)}
+                  </span>
+                  <span
+                    className={`badge ${
+                      abaSelecionada === "disponiveis"
+                        ? "bg-info"
+                        : abaSelecionada === "doados"
+                        ? "bg-success"
+                        : "bg-warning text-dark"
+                    }`}
+                  >
+                    {abaSelecionada === "disponiveis"
+                      ? "DISPONÍVEL"
+                      : abaSelecionada === "doados"
+                      ? "DOADO"
+                      : "VENDIDO"}
                   </span>
                 </div>
-                <div className="card-body">
-                  <h5 className="card-title">{item.descricao}</h5>
-
-                  <div className="mb-3">
-                    <div className="row g-2">
-                      <div className="col-6">
-                        <small className="text-muted">Quantidade:</small>
-                        <div className="fw-bold">{item.quantidade}</div>
-                      </div>
-                      <div className="col-6">
-                        <small className="text-muted">Valor:</small>
-                        <div className="fw-bold text-success">{formatCurrency(item.valor || 0)}</div>
-                      </div>
-                      <div className="col-6">
-                        <small className="text-muted">Estado:</small>
-                        <div className="fw-bold">{item.estadoConservacao}</div>
-                      </div>
-                      <div className="col-6">
-                        <small className="text-muted">Caminhão:</small>
-                        <div className="fw-bold">{item.caminhao ? "Sim" : "Não"}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {item.pessoadoador && (
-                    <div className="mb-3 p-2 bg-light rounded">
-                      <small className="text-muted d-flex align-items-center mb-1">
-                        <User size={14} className="me-1" />
-                        Doador:
-                      </small>
-                      <div className="fw-bold">{item.pessoadoador.nome}</div>
-                      <small className="text-muted">{item.pessoadoador.email}</small>
-                      {item.pessoadoador.endereco && (
-                        <div className="d-flex align-items-center mt-1">
-                          <MapPin size={12} className="me-1" />
-                          <small>
-                            {item.pessoadoador.endereco.cidade} - {item.pessoadoador.endereco.estado}
-                          </small>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Beneficiário (apenas para itens doados) */}
-                  {abaSelecionada === "doados" && item.pessoabeneficiario && (
-                    <div className="mb-3 p-2 bg-success bg-opacity-10 rounded">
-                      <small className="text-muted d-flex align-items-center mb-1">
-                        <Gift size={14} className="me-1" />
-                        Beneficiário:
-                      </small>
-                      <div className="fw-bold">{item.pessoabeneficiario.nome}</div>
-                      <small className="text-muted">{item.pessoabeneficiario.email}</small>
-                    </div>
-                  )}
-
-                  <small className="text-muted">Cadastrado em: {formatDate(item.data_cadastro)}</small>
-                </div>
-
-                {/* Botões apenas para itens disponíveis */}
-                {abaSelecionada === "disponiveis" && (
-                  <div className="card-footer">
-                    <div className="d-flex gap-2">
-                      <button className="btn btn-success flex-fill" onClick={() => abrirModal(item, "doar")}>
-                        <Gift size={16} className="me-1" />
-                        Doar
-                      </button>
-                      <button className="btn btn-primary flex-fill" onClick={() => abrirModal(item, "vender")}>
-                        <ShoppingCart size={16} className="me-1" />
-                        Vender
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
+              <p className="mb-1">
+                Quantidade: <span className="fw-bold">{item.quantidade}</span> |
+                Valor:{" "}
+                <span className="fw-bold text-success">
+                  {formatCurrency(item.valor || 0)}
+                </span>{" "}
+                | Estado:{" "}
+                <span className="fw-bold">{item.estadoConservacao}</span> |
+                Caminhão:{" "}
+                <span className="fw-bold">{item.caminhao ? "Sim" : "Não"}</span>
+              </p>
+
+              {item.pessoadoador && (
+                <div className="mb-2 p-2 bg-light rounded">
+                  <small className="text-muted d-flex align-items-center mb-1">
+                    <User size={14} className="me-1" />
+                    Doador:
+                  </small>
+                  <div className="fw-bold">{item.pessoadoador.nome}</div>
+                  <small className="text-muted">
+                    {item.pessoadoador.email}
+                  </small>
+                  {item.pessoadoador.endereco && (
+                    <div className="d-flex align-items-center mt-1">
+                      <MapPin size={12} className="me-1" />
+                      <small>
+                        {item.pessoadoador.endereco.cidade} -{" "}
+                        {item.pessoadoador.endereco.estado}
+                      </small>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Beneficiário (apenas para itens doados) ou Comprador (apenas para itens vendidos) */}
+              {abaSelecionada === "doados" && item.pessoabeneficiario && (
+                <div className="mb-2 p-2 bg-success bg-opacity-10 rounded">
+                  <small className="text-muted d-flex align-items-center mb-1">
+                    <Gift size={14} className="me-1" />
+                    Beneficiário:
+                  </small>
+                  <div className="fw-bold">{item.pessoabeneficiario.nome}</div>
+                  <small className="text-muted">
+                    {item.pessoabeneficiario.email}
+                  </small>
+                </div>
+              )}
+
+              {abaSelecionada === "vendidos" && item.pessoabeneficiario && (
+                <div className="mb-2 p-2 bg-warning bg-opacity-10 rounded">
+                  <small className="text-muted d-flex align-items-center mb-1">
+                    <ShoppingCart size={14} className="me-1" />
+                    Comprador:
+                  </small>
+                  <div className="fw-bold">{item.pessoabeneficiario.nome}</div>
+                  <small className="text-muted">
+                    {item.pessoabeneficiario.email}
+                  </small>
+                </div>
+              )}
+
+              <small className="text-muted">
+                Cadastrado em: {formatDate(item.data_cadastro)}
+              </small>
+
+              {abaSelecionada === "disponiveis" && (
+                <div className="d-flex gap-2 mt-3 justify-content-end">
+                  <button
+                    className="btn btn-outline-success btn-sm"
+                    onClick={() => abrirModal(item, "doar")}
+                  >
+                    <Gift size={16} className="me-1" />
+                    Doar
+                  </button>
+                  <button
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={() => abrirModal(item, "vender")}
+                  >
+                    <ShoppingCart size={16} className="me-1" />
+                    Vender
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -410,26 +492,36 @@ const Social: React.FC = () => {
             {searchTerm || categoriaFiltro
               ? "Nenhum item encontrado com os filtros aplicados."
               : abaSelecionada === "disponiveis"
-                ? "Não há itens depositados disponíveis para doação ou venda."
-                : "Não há itens doados ainda."}
+              ? "Não há itens depositados disponíveis para doação ou venda."
+              : "Não há itens doados ainda."}
           </p>
         </div>
       )}
 
       {/* Modal de Confirmação */}
       {showModal && itemSelecionado && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">{tipoAcao === "doar" ? "Doar Item" : "Vender Item"}</h5>
-                <button type="button" className="btn-close" onClick={fecharModal}></button>
+                <h5 className="modal-title">
+                  {tipoAcao === "doar" ? "Doar Item" : "Vender Item"}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={fecharModal}
+                ></button>
               </div>
               <div className="modal-body">
                 <div className="mb-3">
                   <h6>Item: {itemSelecionado.descricao}</h6>
                   <p className="text-muted">
-                    Quantidade: {itemSelecionado.quantidade} | Valor: {formatCurrency(itemSelecionado.valor || 0)}
+                    Quantidade: {itemSelecionado.quantidade} | Valor:{" "}
+                    {formatCurrency(itemSelecionado.valor || 0)}
                   </p>
                 </div>
 
@@ -437,7 +529,8 @@ const Social: React.FC = () => {
                   <>
                     <div className="mb-3">
                       <label className="form-label">
-                        Selecionar {tipoAcao === "doar" ? "Beneficiário" : "Comprador"}:
+                        Selecionar{" "}
+                        {tipoAcao === "doar" ? "Beneficiário" : "Comprador"}:
                       </label>
                       <input
                         type="text"
@@ -595,7 +688,11 @@ const Social: React.FC = () => {
                     </div>
 
                     <div className="d-flex justify-content-end mt-3">
-                      <button type="submit" className="btn btn-success" disabled={isSubmittingPessoa}>
+                      <button
+                        type="submit"
+                        className="btn btn-success"
+                        disabled={isSubmittingPessoa}
+                      >
                         {isSubmittingPessoa ? (
                           <>
                             <span className="spinner-border spinner-border-sm me-2" />
@@ -614,21 +711,29 @@ const Social: React.FC = () => {
 
                 {pessoaSelecionada && (
                   <div className="alert alert-success">
-                    <strong>Pessoa Selecionada:</strong> {pessoaSelecionada.nome}
+                    <strong>Pessoa Selecionada:</strong>{" "}
+                    {pessoaSelecionada.nome}
                     <br />
                     <small>
-                      CPF: {pessoaSelecionada.cpf} | Email: {pessoaSelecionada.email}
+                      CPF: {pessoaSelecionada.cpf} | Email:{" "}
+                      {pessoaSelecionada.email}
                     </small>
                   </div>
                 )}
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={fecharModal}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={fecharModal}
+                >
                   Cancelar
                 </button>
                 <button
                   type="button"
-                  className={`btn ${tipoAcao === "doar" ? "btn-success" : "btn-primary"}`}
+                  className={`btn ${
+                    tipoAcao === "doar" ? "btn-success" : "btn-primary"
+                  }`}
                   onClick={confirmarAcao}
                   disabled={!pessoaSelecionada || isProcessing}
                 >
@@ -654,7 +759,7 @@ const Social: React.FC = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Social
+export default Social;

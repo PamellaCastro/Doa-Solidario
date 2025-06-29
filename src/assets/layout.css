@@ -1,5 +1,3 @@
-/* layout.css */
-
 /* Paleta de Cores Sugerida */
 :root {
   --primary-blue: #1A3E6C; /* Azul escuro principal (sidebar, header, títulos) */
@@ -212,6 +210,7 @@ html, body {
 .sidebar-link:hover,
 .sidebar-link.active {
   background-color: var(--secondary-blue); /* Fundo ao passar o mouse ou ativo */
+  color: var(--text-light);
   border-left-color: var(--accent-orange); /* Indicador de ativo */
 }
 

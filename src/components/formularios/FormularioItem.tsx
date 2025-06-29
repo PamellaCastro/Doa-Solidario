@@ -95,8 +95,19 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
   const categorias: Categoria[] = [Categoria.ELETRONICO, Categoria.ELETRODOMESTICO, Categoria.MOVEL, Categoria.TEXTIL]
 
   const estadosConservacao = Object.values(EstadoConservacao)
-  const situacoes = Object.values(Situacao)
   const estados = Object.values(Estado)
+  let situacoesDisponiveisParaSelect: Situacao[] = []
+
+  if (modo === "cadastro") {
+    situacoesDisponiveisParaSelect = [Situacao.ABERTO]
+  } else if (modo === "edicao") {
+    situacoesDisponiveisParaSelect = Object.values(Situacao).filter(
+      (situ) =>
+        situ === Situacao.ABERTO ||
+        situ === Situacao.EM_ANDAMENTO ||
+        situ === Situacao.DEPOSITADO
+    );
+  }
 
   // Busca de pessoa usando a API
   const buscarPessoa = async () => {
@@ -189,26 +200,26 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
   }
 
   // Função para submeter o formulário com a pessoa selecionada
- const handleFormSubmit = (e: React.FormEvent) => {
-  e.preventDefault()
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
 
-  if (!selectedPessoa) {
-    alert("Por favor, selecione uma pessoa antes de continuar.")
-    return
+    if (!selectedPessoa) {
+      alert("Por favor, selecione uma pessoa antes de continuar.")
+      return
+    }
+
+    if (!item?.subCategoria) {
+      alert("Por favor, selecione uma subcategoria.")
+      return
+    }
+
+    const itemAtualizado: Item = {
+      ...item,
+      pessoadoador: selectedPessoa,
+    }
+
+    onSubmit(e, itemAtualizado) // envia item completo com pessoadoador
   }
-
-  if (!item?.subCategoria) {
-    alert("Por favor, selecione uma subcategoria.")
-    return
-  }
-
-  const itemAtualizado: Item = {
-    ...item,
-    pessoadoador: selectedPessoa,
-  }
-
-  onSubmit(e, itemAtualizado) // envia item completo com pessoadoador
-}
 
 
   return (
@@ -362,7 +373,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
             />
           </div>
 
-          <div className="mb-3 col-12 col-md-6">
+          {/* <div className="mb-3 col-12 col-md-6">
             <label htmlFor="valor" className="form-label">
               Valor (R$) *
             </label>
@@ -376,7 +387,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               inputMode="decimal"
               required
             />
-          </div>
+          </div> */}
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="caminhao" className="form-label">
@@ -476,17 +487,20 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               className="form-select"
               id="situacao"
               name="situacao"
-              value={item?.situacao || ""}
+              // Define o valor padrão para "ABERTO" no cadastro, caso contrário usa o valor do item
+              value={modo === "cadastro" ? Situacao.ABERTO : (item?.situacao || "")}
               onChange={onChange}
               required
+              disabled={modo === "cadastro"}
             >
-              <option value="">Selecione a situação</option>
-              {situacoes.map((situ) => (
+              {modo === "edicao" && <option value="">Selecione a situação</option>}
+              {situacoesDisponiveisParaSelect.map((situ) => (
                 <option key={situ} value={situ}>
                   {formatarTexto(situ)}
                 </option>
               ))}
             </select>
+          
           </div>
 
           <div className="mb-3 col-12">

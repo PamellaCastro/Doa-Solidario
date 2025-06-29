@@ -173,7 +173,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
                   <th>Descrição</th>
                   <th>Pessoa</th>
                   <th>Quantidade</th>
-                  <th>Valor</th>
+                  {/* <th>Valor</th> Oculta na listagem das categoria */}
                   <th>Estado</th>
                   <th>Situação</th>
                   <th>Data Cadastro</th>
@@ -231,7 +231,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
                       <td>
                         <span className="badge bg-light text-dark">{item.quantidade}</span>
                       </td>
-                      <td>{formatCurrency(item.valor || 0)}</td>
+                      {/* <td>{formatCurrency(item.valor || 0)}</td> */}
                       <td>
                         <span className={`fw-bold ${getEstadoConservacaoClass(item.estadoConservacao)}`}>
                           {formatarTexto(item.estadoConservacao)}
@@ -272,7 +272,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
         </div>
       </div>
 
-      {/* Estatísticas */}
+      {/* Estatísticas
       {filteredItens.length > 0 && (
         <div className="row mt-4 row-cols-1 row-cols-md-4 g-2">
           <div className="col">
@@ -318,7 +318,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

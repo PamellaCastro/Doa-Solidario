@@ -51,7 +51,7 @@ const Dashboard: React.FC = () => {
       const statsCalculadas = calcularEstatisticas(itens, pessoas)
       setStats(statsCalculadas)
     } catch (err) {
-      setError("Erro ao carregar dados do dashboard")
+      setError("Erro ao carregar dados do gráficos")
       console.error(err)
     } finally {
       setLoading(false)
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Carregando dashboard...</span>
+          <span className="visually-hidden">Carregando gráficos...</span>
         </div>
       </div>
     )
@@ -178,7 +178,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h2 text-primary mb-0">Dashboard</h1>
+        <h1 className="h2 text-primary mb-0">Gráficos</h1>
         <button className="btn btn-outline-primary" onClick={carregarDados}>
           Atualizar Dados
         </button>
