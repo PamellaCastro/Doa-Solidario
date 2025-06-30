@@ -1,487 +1,181 @@
-import type React from "react"
+import type React from "react";
+import { useState } from "react";
+import {
+  Settings,
+  Database,
+  User,
+  Users,
+  PlusCircle,
+  Home,
+} from "lucide-react";
+import StatusSistema from "../../components/gerenciamento/StatusSistema";
+import GerenciamentoPessoa from "../../components/gerenciamento/GerenciamentoPessoa";
+import GerenciamentoCategoria from "../../components/gerenciamento/GerenciamentoCategoria";
+import GerenciamentoUsuario from "../../components/gerenciamento/GerenciamentoUsuario";
 
-import { useState } from "react"
-import { User, Shield, Bell, Database, Save, X } from "lucide-react"
+type SectionKey = "status" | "pessoas" | "usuarios" | "categorias";
 
-// Simulação de dados de usuários
-const mockUsuarios = [
-  {
-    id: 1,
-    nome: "Admin",
-    email: "admin@bairrodajuventude.org",
-    cargo: "Administrador",
-    permissoes: ["eletronicos", "eletrodomesticos", "moveis", "texteis", "social", "configuracoes"],
-  },
-  {
-    id: 2,
-    nome: "João Silva",
-    email: "joao@bairrodajuventude.org",
-    cargo: "Coordenador de Eletrônicos",
-    permissoes: ["eletronicos"],
-  },
-  {
-    id: 3,
-    nome: "Maria Santos",
-    email: "maria@bairrodajuventude.org",
-    cargo: "Coordenadora de Têxteis",
-    permissoes: ["texteis"],
-  },
-]
+const ConfiguracoesSistema: React.FC = () => {
+  const [activeSection, setActiveSection] = useState<SectionKey>("status");
 
-function Configuracoes() {
-  const [activeTab, setActiveTab] = useState("usuarios")
-  const [usuarios, setUsuarios] = useState(mockUsuarios)
-  const [novoUsuario, setNovoUsuario] = useState({
-    nome: "",
-    email: "",
-    senha: "",
-    cargo: "",
-    permissoes: [] as string[],
-  })
-  const [mostrarFormulario, setMostrarFormulario] = useState(false)
+  const sections = [
+    {
+      id: "status" as SectionKey,
+      label: "Status do Sistema",
+      icon: Database,
+      description: "Monitoramento e saúde dos serviços",
+      color: "primary",
+    },
+    {
+      id: "pessoas" as SectionKey,
+      label: "Gerenciar Pessoas",
+      icon: User,
+      description: "Cadastro e gestão de pessoas",
+      color: "success",
+    },
+    {
+      id: "usuarios" as SectionKey,
+      label: "Gerenciar Usuários",
+      icon: Users,
+      description: "Controle de usuários do sistema",
+      color: "info",
+    },
+    {
+      id: "categorias" as SectionKey,
+      label: "Categorias",
+      icon: PlusCircle,
+      description: "Gestão de categorias e subcategorias",
+      color: "warning",
+    },
+  ];
 
-  
-  const [configuracoes, setConfiguracoes] = useState({
-    nomeInstituicao: "Bairro da Juventude",
-    emailContato: "contato@bairrodajuventude.org",
-    telefoneContato: "(48) 3333-4444",
-    enderecoInstituicao: "Rua Exemplo, 123 - Criciúma, SC",
-    notificacoesEmail: true,
-    backupAutomatico: true,
-    intervaloBackup: "diario",
-  })
+  const getCurrentSection = () => {
+    return sections.find((section) => section.id === activeSection);
+  };
 
-  const handleChangeUsuario = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setNovoUsuario({
-      ...novoUsuario,
-      [name]: value,
-    })
-  }
-
-  const handleChangePermissao = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target
-
-    if (checked) {
-      setNovoUsuario({
-        ...novoUsuario,
-        permissoes: [...novoUsuario.permissoes, value],
-      })
-    } else {
-      setNovoUsuario({
-        ...novoUsuario,
-        permissoes: novoUsuario.permissoes.filter((p) => p !== value),
-      })
+  const renderSectionContent = () => {
+    switch (activeSection) {
+      case "status":
+        return (
+          <div>
+            <StatusSistema />
+          </div>
+        );
+      case "pessoas":
+        return <GerenciamentoPessoa />;
+      case "usuarios":
+        return <GerenciamentoUsuario />;
+      case "categorias":
+        return <GerenciamentoCategoria />;
+      default:
+        return <StatusSistema />;
     }
-  }
+  };
 
-  const handleSubmitUsuario = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Simulando envio para API
-    const novoUsuarioCompleto = {
-      ...novoUsuario,
-      id: usuarios.length + 1,
-    }
-
-    setUsuarios([...usuarios, novoUsuarioCompleto])
-    setNovoUsuario({
-      nome: "",
-      email: "",
-      senha: "",
-      cargo: "",
-      permissoes: [],
-    })
-    setMostrarFormulario(false)
-    alert("Usuário cadastrado com sucesso!")
-  }
-
-  const handleChangeConfiguracao = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target
-
-    setConfiguracoes({
-      ...configuracoes,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-    })
-  }
-
-  const handleSubmitConfiguracoes = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Simulando envio para API
-    alert("Configurações salvas com sucesso!")
-  }
-
-  const handleRemoverUsuario = (id: number) => {
-    if (confirm("Tem certeza que deseja remover este usuário?")) {
-      setUsuarios(usuarios.filter((user) => user.id !== id))
-      alert("Usuário removido com sucesso!")
-    }
-  }
+  const currentSection = getCurrentSection();
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-primary mb-6">Configurações do Sistema</h1>
-
-      <div className="flex border-b mb-6">
-        <button
-          className={`px-4 py-2 font-medium ${activeTab === "usuarios" ? "border-b-2 border-primary text-primary" : "text-gray-600"}`}
-          onClick={() => setActiveTab("usuarios")}
-        >
-          <User size={16} className="inline mr-2" />
-          Usuários
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${activeTab === "sistema" ? "border-b-2 border-primary text-primary" : "text-gray-600"}`}
-          onClick={() => setActiveTab("sistema")}
-        >
-          <Shield size={16} className="inline mr-2" />
-          Sistema
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${activeTab === "notificacoes" ? "border-b-2 border-primary text-primary" : "text-gray-600"}`}
-          onClick={() => setActiveTab("notificacoes")}
-        >
-          <Bell size={16} className="inline mr-2" />
-          Notificações
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${activeTab === "backup" ? "border-b-2 border-primary text-primary" : "text-gray-600"}`}
-          onClick={() => setActiveTab("backup")}
-        >
-          <Database size={16} className="inline mr-2" />
-          Backup
-        </button>
+    <div className="container-fluid p-4">
+      {/* Header Principal */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 className="h2 text-primary mb-1">
+                <Settings size={32} className="me-3" />
+                Configurações do Sistema
+              </h1>
+              <nav aria-label="breadcrumb">
+                <ol className="breadcrumb mb-0">
+                  <li className="breadcrumb-item">
+                    <Home size={14} className="me-1" />
+                    Gráficos
+                  </li>
+                  <li className="breadcrumb-item active" aria-current="page">
+                    Configurações
+                  </li>
+                  {currentSection && (
+                    <li className="breadcrumb-item active" aria-current="page">
+                      {currentSection.label}
+                    </li>
+                  )}
+                </ol>
+              </nav>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {activeTab === "usuarios" && (
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">Gerenciamento de Usuários</h2>
-            <button className="form-button success" onClick={() => setMostrarFormulario(!mostrarFormulario)}>
-              {mostrarFormulario ? "Cancelar" : "Novo Usuário"}
-            </button>
-          </div>
-
-          {mostrarFormulario && (
-            <div className="form-container mb-6">
-              <h3 className="form-title">Cadastrar Novo Usuário</h3>
-              <form onSubmit={handleSubmitUsuario}>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="form-group">
-                    <label className="form-label">Nome</label>
-                    <input
-                      type="text"
-                      name="nome"
-                      className="form-input"
-                      value={novoUsuario.nome}
-                      onChange={handleChangeUsuario}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">E-mail</label>
-                    <input
-                      type="email"
-                      name="email"
-                      className="form-input"
-                      value={novoUsuario.email}
-                      onChange={handleChangeUsuario}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Senha</label>
-                    <input
-                      type="password"
-                      name="senha"
-                      className="form-input"
-                      value={novoUsuario.senha}
-                      onChange={handleChangeUsuario}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Cargo</label>
-                    <input
-                      type="text"
-                      name="cargo"
-                      className="form-input"
-                      value={novoUsuario.cargo}
-                      onChange={handleChangeUsuario}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group col-span-2">
-                    <label className="form-label">Permissões</label>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          value="eletronicos"
-                          checked={novoUsuario.permissoes.includes("eletronicos")}
-                          onChange={handleChangePermissao}
-                        />
-                        Eletrônicos
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          value="eletrodomesticos"
-                          checked={novoUsuario.permissoes.includes("eletrodomesticos")}
-                          onChange={handleChangePermissao}
-                        />
-                        Eletrodomésticos
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          value="moveis"
-                          checked={novoUsuario.permissoes.includes("moveis")}
-                          onChange={handleChangePermissao}
-                        />
-                        Móveis
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          value="texteis"
-                          checked={novoUsuario.permissoes.includes("texteis")}
-                          onChange={handleChangePermissao}
-                        />
-                        Têxteis
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          value="social"
-                          checked={novoUsuario.permissoes.includes("social")}
-                          onChange={handleChangePermissao}
-                        />
-                        Social
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          value="configuracoes"
-                          checked={novoUsuario.permissoes.includes("configuracoes")}
-                          onChange={handleChangePermissao}
-                        />
-                        Configurações
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 mt-6">
-                  <button type="button" className="form-button secondary" onClick={() => setMostrarFormulario(false)}>
-                    Cancelar
-                  </button>
-                  <button type="submit" className="form-button success">
-                    Cadastrar Usuário
-                  </button>
-                </div>
-              </form>
+      <div className="row">
+        {/* Sidebar de Navegação */}
+        <div className="col-lg-3 col-md-4 mb-4">
+          <div className="card shadow-sm">
+            <div className="card-header bg-light">
+              <h5 className="card-title mb-0 text-secondary">
+                <Settings size={18} className="me-2" />
+                Seções
+              </h5>
             </div>
-          )}
-
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nome</th>
-                  <th>E-mail</th>
-                  <th>Cargo</th>
-                  <th>Permissões</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usuarios.map((usuario) => (
-                  <tr key={usuario.id}>
-                    <td>{usuario.id}</td>
-                    <td>{usuario.nome}</td>
-                    <td>{usuario.email}</td>
-                    <td>{usuario.cargo}</td>
-                    <td>
-                      <div className="flex flex-wrap gap-1">
-                        {usuario.permissoes.map((permissao) => (
-                          <span
-                            key={permissao}
-                            className="inline-block px-2 py-1 bg-gray-200 text-gray-800 rounded-full text-xs"
-                          >
-                            {permissao}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="actions">
-                        <button className="action-button edit" title="Editar">
-                          <User size={16} />
-                        </button>
-                        <button
-                          className="action-button delete"
-                          title="Remover"
-                          onClick={() => handleRemoverUsuario(usuario.id)}
+            <div className="list-group list-group-flush">
+              {sections.map((section) => {
+                const Icon = section.icon;
+                const isActive = activeSection === section.id;
+                return (
+                  <button
+                    key={section.id}
+                    className={`list-group-item list-group-item-action border-0 ${
+                      isActive ? `bg-${section.color} text-white` : "text-dark"
+                    }`}
+                    onClick={() => setActiveSection(section.id)}
+                  >
+                    <div className="d-flex align-items-center">
+                      <Icon size={18} className="me-3" />
+                      <div className="text-start">
+                        <div className="fw-bold">{section.label}</div>
+                        <small
+                          className={isActive ? "text-white-50" : "text-muted"}
                         >
-                          <X size={16} />
-                        </button>
+                          {section.description}
+                        </small>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      )}
 
-      {activeTab === "sistema" && (
-        <div className="form-container">
-          <h2 className="form-title">Configurações do Sistema</h2>
-          <form onSubmit={handleSubmitConfiguracoes}>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="form-group">
-                <label className="form-label">Nome da Instituição</label>
-                <input
-                  type="text"
-                  name="nomeInstituicao"
-                  className="form-input"
-                  value={configuracoes.nomeInstituicao}
-                  onChange={handleChangeConfiguracao}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">E-mail de Contato</label>
-                <input
-                  type="email"
-                  name="emailContato"
-                  className="form-input"
-                  value={configuracoes.emailContato}
-                  onChange={handleChangeConfiguracao}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Telefone de Contato</label>
-                <input
-                  type="text"
-                  name="telefoneContato"
-                  className="form-input"
-                  value={configuracoes.telefoneContato}
-                  onChange={handleChangeConfiguracao}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Endereço da Instituição</label>
-                <input
-                  type="text"
-                  name="enderecoInstituicao"
-                  className="form-input"
-                  value={configuracoes.enderecoInstituicao}
-                  onChange={handleChangeConfiguracao}
-                />
+        {/* Área de Conteúdo */}
+        <div className="col-lg-9 col-md-8">
+          <div className="card shadow-sm">
+            <div className="card-header">
+              <div className="d-flex align-items-center">
+                {currentSection && (
+                  <>
+                    <div
+                      className={`badge bg-${currentSection.color} me-3 p-2`}
+                    >
+                      <currentSection.icon size={20} />
+                    </div>
+                    <div>
+                      <h5 className="card-title mb-0">
+                        {currentSection.label}
+                      </h5>
+                      <small className="text-muted">
+                        {currentSection.description}
+                      </small>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-
-            <div className="flex justify-end mt-6">
-              <button type="submit" className="form-button success flex items-center gap-2">
-                <Save size={18} />
-                Salvar Configurações
-              </button>
-            </div>
-          </form>
+            <div className="card-body">{renderSectionContent()}</div>
+          </div>
         </div>
-      )}
-
-      {activeTab === "notificacoes" && (
-        <div className="form-container">
-          <h2 className="form-title">Configurações de Notificações</h2>
-          <form onSubmit={handleSubmitConfiguracoes}>
-            <div className="form-group">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="notificacoesEmail"
-                  checked={configuracoes.notificacoesEmail}
-                  onChange={handleChangeConfiguracao}
-                />
-                Receber notificações por e-mail
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                Receba notificações por e-mail quando novos pedidos forem registrados.
-              </p>
-            </div>
-
-            <div className="flex justify-end mt-6">
-              <button type="submit" className="form-button success flex items-center gap-2">
-                <Save size={18} />
-                Salvar Configurações
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {activeTab === "backup" && (
-        <div className="form-container">
-          <h2 className="form-title">Configurações de Backup</h2>
-          <form onSubmit={handleSubmitConfiguracoes}>
-            <div className="form-group">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="backupAutomatico"
-                  checked={configuracoes.backupAutomatico}
-                  onChange={handleChangeConfiguracao}
-                />
-                Realizar backup automático
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                O sistema realizará backups automáticos dos dados conforme o intervalo configurado.
-              </p>
-            </div>
-
-            {configuracoes.backupAutomatico && (
-              <div className="form-group mt-4">
-                <label className="form-label">Intervalo de Backup</label>
-                <select
-                  name="intervaloBackup"
-                  className="form-select"
-                  value={configuracoes.intervaloBackup}
-                  onChange={handleChangeConfiguracao}
-                >
-                  <option value="diario">Diário</option>
-                  <option value="semanal">Semanal</option>
-                  <option value="mensal">Mensal</option>
-                </select>
-              </div>
-            )}
-
-            <div className="flex justify-between mt-6">
-              <button type="button" className="form-button flex items-center gap-2">
-                <Database size={18} />
-                Realizar Backup Manual
-              </button>
-
-              <button type="submit" className="form-button success flex items-center gap-2">
-                <Save size={18} />
-                Salvar Configurações
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Configuracoes
+export default ConfiguracoesSistema;

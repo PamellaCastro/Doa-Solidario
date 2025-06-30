@@ -1,235 +1,173 @@
-import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getItemById, updateItem, Item } from "../../../services/ItemService";
-import axios from "axios";
+import FormularioItemIntegrado from "../../../components/formularios/FormularioItem";
+import { ItemService } from "../../../services/ItemService";
+import type { Item } from "../../../types/Item";
 
-const EditarMoveis: React.FC = () => {
+const EditarMovel: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
-  const [item, setItem] = useState<Item>({
-    descricao: "",
-    data_cadastro: "",
-    quantidade: 0,
-    valor: 0,
-    caminhao: "",
-    categoria: "MOVEL",
-    estadoConservacao: "",
-    situacao: "",
-    anexo: "",
-  });
-
-  const [categorias, setCategorias] = useState<string[]>([]);
+  const [item, setItem] = useState<Item | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
-    if (id) buscarItem(parseInt(id));
-    // buscarCategorias();
+    const fetchItem = async () => {
+      if (id) {
+        try {
+          const data = await ItemService.buscarPorId(Number(id));
+
+          if (data.data_cadastro) {
+            data.data_cadastro = new Date(data.data_cadastro)
+              .toISOString()
+              .split("T")[0];
+          }
+
+          setItem(data);
+          setError(null);
+        } catch (err) {
+          console.error("Erro ao buscar móvel:", err);
+          setError("Não foi possível carregar os dados do móvel para edição.");
+          setItem(null);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setError("ID do móvel não fornecido.");
+        setLoading(false);
+      }
+    };
+
+    fetchItem();
   }, [id]);
 
-  const buscarItem = async (itemId: number) => {
-    try {
-      const data = await getItemById(itemId);
-      setItem(data);
-      setError(null);
-    } catch (err) {
-      console.error("Erro ao buscar o item:", err);
-      setError("Erro ao buscar o item. Tente novamente mais tarde.");
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value, type } = e.target;
+
+    if (!item) return;
+
+    if (name === "valor") {
+      const numericString = value.replace(/[^\d]/g, "");
+      const numericValue = Number(numericString) / 100;
+      setItem((prev) => ({ ...prev!, valor: numericValue }));
+    } else if (name === "caminhao") {
+      setItem((prev) => ({ ...prev!, caminhao: value === "true" }));
+    } else if (type === "number" || name === "quantidade") {
+      setItem((prev) => ({ ...prev!, [name]: Number.parseFloat(value) || 0 }));
+    } else {
+      setItem((prev) => ({ ...prev!, [name]: value }));
     }
   };
 
-  // const buscarCategorias = async () => {
-  //   try {
-  //     const response = await axios.get("/api/categorias");
-  //     setCategorias(response.data);
-  //   } catch (error) {
-  //     console.error("Erro ao buscar categorias:", error);
-  //   }
-  // };
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setItem((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, itemAtualizado?: Item) => {
     e.preventDefault();
-    if (id) {
-      try {
-        await updateItem(parseInt(id), item);
-        alert("Item atualizado com sucesso!");
-        navigate("/categorias/movel");
-      } catch (err) {
-        console.error("Erro ao atualizar o item:", err);
-        setError("Erro ao atualizar o item. Tente novamente mais tarde.");
-      }
+    const finalItem = itemAtualizado || item
+    setIsSubmitting(true);
+    setError(null);
+
+    if (!finalItem || !finalItem.id) {
+      setError("Item inválido para atualização.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    
+    if (
+      !finalItem.descricao ||
+      finalItem.quantidade <= 0 ||
+      !finalItem.estadoConservacao ||
+      !finalItem.situacao
+    ) {
+      setError("Por favor, preencha todos os campos obrigatórios.");
+      setIsSubmitting(false);
+      return;
+    }
+
+  
+    if (!finalItem.pessoadoador) {
+      setError("Por favor, selecione uma pessoa.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      await ItemService.atualizar(finalItem.id, finalItem);
+      alert("Móvel atualizado com sucesso!");
+      navigate("/categorias/moveis");
+    } catch (err) {
+      console.error("Erro ao atualizar móvel:", err);
+      setError(
+        "Erro ao atualizar móvel. Verifique os dados e tente novamente."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return isNaN(date.getTime()) ? "Data inválida" : date.toLocaleDateString("pt-BR");
-  };
-
-  const formatCurrency = (value: number) =>
-    value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Editar Móvel</h1>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+  if (loading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "200px" }}
+      >
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Carregando...</span>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="descricao">Descrição:</label>
-          <input
-            type="text"
-            id="descricao"
-            name="descricao"
-            value={item.descricao}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="data_cadastro">Data de Cadastro:</label>
-          <input
-            type="date"
-            id="data_cadastro"
-            name="data_cadastro"
-            value={item.data_cadastro ? item.data_cadastro.split("T")[0] : ""}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="quantidade">Quantidade:</label>
-          <input
-            type="number"
-            id="quantidade"
-            name="quantidade"
-            value={item.quantidade}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="valor">Valor:</label>
-          <input
-            type="number"
-            id="valor"
-            name="valor"
-            step="0.01"
-            value={item.valor}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="caminhao">Caminhão:</label>
-          <input
-            type="text"
-            id="caminhao"
-            name="caminhao"
-            value={item.caminhao}
-            onChange={handleChange}
-            className="input"
-            
-          />
-        </div>
-
-        <div>
-          <label htmlFor="estadoConservacao">Estado de Conservação:</label>
-          <select
-            id="estadoConservacao"
-            name="estadoConservacao"
-            value={item.estadoConservacao}
-            onChange={handleChange}
-            className="input"
-            required
+  if (error || !item) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="alert alert-danger" role="alert">
+          <h4>Erro ao carregar móvel</h4>
+          <p>{error || "Móvel não encontrado."}</p>
+          <button
+            className="btn btn-outline-primary mt-3"
+            onClick={() => navigate("/categorias/moveis")}
           >
-            <option value="">Selecione</option>
-            <option value="BOM">Bom</option>
-            <option value="REGULAR">Regular</option>
-            <option value="RUIM">Ruim</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="situacao">Situação:</label>
-          <select
-            id="situacao"
-            name="situacao"
-            value={item.situacao}
-            onChange={handleChange}
-            className="input"
-            required
-          >
-            <option value="">Selecione</option>
-            <option value="ABERTO">Aberto</option>
-            <option value="EM_ANDAMENTO">Em andamento</option>
-            <option value="DEPOSITADO">Depositado</option>
-            <option value="VENDIDO">Vendido</option>
-            <option value="SOLICITADO">Solicitado</option>
-            <option value="DOADO">Doado</option>
-            
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="categoria">Categoria:</label>
-          <select
-            id="categoria"
-            name="categoria"
-            value={item.categoria}
-            onChange={handleChange}
-            className="input"
-            required
-          >
-            <option value="">Selecione uma categoria</option>
-            <option value="ELETRONICO">Eletrônico</option>
-            <option value="ELETRODOMESTICO">Eletrodoméstico</option>
-            <option value="MOVEL">Móvel</option>
-            <option value="TEXTIL">Têxtil</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="anexo">Anexo (URL):</label>
-          <input
-            type="text"
-            id="anexo"
-            name="anexo"
-            value={item.anexo || ""}
-            onChange={handleChange}
-            className="input"
-          />
-        </div>
-
-        <div>
-          <button type="submit" className="form-button primary">
-            Atualizar Móvel
+            Voltar para a Lista
           </button>
         </div>
-      </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="text-2xl font-bold text-primary">Editar Móvel</h1>
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => navigate("/categorias/moveis")}
+        >
+          Voltar para Lista
+        </button>
+      </div>
+
+      <div className="row justify-content-center">
+        <div className="col-12">
+          <FormularioItemIntegrado
+            item={item}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            modo="edicao"
+            error={error}
+            isSubmitting={isSubmitting}
+            disableCategoria={true}
+            disableDataCadastro={true}
+          />
+        </div>
+      </div>
     </div>
   );
 };
 
-export default EditarMoveis
+export default EditarMovel;

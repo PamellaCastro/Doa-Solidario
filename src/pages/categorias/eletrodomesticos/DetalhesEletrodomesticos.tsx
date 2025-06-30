@@ -1,68 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getItemById, Item } from "../../../services/ItemService";
+import type React from "react";
+import DetalhesItemIntegrado from "../../../components/formularios/DetalhesItem";
 
 const DetalhesEletrodomestico: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [item, setItem] = useState<Item | null>(null);
-
-  useEffect(() => {
-    async function fetchItem() {
-      if (id) {
-        try {
-          const data = await getItemById(Number(id));
-          setItem(data);
-        } catch (error) {
-          console.error("Erro ao buscar eletrodoméstico:", error);
-        }
-      }
-    }
-    fetchItem();
-  }, [id]);
-
-  if (!item) return <p>Carregando...</p>;
-
   return (
-    <div>
-      <h1>Detalhes do Eletrodoméstico</h1>
-      <p>
-        <strong>ID:</strong> {item.id}
-      </p>
-      <p>
-        <strong>Descrição:</strong> {item.descricao}
-      </p>
-      <p>
-        <strong>Data de Cadastro:</strong> {item.data_cadastro || "Não informado"}
-      </p>
-      <p>
-        <strong>Quantidade:</strong> {item.quantidade}
-      </p>
-      <p>
-        <strong>Valor:</strong> {`R$ ${Number(item.valor).toFixed(2)}`}
-      </p>
-      <p>
-        <strong>Caminhão:</strong> {item.caminhao}
-      </p>
-      <p>
-        <strong>Categoria:</strong> {item.categoria}
-      </p>
-      <p>
-        <strong>Estado de Conservação:</strong> {item.estadoConservacao}
-      </p>
-      <p>
-        <strong>Situação:</strong> {item.situacao}
-      </p>
-      <p>
-        <strong>Anexo:</strong>{" "}
-        {item.anexo ? (
-          <a href={item.anexo} target="_blank" rel="noopener noreferrer">
-            Ver Anexo
-          </a>
-        ) : (
-          "Sem anexo"
-        )}
-      </p>
-    </div>
+    <DetalhesItemIntegrado
+      categoria="eletrodomesticos"
+      titulo="Eletrodoméstico"
+    />
   );
 };
 

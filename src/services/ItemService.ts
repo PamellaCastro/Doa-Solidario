@@ -1,53 +1,31 @@
-import axios from "axios";
+import api from "../../api"
+import type { Item, Categoria } from "../types/Item"
 
-const API_URL = "http://localhost:8080/api/item";
+export class ItemService {
+  private static readonly BASE_URL = "/item"
 
-// Tipo para categoria
-export type Categoria = "ELETRONICO" | "MOVEL" | "ELETRODOMESTICO" | "TEXTIL";
+  static async listarTodos(categoria?: Categoria): Promise<Item[]> {
+    const url = categoria ? `${this.BASE_URL}?categoria=${categoria}` : this.BASE_URL
+    const response = await api.get(url)
+    return response.data
+  }
 
+  static async buscarPorId(id: number): Promise<Item> {
+    const response = await api.get(`${this.BASE_URL}/${id}`)
+    return response.data
+  }
 
-export interface Item {
-  id?: number;
-  descricao: string;
-  data_cadastro?: string;
-  quantidade: number;
-  valor: number;
-  caminhao: string;
-  categoria: Categoria;
-  estadoConservacao: string;
-  situacao: string;
-  anexo?: string;
-  
+  static async criar(item: Item): Promise<Item> {
+    const response = await api.post(this.BASE_URL, item)
+    return response.data
+  }
+
+  static async atualizar(id: number, item: Item): Promise<Item> {
+    const response = await api.put(`${this.BASE_URL}/${id}`, item)
+    return response.data
+  }
+
+  static async deletar(id: number): Promise<void> {
+    await api.delete(`${this.BASE_URL}/${id}`)
+  }
 }
-
-// Obter todos os itens de uma categoria específica
-export const getItens = async (categoria: Categoria): Promise<Item[]> => {
-  const response = await axios.get(`${API_URL}?categoria=${categoria}`);
-  return response.data;
-};
-
-// Obter item por ID
-export const getItemById = async (id: number): Promise<Item> => {
-  const response = await axios.get(`${API_URL}/${id}`);
-  return response.data;
-};
-
-// Criar novo item usando FormData para upload de arquivos
-export async function createItem(item: Item) {
-  return axios.post("http://localhost:8080/api/item", item, {
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
-}
-
-// Atualizar item (caso a atualização não envolva upload de arquivo, permanece usando Item)
-export const updateItem = async (id: number, item: Item): Promise<Item> => {
-  const response = await axios.put(`${API_URL}/${id}`, item);
-  return response.data;
-};
-
-// Excluir item
-export const deleteItem = async (id: number): Promise<void> => {
-  await axios.delete(`${API_URL}/${id}`);
-};

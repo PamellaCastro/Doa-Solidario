@@ -4,8 +4,8 @@
   font-weight: 400;
 
   /* Cores definidas para o tema claro */
-  color: #213547; /* Cor do texto padrão (um cinza escuro) */
-  background-color: #ffffff; /* Fundo padrão (branco) */
+  color: #213547; 
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,17 +15,15 @@
 
 a {
   font-weight: 500;
-  color: #747bff; /* Cor do link para tema claro */
+  color: #747bff; 
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2; /* Cor do link ao passar o mouse */
+  color: #535bf2; 
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -42,12 +40,12 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #f9f9f9; /* Fundo do botão para tema claro */
+  background-color: #f9f9f9; 
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #747bff; /* Borda do botão ao passar o mouse */
+  border-color: #747bff; 
 }
 button:focus,
 button:focus-visible {
@@ -55,65 +53,65 @@ button:focus-visible {
 }
 
 
-/* Estilo para inputs de texto, número, email, etc. */
+/* Estilo inputs de texto, número, email, etc. */
 .form-input {
-  color: #333333; /* Cor do texto: um cinza escuro */
-  background-color: #ffffff; /* Fundo branco para os inputs */
-  border: 1px solid #ced4da; /* Borda sutil */
-  padding: 0.75rem 1rem; /* Espaçamento interno */
-  border-radius: 0.25rem; /* Bordas levemente arredondadas */
-  width: 100%; /* Ocupa a largura total do container */
-  box-sizing: border-box; /* Inclui padding e border na largura total */
+  color: #333333; 
+  background-color: #ffffff; 
+  border: 1px solid #ced4da;
+  padding: 0.75rem 1rem; 
+  border-radius: 0.25rem; 
+  width: 100%; 
+  box-sizing: border-box; 
 }
 
 /* Estilo para selects (dropdowns) */
 .form-select {
-  color: #333333; /* Cor do texto */
-  background-color: #ffffff; /* Fundo branco */
-  border: 1px solid #ced4da; /* Borda */
-  padding: 0.75rem 1rem; /* Espaçamento interno */
-  border-radius: 0.25rem; /* Bordas arredondadas */
-  appearance: none; /* Remove estilos padrão do navegador para select */
-  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H18.4c-5%200-9.3%203.2-11.2%207.9-.7%201.8-.8%203.8-.1%205.8l128.4%20168a17.6%2017.6%200%200%200%2027.6%200l128.4-168c1.3-1.6%201.8-3.6%201.2-5.7z%22%2F%3E%3C%2Fsvg%3E'); /* Ícone de seta */
+  color: #333333;
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  padding: 0.75rem 1rem;
+  border-radius: 0.25rem;
+  appearance: none; 
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H18.4c-5%200-9.3%203.2-11.2%207.9-.7%201.8-.8%203.8-.1%205.8l128.4%20168a17.6%2017.6%200%200%200%2027.6%200l128.4-168c1.3-1.6%201.8-3.6%201.2-5.7z%22%2F%3E%3C%2Fsvg%3E');
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 0.8em;
-  padding-right: 2.5rem; /* Espaço para o ícone de seta */
-  width: 100%; /* Ocupa a largura total do container */
-  box-sizing: border-box; /* Inclui padding e border na largura total */
+  padding-right: 2.5rem; 
+  width: 100%; 
+  box-sizing: border-box; 
 }
 
-/* Estilo para textareas */
+/* Estilo textareas */
 textarea.form-textarea {
-  color: #333333; /* Cor do texto */
-  background-color: #ffffff; /* Fundo branco */
-  border: 1px solid #ced4da; /* Borda */
-  padding: 0.75rem 1rem; /* Espaçamento interno */
-  border-radius: 0.25rem; /* Bordas arredondadas */
-  resize: vertical; /* Permite redimensionar verticalmente */
-  min-height: 80px; /* Altura mínima */
-  width: 100%; /* Ocupa a largura total do container */
-  box-sizing: border-box; /* Inclui padding e border na largura total */
+  color: #333333; 
+  background-color: #ffffff; 
+  border: 1px solid #ced4da; 
+  padding: 0.75rem 1rem; 
+  border-radius: 0.25rem; 
+  resize: vertical; 
+  min-height: 80px; 
+  width: 100%; 
+  box-sizing: border-box; 
 }
 
-/* Estilo para labels dos formulários */
+/* Estilo labels dos formulários */
 .form-label {
-  color: #333333; /* Garante que os rótulos também sejam visíveis */
+  color: #333333; 
   font-weight: 500;
-  margin-bottom: 0.5rem; /* Espaçamento abaixo do label */
-  display: block; /* Garante que o label ocupe sua própria linha */
+  margin-bottom: 0.5rem; 
+  display: block; 
 }
 
-/* Estilo para o indicador de campo obrigatório */
+/* Estilo indicador de campo obrigatório */
 .form-label-required::after {
   content: " *";
-  color: #dc3545; /* Cor vermelha para o asterisco */
+  color: #dc3545; 
   margin-left: 2px;
 }
 
-/* Estilo para textos de ajuda */
+/* Estilo textos de ajuda */
 .form-help-text {
   font-size: 0.875rem;
-  color: #6c757d; /* Um cinza mais claro para textos de ajuda */
+  color: #6c757d; 
   margin-top: 0.25rem;
 }
