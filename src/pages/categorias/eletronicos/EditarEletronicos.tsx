@@ -24,7 +24,6 @@ const EditarEletronico: React.FC = () => {
               .toISOString()
               .split("T")[0];
           }
-
           setItem(data);
           setError(null);
         } catch (err) {

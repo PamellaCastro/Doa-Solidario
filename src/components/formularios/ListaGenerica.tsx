@@ -1,81 +1,97 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Edit, Trash2, Eye, Plus, Search, Package } from "lucide-react"
-import { ItemService } from "../../services/ItemService"
-import type { Item, Categoria } from "../../types/Item"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Edit, Trash2, Eye, Plus, Search, Package } from "lucide-react";
+import { ItemService } from "../../services/ItemService";
+import type { Item, Categoria } from "../../types/Item";
 
 interface ListaGenericaProps {
-  categoria: Categoria
-  titulo: string
-  onEdit: (item: Item) => void
-  onView: (item: Item) => void
-  onAdd: () => void
+  categoria: Categoria;
+  titulo: string;
+  onEdit: (item: Item) => void;
+  onView: (item: Item) => void;
+  onAdd: () => void;
 }
 
-const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit, onView, onAdd }) => {
-  const [itens, setItens] = useState<Item[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
+const ListaGenerica: React.FC<ListaGenericaProps> = ({
+  categoria,
+  titulo,
+  onEdit,
+  onView,
+  onAdd,
+}) => {
+  const [itens, setItens] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    carregarItens()
-  }, [categoria])
+    carregarItens();
+  }, [categoria]);
 
   const carregarItens = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const data = await ItemService.listarTodos()
+      const data = await ItemService.listarTodos();
 
       // Filtrar por categoria E por situações permitidas nas páginas de categoria
-      const situacoesPermitidas = ["ABERTO", "EM_ANDAMENTO", "DEPOSITADO"]
+      const situacoesPermitidas = ["ABERTO", "EM_ANDAMENTO", "DEPOSITADO"];
       const itensFiltrados = data.filter(
-        (item) => item.categoria === categoria && situacoesPermitidas.includes(item.situacao),
-      )
+        (item) =>
+          item.categoria === categoria &&
+          situacoesPermitidas.includes(item.situacao)
+      );
 
-      setItens(itensFiltrados)
+      setItens(itensFiltrados);
     } catch (err) {
-      setError(`Erro ao carregar ${titulo.toLowerCase()}`)
-      console.error(err)
+      setError(`Erro ao carregar ${titulo.toLowerCase()}`);
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (id: number) => {
-    if (!confirm(`Tem certeza que deseja excluir este ${titulo.toLowerCase().slice(0, -1)}?`)) {
-      return
+    if (
+      !confirm(
+        `Tem certeza que deseja excluir este ${titulo
+          .toLowerCase()
+          .slice(0, -1)}?`
+      )
+    ) {
+      return;
     }
 
     try {
-      await ItemService.deletar(id)
-      alert(`${titulo.slice(0, -1)} excluído com sucesso!`)
-      await carregarItens()
+      await ItemService.deletar(id);
+      alert(`${titulo.slice(0, -1)} excluído com sucesso!`);
+      await carregarItens();
     } catch (err) {
-      alert(`Erro ao excluir ${titulo.toLowerCase().slice(0, -1)}`)
-      console.error(err)
+      alert(`Erro ao excluir ${titulo.toLowerCase().slice(0, -1)}`);
+      console.error(err);
     }
-  }
+  };
 
   const filteredItens = itens.filter(
     (item) =>
       item.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.pessoadoador?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.situacao.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      item.pessoadoador?.nome
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      item.situacao.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formatCurrency = (value: number): string => {
     return value.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
-    })
-  }
+    });
+  };
 
   const formatDate = (dateString?: string): string => {
-    if (!dateString) return "N/A"
-    return new Date(dateString).toLocaleDateString("pt-BR")
-  }
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("pt-BR");
+  };
 
   const getSituacaoBadgeClass = (situacao: string): string => {
     const classes: Record<string, string> = {
@@ -85,35 +101,40 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
       VENDIDO: "bg-success",
       SOLICITADO: "bg-secondary",
       DOADO: "bg-success",
-    }
-    return classes[situacao] || "bg-secondary"
-  }
+    };
+    return classes[situacao] || "bg-secondary";
+  };
 
   const getEstadoConservacaoClass = (estado: string): string => {
     const classes: Record<string, string> = {
       BOM: "text-success",
       REGULAR: "text-warning",
       RUIM: "text-danger",
-    }
-    return classes[estado] || "text-secondary"
-  }
+    };
+    return classes[estado] || "text-secondary";
+  };
 
   const formatarTexto = (texto: string): string => {
     return texto
       .toLowerCase()
       .split("_")
       .map((palavra) => palavra.charAt(0).toUpperCase() + palavra.slice(1))
-      .join(" ")
-  }
+      .join(" ");
+  };
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "300px" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "300px" }}
+      >
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Carregando {titulo.toLowerCase()}...</span>
+          <span className="visually-hidden">
+            Carregando {titulo.toLowerCase()}...
+          </span>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -125,7 +146,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
           Tentar Novamente
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -133,7 +154,10 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="h2 text-primary mb-0">{titulo}</h1>
-        <button className="btn btn-success d-flex align-items-center gap-2" onClick={onAdd}>
+        <button
+          className="btn btn-success d-flex align-items-center gap-2"
+          onClick={onAdd}
+        >
           <Plus size={18} />
           Adicionar {titulo.slice(0)}
         </button>
@@ -157,7 +181,8 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
         </div>
         <div className="col-md-6 text-end">
           <small className="text-muted">
-            Total: {filteredItens.length} {filteredItens.length === 1 ? "item" : "itens"}
+            Total: {filteredItens.length}{" "}
+            {filteredItens.length === 1 ? "item" : "itens"}
           </small>
         </div>
       </div>
@@ -212,7 +237,10 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
                         <div>
                           <strong>{item.descricao}</strong>
                           {item.caminhao && (
-                            <span className="badge bg-warning text-dark ms-2" title="Requer Entrega">
+                            <span
+                              className="badge bg-warning text-dark ms-2"
+                              title="Requer Entrega"
+                            >
                               🚛
                             </span>
                           )}
@@ -222,23 +250,35 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
                         {item.pessoadoador ? (
                           <div>
                             <div>{item.pessoadoador.nome}</div>
-                            <small className="text-muted">{item.pessoadoador.email}</small>
+                            <small className="text-muted">
+                              {item.pessoadoador.email}
+                            </small>
                           </div>
                         ) : (
                           <span className="text-muted">Não informado</span>
                         )}
                       </td>
                       <td>
-                        <span className="badge bg-light text-dark">{item.quantidade}</span>
+                        <span className="badge bg-light text-dark">
+                          {item.quantidade}
+                        </span>
                       </td>
                       {/* <td>{formatCurrency(item.valor || 0)}</td> */}
                       <td>
-                        <span className={`fw-bold ${getEstadoConservacaoClass(item.estadoConservacao)}`}>
+                        <span
+                          className={`fw-bold ${getEstadoConservacaoClass(
+                            item.estadoConservacao
+                          )}`}
+                        >
                           {formatarTexto(item.estadoConservacao)}
                         </span>
                       </td>
                       <td>
-                        <span className={`badge ${getSituacaoBadgeClass(item.situacao)} text-white`}>
+                        <span
+                          className={`badge ${getSituacaoBadgeClass(
+                            item.situacao
+                          )} text-white`}
+                        >
                           {formatarTexto(item.situacao)}
                         </span>
                       </td>
@@ -320,7 +360,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
         </div>
       )} */}
     </div>
-  )
-}
+  );
+};
 
-export default ListaGenerica
+export default ListaGenerica;

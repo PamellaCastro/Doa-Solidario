@@ -39,7 +39,7 @@ interface FormData {
   quantidade: number | string;
   data_cadastro: string;
   caminhao: string;
- // valor: number | string;
+  // valor: number | string;
   categoria: string;
   situacao: string;
   estadoConservacao: string;
@@ -74,6 +74,9 @@ export default function QueroDoarIntegrado() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  // Novo estado para controlar a visibilidade do modal de sucesso
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   const [formData, setFormData] = useState<FormData>({
     nome: "",
     cpf: "",
@@ -91,7 +94,7 @@ export default function QueroDoarIntegrado() {
     categoria: "",
     situacao: Situacao.ABERTO,
     estadoConservacao: "",
-    subCategoriaId: "", 
+    subCategoriaId: "",
   });
 
   const [todasSubCategorias, setTodasSubCategorias] = useState<SubCategoria[]>(
@@ -113,7 +116,7 @@ export default function QueroDoarIntegrado() {
       }
     };
     fetchTodasSubCategorias();
-  }, []); 
+  }, []);
 
   // Efeito para filtrar as subcategorias disponíveis sempre que a categoria ou a lista completa muda
   useEffect(() => {
@@ -147,7 +150,7 @@ export default function QueroDoarIntegrado() {
     //   const valorNumber = Number(numeric);
     //   setFormData((prev) => ({ ...prev, [name]: valorNumber }));
     // }
-      if (name === "quantidade") {
+    if (name === "quantidade") {
       const val = value === "" ? "" : Number(value);
       setFormData((prev) => ({ ...prev, [name]: val }));
     } else {
@@ -246,8 +249,8 @@ export default function QueroDoarIntegrado() {
         situacao: (formData.situacao as Situacao) || Situacao.ABERTO,
         estadoConservacao: formData.estadoConservacao as EstadoConservacao,
         data_cadastro: formData.data_cadastro,
-        pessoadoador: pessoa, 
-        pessoabeneficiario: undefined, 
+        pessoadoador: pessoa,
+        pessoabeneficiario: undefined,
         subCategoria: {
           id: Number(formData.subCategoriaId),
         } as SubCategoria,
@@ -255,8 +258,9 @@ export default function QueroDoarIntegrado() {
 
       await ItemService.criar(novoItem);
 
-      alert("Doação cadastrada com sucesso! Obrigado pela sua contribuição!");
-      navigate("/login");
+        // Em vez de alert, define o estado para mostrar o modal
+      setShowSuccessModal(true);
+
     } catch (error: any) {
       // Use 'any' para lidar com a tipagem de erro do Axios
       console.error("Erro ao cadastrar doação:", error);
@@ -272,10 +276,16 @@ export default function QueroDoarIntegrado() {
       } else if (error.message) {
         errorMessage = `Erro: ${error.message}`;
       }
-      alert(errorMessage);
+      alert(errorMessage); // Mantém o alert para erros
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Função para fechar o modal e navegar
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    navigate("/login");
   };
 
   const steps = [
@@ -644,7 +654,7 @@ export default function QueroDoarIntegrado() {
                           ))}
                         </select>
                       </div>
-                      <div className="col-md-6">
+                      {/* <div className="col-md-6">
                         <label htmlFor="situacao" className="form-label">
                           Situação
                         </label>
@@ -662,7 +672,7 @@ export default function QueroDoarIntegrado() {
                             </option>
                           ))}
                         </select>
-                      </div>
+                      </div> */}
                       <div className="col-md-6">
                         <label htmlFor="caminhao" className="form-label">
                           Requer Entrega?
@@ -690,6 +700,7 @@ export default function QueroDoarIntegrado() {
                           name="data_cadastro"
                           value={formData.data_cadastro}
                           onChange={handleInputChange}
+                          disabled
                         />
                       </div>
                     </div>
@@ -743,6 +754,57 @@ export default function QueroDoarIntegrado() {
           </div>
         </div>
       </div>
+
+       {/* Modal de Sucesso */}
+      {showSuccessModal && (
+        <div
+          className="modal fade show"
+          tabIndex={-1}
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          aria-labelledby="successModalLabel"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header bg-success text-white">
+                <h5 className="modal-title" id="successModalLabel">
+                  <CheckCircle className="me-2" />
+                  Doação Cadastrada com Sucesso!
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  aria-label="Close"
+                  onClick={handleCloseSuccessModal}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>
+                  Agradecemos imensamente sua contribuição! Sua doação estará
+                  agora em análise.
+                </p>
+                <p>
+                  Assim que for aprovada, entraremos em contato com você através
+                  do e-mail cadastrado para coordenar os próximos passos.
+                </p>
+                <p className="text-muted small">
+                  Você será redirecionado para a tela de login.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={handleCloseSuccessModal}
+                >
+                  Entendido!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

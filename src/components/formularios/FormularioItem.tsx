@@ -1,23 +1,28 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Save, XCircle, Search, UserPlus, User, X } from "lucide-react"
-import { type Item, EstadoConservacao, Situacao } from "../../types/Item"
-import { Categoria } from "../../types/Categoria"
-import type { Pessoa } from "../../types/Pessoa"
-import type { SubCategoria } from "../../types/SubCategoria"
-import { Estado } from "../../types/Endereco"
-import { PessoaService } from "../../services/PessoaService"
-import { SubCategoriaService } from "../../services/SubCategoriaService"
+import type React from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Save, XCircle, Search, UserPlus, User, X } from "lucide-react";
+import { type Item, EstadoConservacao, Situacao } from "../../types/Item";
+import { Categoria } from "../../types/Categoria";
+import type { Pessoa } from "../../types/Pessoa";
+import type { SubCategoria } from "../../types/SubCategoria";
+import { Estado } from "../../types/Endereco";
+import { PessoaService } from "../../services/PessoaService";
+import { SubCategoriaService } from "../../services/SubCategoriaService";
 
 interface FormularioItemProps {
-  item: Item | null
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void
-  onSubmit: (e: React.FormEvent, itemAtualizado?: Item) => void
-  modo: "cadastro" | "edicao"
-  error: string | null
-  isSubmitting: boolean
-  disableCategoria?: boolean
-  disableDataCadastro?: boolean
+  item: Item | null;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => void;
+  onSubmit: (e: React.FormEvent, itemAtualizado?: Item) => void;
+  modo: "cadastro" | "edicao";
+  error: string | null;
+  isSubmitting: boolean;
+  categoriaFixa?: Categoria;
+  disableDataCadastro?: boolean;
+  disableCategoria?: boolean;
 }
 
 const FormularioItem: React.FC<FormularioItemProps> = ({
@@ -27,17 +32,24 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
   modo,
   error,
   isSubmitting,
-  disableCategoria = false,
+  categoriaFixa,
   disableDataCadastro = false,
+  disableCategoria = false,
 }) => {
-  const [showModal, setShowModal] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedPessoa, setSelectedPessoa] = useState<Pessoa | null>(null)
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState<Pessoa[]>([])
-  const [isSubmittingPessoa, setIsSubmittingPessoa] = useState(false)
-  const [subCategorias, setSubCategorias] = useState<SubCategoria[]>([])
-  const [loadingSubCategorias, setLoadingSubCategorias] = useState(false)
+  const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPessoa, setSelectedPessoa] = useState<Pessoa | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<Pessoa[]>([]);
+  const [isSubmittingPessoa, setIsSubmittingPessoa] = useState(false);
+
+  const [todasSubCategorias, setTodasSubCategorias] = useState<SubCategoria[]>(
+    []
+  );
+  const [subCategoriasDisponiveis, setSubCategoriasDisponiveis] = useState<
+    SubCategoria[]
+  >([]);
+  const [loadingSubCategorias, setLoadingSubCategorias] = useState(false);
 
   const [novaPessoa, setNovaPessoa] = useState<Pessoa>({
     nome: "",
@@ -50,177 +62,232 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
       numero: 0,
       estado: Estado.SC,
     },
-  })
+  });
 
-  const formatarTexto = (texto: string): string => {
+  const formatarTexto = useCallback((texto: string): string => {
     return texto
       .toLowerCase()
-      .split("_")
-      .map((palavra) => palavra.charAt(0).toUpperCase() + palavra.slice(1))
-      .join(" ")
-  }
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }, []);
 
   useEffect(() => {
     // No modo de edição vem com uma pessoa selecionada
     if (modo === "edicao" && item?.pessoadoador && !selectedPessoa) {
-      console.log("Definindo pessoa do item:", item.pessoadoador)
-      setSelectedPessoa(item.pessoadoador)
+      console.log("Definindo pessoa do item:", item.pessoadoador);
+      setSelectedPessoa(item.pessoadoador);
     }
-  }, [item, modo, selectedPessoa])
+  }, [item, modo, selectedPessoa]);
 
-  // Carregar subcategorias quando a categoria mudar
+  // Efeito para carregar TODAS as subcategorias uma única vez
   useEffect(() => {
-    if (item?.categoria) {
-      carregarSubCategorias(item.categoria)
-    } else {
-      setSubCategorias([])
+    const fetchTodasSubCategorias = async () => {
+      setLoadingSubCategorias(true);
+      try {
+        // Chamada para listar TODOS, sem filtro aqui
+        const fetchedSubCategorias = await SubCategoriaService.listarTodos();
+        setTodasSubCategorias(fetchedSubCategorias);
+      } catch (error) {
+        console.error("Erro ao carregar todas as subcategorias:", error);
+        setTodasSubCategorias([]);
+      } finally {
+        setLoadingSubCategorias(false);
+      }
+    };
+    fetchTodasSubCategorias();
+  }, []);
+
+  useEffect(() => {
+    const categoriaParaFiltrar = categoriaFixa || item?.categoria;
+
+    if (loadingSubCategorias || todasSubCategorias.length === 0) {
+      setSubCategoriasDisponiveis([]);
+      return;
     }
-  }, [item?.categoria])
 
-  const carregarSubCategorias = async (categoria: Categoria) => {
-    setLoadingSubCategorias(true)
-    try {
-      const subs = await SubCategoriaService.listarPorCategoria(categoria)
-      setSubCategorias(subs)
-    } catch (error) {
-      console.error("Erro ao carregar subcategorias:", error)
-      setSubCategorias([])
-    } finally {
-      setLoadingSubCategorias(false)
+    if (!categoriaParaFiltrar) {
+      setSubCategoriasDisponiveis([]);
+      onChange({ target: { name: "subCategoria", value: null } } as any);
+      return;
     }
-  }
 
-  if (!item && modo === "edicao") return null
-
-  const categorias: Categoria[] = [Categoria.ELETRONICO, Categoria.ELETRODOMESTICO, Categoria.MOVEL, Categoria.TEXTIL]
-
-  const estadosConservacao = Object.values(EstadoConservacao)
-  const estados = Object.values(Estado)
-  let situacoesDisponiveisParaSelect: Situacao[] = []
-
-  if (modo === "cadastro") {
-    situacoesDisponiveisParaSelect = [Situacao.ABERTO]
-  } else if (modo === "edicao") {
-    situacoesDisponiveisParaSelect = Object.values(Situacao).filter(
-      (situ) =>
-        situ === Situacao.ABERTO ||
-        situ === Situacao.EM_ANDAMENTO ||
-        situ === Situacao.DEPOSITADO
+    const filtered = todasSubCategorias.filter(
+      (subCat) => subCat.categoria === categoriaParaFiltrar
     );
-  }
+    setSubCategoriasDisponiveis(filtered);
 
-  // Busca de pessoa usando a API
-  const buscarPessoa = async () => {
-    if (!searchTerm.trim()) return
+    if (
+      item?.subCategoria?.id &&
+      !filtered.some((sc) => sc.id === item.subCategoria?.id)
+    ) {
+      onChange({ target: { name: "subCategoria", value: null } } as any);
+    }
+  }, [
+    categoriaFixa,
+    item?.categoria,
+    todasSubCategorias,
+    loadingSubCategorias,
+    onChange,
+    item?.subCategoria?.id,
+  ]);
 
-    setIsSearching(true)
+  if (!item && modo === "edicao") return null;
+
+  const categorias: Categoria[] = useMemo(
+    () => [
+      Categoria.ELETRONICO,
+      Categoria.ELETRODOMESTICO,
+      Categoria.MOVEL,
+      Categoria.TEXTIL,
+    ],
+    []
+  );
+
+  const estadosConservacao = useMemo(
+    () => Object.values(EstadoConservacao),
+    []
+  );
+  const estados = useMemo(() => Object.values(Estado), []);
+
+  const situacoesDisponiveisParaSelect = useMemo(() => {
+    if (modo === "cadastro") {
+      return [Situacao.ABERTO];
+    } else if (modo === "edicao") {
+      return Object.values(Situacao).filter(
+        (situ) =>
+          situ === Situacao.ABERTO ||
+          situ === Situacao.EM_ANDAMENTO ||
+          situ === Situacao.DEPOSITADO
+      );
+    }
+    return [];
+  }, [modo]);
+
+  const buscarPessoa = useCallback(async () => {
+    if (!searchTerm.trim()) return;
+
+    setIsSearching(true);
     try {
-      const resultados = await PessoaService.buscar(searchTerm)
-      setSearchResults(resultados)
+      const resultados = await PessoaService.buscar(searchTerm);
+      setSearchResults(resultados);
     } catch (error) {
-      console.error("Erro ao buscar pessoa:", error)
-      setSearchResults([])
-      alert("Erro ao buscar pessoa. Tente novamente.")
+      console.error("Erro ao buscar pessoa:", error);
+      setSearchResults([]);
+      alert("Erro ao buscar pessoa. Tente novamente.");
     } finally {
-      setIsSearching(false)
+      setIsSearching(false);
     }
-  }
+  }, [searchTerm]);
 
-  const selecionarPessoa = (pessoa: Pessoa) => {
-    setSelectedPessoa(pessoa)
-    setSearchResults([])
-    setSearchTerm("")
-  }
+  const selecionarPessoa = useCallback((pessoa: Pessoa) => {
+    setSelectedPessoa(pessoa);
+    setSearchResults([]);
+    setSearchTerm("");
+  }, []);
 
-  const handleNovaPessoaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleNovaPessoaChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
 
-    if (name.startsWith("endereco.")) {
-      const enderecoField = name.split(".")[1]
-      setNovaPessoa((prev) => ({
-        ...prev,
-        endereco: {
-          ...prev.endereco!,
-          [enderecoField]: enderecoField === "numero" ? Number(value) : value,
-        },
-      }))
-    } else {
-      setNovaPessoa((prev) => ({ ...prev, [name]: value }))
-    }
-  }
+      if (name.startsWith("endereco.")) {
+        const enderecoField = name.split(".")[1];
+        setNovaPessoa((prev) => ({
+          ...prev,
+          endereco: {
+            ...prev.endereco!,
+            [enderecoField]: enderecoField === "numero" ? Number(value) : value,
+          },
+        }));
+      } else {
+        setNovaPessoa((prev) => ({ ...prev, [name]: value }));
+      }
+    },
+    []
+  );
 
-  // Cadastro de pessoa usando a API
-  const cadastrarNovaPessoa = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmittingPessoa(true)
+  const cadastrarNovaPessoa = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmittingPessoa(true);
 
-    try {
-      const pessoaCadastrada = await PessoaService.criar(novaPessoa)
-      setSelectedPessoa(pessoaCadastrada)
-      setShowModal(false)
-      setNovaPessoa({
-        nome: "",
-        cpf: "",
-        email: "",
-        endereco: {
-          cidade: "",
-          cep: "",
-          rua: "",
-          numero: 0,
-          estado: Estado.SC,
-        },
-      })
-      alert("Pessoa cadastrada com sucesso!")
-    } catch (error) {
-      console.error("Erro ao cadastrar pessoa:", error)
-      alert("Erro ao cadastrar pessoa. Verifique os dados e tente novamente.")
-    } finally {
-      setIsSubmittingPessoa(false)
-    }
-  }
+      try {
+        const pessoaCadastrada = await PessoaService.criar(novaPessoa);
+        setSelectedPessoa(pessoaCadastrada);
+        setShowModal(false);
+        setNovaPessoa({
+          nome: "",
+          cpf: "",
+          email: "",
+          endereco: {
+            cidade: "",
+            cep: "",
+            rua: "",
+            numero: 0,
+            estado: Estado.SC,
+          },
+        });
+        alert("Pessoa cadastrada com sucesso!");
+      } catch (error) {
+        console.error("Erro ao cadastrar pessoa:", error);
+        alert(
+          "Erro ao cadastrar pessoa. Verifique os dados e tente novamente."
+        );
+      } finally {
+        setIsSubmittingPessoa(false);
+      }
+    },
+    [novaPessoa]
+  );
 
-  const removerPessoa = () => {
-    setSelectedPessoa(null)
-  }
+  const removerPessoa = useCallback(() => {
+    setSelectedPessoa(null);
+  }, []);
 
   // Handle para mudança de subcategoria
-  const handleSubCategoriaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const subCategoriaId = Number(e.target.value)
-    const subCategoria = subCategorias.find((sub) => sub.id === subCategoriaId)
+  const handleSubCategoriaChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const subCategoriaId = Number(e.target.value);
+      // Busca na lista de subcategorias DISPONÍVEIS
+      const subCategoria = subCategoriasDisponiveis.find(
+        (sub) => sub.id === subCategoriaId
+      );
+      // Criar evento sintético para o onChange do componente pai
+      const syntheticEvent = {
+        target: {
+          name: "subCategoria",
+          value: subCategoria || null,
+        },
+      } as any;
 
-    // Criar evento sintético para o onChange do componente pai
-    const syntheticEvent = {
-      target: {
-        name: "subCategoria",
-        value: subCategoria,
-      },
-    } as any
+      onChange(syntheticEvent);
+    },
+    [onChange, subCategoriasDisponiveis]
+  );
 
-    onChange(syntheticEvent)
-  }
+  const handleFormSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
 
-  // Função para submeter o formulário com a pessoa selecionada
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+      if (!selectedPessoa) {
+        alert("Por favor, selecione uma pessoa antes de continuar.");
+        return;
+      }
 
-    if (!selectedPessoa) {
-      alert("Por favor, selecione uma pessoa antes de continuar.")
-      return
-    }
+      if (!item?.subCategoria) {
+        alert("Por favor, selecione uma subcategoria.");
+        return;
+      }
 
-    if (!item?.subCategoria) {
-      alert("Por favor, selecione uma subcategoria.")
-      return
-    }
+      const itemAtualizado: Item = {
+        ...item,
+        pessoadoador: selectedPessoa,
+        categoria: categoriaFixa || item?.categoria,
+      };
 
-    const itemAtualizado: Item = {
-      ...item,
-      pessoadoador: selectedPessoa,
-    }
-
-    onSubmit(e, itemAtualizado) // envia item completo com pessoadoador
-  }
-
+      onSubmit(e, itemAtualizado);
+    },
+    [item, onSubmit, selectedPessoa, categoriaFixa]
+  );
 
   return (
     <>
@@ -254,13 +321,21 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                       onClick={buscarPessoa}
                       disabled={isSearching || !searchTerm.trim()}
                     >
-                      {isSearching ? <span className="spinner-border spinner-border-sm" /> : <Search size={16} />}
+                      {isSearching ? (
+                        <span className="spinner-border spinner-border-sm" />
+                      ) : (
+                        <Search size={16} />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 <div className="col-md-4 mb-3 d-flex align-items-end">
-                  <button type="button" className="btn btn-success w-100" onClick={() => setShowModal(true)}>
+                  <button
+                    type="button"
+                    className="btn btn-success w-100"
+                    onClick={() => setShowModal(true)}
+                  >
                     <UserPlus size={16} className="me-2" />
                     Cadastrar Nova Pessoa
                   </button>
@@ -271,7 +346,9 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   <div className="col-12">
                     <div className="card">
                       <div className="card-header">
-                        <small className="text-muted">Resultados encontrados:</small>
+                        <small className="text-muted">
+                          Resultados encontrados:
+                        </small>
                       </div>
                       <div className="card-body p-2">
                         {searchResults.map((pessoadoador) => (
@@ -285,11 +362,13 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                               <strong>{pessoadoador.nome}</strong>
                               <br />
                               <small className="text-muted">
-                                CPF: {pessoadoador.cpf} | Email: {pessoadoador.email}
+                                CPF: {pessoadoador.cpf} | Email:{" "}
+                                {pessoadoador.email}
                               </small>
                               {pessoadoador.endereco && <br />}
                               <small className="text-muted">
-                                {pessoadoador.endereco?.cidade} - {pessoadoador.endereco?.estado}
+                                {pessoadoador.endereco?.cidade} -{" "}
+                                {pessoadoador.endereco?.estado}
                               </small>
                             </div>
                             <button
@@ -318,12 +397,17 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                     <>
                       <br />
                       <small>
-                        {selectedPessoa.endereco.cidade} - {selectedPessoa.endereco.estado}
+                        {selectedPessoa.endereco.cidade} -{" "}
+                        {selectedPessoa.endereco.estado}
                       </small>
                     </>
                   )}
                 </div>
-                <button type="button" className="btn btn-sm btn-outline-danger" onClick={removerPessoa}>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={removerPessoa}
+                >
                   <X size={16} />
                 </button>
               </div>
@@ -366,7 +450,9 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               className="form-control"
               id="quantidade"
               name="quantidade"
-              value={item?.quantidade && item.quantidade > 0 ? item.quantidade : ""}
+              value={
+                item?.quantidade && item.quantidade > 0 ? item.quantidade : ""
+              }
               onChange={onChange}
               required
               min="1"
@@ -413,17 +499,25 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               className="form-select"
               id="categoria"
               name="categoria"
-              value={item?.categoria || ""}
+              value={categoriaFixa || item?.categoria || ""}
               onChange={onChange}
               required
-              disabled={disableCategoria}
+              disabled={!!categoriaFixa || isSubmitting || disableCategoria}
             >
-              <option value="">Selecione uma categoria</option>
-              {categorias.map((cat) => (
-                <option key={cat} value={cat}>
-                  {formatarTexto(cat)}
+              {categoriaFixa ? (
+                <option value={categoriaFixa}>
+                  {formatarTexto(categoriaFixa)}
                 </option>
-              ))}
+              ) : (
+                <>
+                  <option value="">Selecione uma categoria</option>
+                  {categorias.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {formatarTexto(cat)}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
           </div>
 
@@ -438,24 +532,34 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               value={item?.subCategoria?.id || ""}
               onChange={handleSubCategoriaChange}
               required
-              disabled={!item?.categoria || loadingSubCategorias}
+              disabled={
+                !(categoriaFixa || item?.categoria) ||
+                loadingSubCategorias ||
+                subCategoriasDisponiveis.length === 0
+              }
             >
               <option value="">
-                {!item?.categoria
+                {!(categoriaFixa || item?.categoria)
                   ? "Selecione uma categoria primeiro"
                   : loadingSubCategorias
-                    ? "Carregando..."
-                    : "Selecione uma subcategoria"}
+                  ? "Carregando..."
+                  : subCategoriasDisponiveis.length === 0
+                  ? "Nenhuma subcategoria disponível"
+                  : "Selecione uma subcategoria"}
               </option>
-              {subCategorias.map((sub) => (
+              {subCategoriasDisponiveis.map((sub) => (
                 <option key={sub.id} value={sub.id}>
                   {sub.descricao}
                 </option>
               ))}
             </select>
-            {item?.categoria && subCategorias.length === 0 && !loadingSubCategorias && (
-              <small className="text-muted">Nenhuma subcategoria disponível para esta categoria.</small>
-            )}
+            {(categoriaFixa || item?.categoria) &&
+              subCategoriasDisponiveis.length === 0 &&
+              !loadingSubCategorias && (
+                <small className="text-muted">
+                  Nenhuma subcategoria disponível para esta categoria.
+                </small>
+              )}
           </div>
 
           <div className="mb-3 col-12 col-md-6">
@@ -488,19 +592,22 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
               id="situacao"
               name="situacao"
               // Define o valor padrão para "ABERTO" no cadastro, caso contrário usa o valor do item
-              value={modo === "cadastro" ? Situacao.ABERTO : (item?.situacao || "")}
+              value={
+                modo === "cadastro" ? Situacao.ABERTO : item?.situacao || ""
+              }
               onChange={onChange}
               required
               disabled={modo === "cadastro"}
             >
-              {modo === "edicao" && <option value="">Selecione a situação</option>}
+              {modo === "edicao" && (
+                <option value="">Selecione a situação</option>
+              )}
               {situacoesDisponiveisParaSelect.map((situ) => (
                 <option key={situ} value={situ}>
                   {formatarTexto(situ)}
                 </option>
               ))}
             </select>
-          
           </div>
 
           <div className="mb-3 col-12">
@@ -520,7 +627,10 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           {error && (
             <div className="col-12">
-              <div className="alert alert-danger d-flex align-items-center" role="alert">
+              <div
+                className="alert alert-danger d-flex align-items-center"
+                role="alert"
+              >
                 <XCircle size={20} className="me-2" />
                 <div>{error}</div>
               </div>
@@ -535,7 +645,11 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
             >
               {isSubmitting ? (
                 <>
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Salvando...
                 </>
               ) : (
@@ -547,7 +661,9 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
             </button>
             {(!selectedPessoa || !item?.subCategoria) && (
               <div className="text-muted mt-2">
-                <small>* Selecione uma pessoa e subcategoria para continuar</small>
+                <small>
+                  * Selecione uma pessoa e subcategoria para continuar
+                </small>
               </div>
             )}
           </div>
@@ -556,7 +672,10 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
       {/* Modal para Cadastrar Nova Pessoa */}
       {showModal && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -564,7 +683,11 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   <UserPlus size={20} className="me-2" />
                   Cadastrar Nova Pessoa
                 </h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                ></button>
               </div>
               <form onSubmit={cadastrarNovaPessoa}>
                 <div className="modal-body">
@@ -701,10 +824,18 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowModal(false)}
+                  >
                     Cancelar
                   </button>
-                  <button type="submit" className="btn btn-success" disabled={isSubmittingPessoa}>
+                  <button
+                    type="submit"
+                    className="btn btn-success"
+                    disabled={isSubmittingPessoa}
+                  >
                     {isSubmittingPessoa ? (
                       <>
                         <span className="spinner-border spinner-border-sm me-2" />
@@ -724,7 +855,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default FormularioItem
+export default FormularioItem;

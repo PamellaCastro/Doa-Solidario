@@ -95,24 +95,62 @@ const EditarEletrodomestico: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="text-center p-4">Carregando...</div>;
+  if (loading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "200px" }}
+      >
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Carregando...</span>
+        </div>
+      </div>
+    );
+  }
 
-  return item ? (
+  if (error || !item) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="alert alert-danger" role="alert">
+          <h4>Erro ao carregar eletrodoméstico</h4>
+          <p>{error || "Eletrodoméstico não encontrado."}</p>
+          <button
+            className="btn btn-outline-primary mt-3"
+            onClick={() => navigate("/categorias/eletrodomesticos")}
+          >
+            Voltar para a Lista
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="container mx-auto p-4">
-      <h1 className="mb-4 text-primary">Editar Eletrodoméstico</h1>
-      <FormularioItemIntegrado
-        item={item}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-        modo="edicao"
-        error={error}
-        isSubmitting={isSubmitting}
-        disableCategoria
-        disableDataCadastro
-      />
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="text-primary">Editar Eletrodoméstico</h1>
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => navigate("/categorias/eletrodomesticos")}
+        >
+          Voltar para Lista
+        </button>
+      </div>
+      <div className="row justify-content-center">
+        <div className="col-12">
+          <FormularioItemIntegrado
+            item={item}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            modo="edicao"
+            error={error}
+            isSubmitting={isSubmitting}
+            disableCategoria={true}
+            disableDataCadastro={true}
+          />
+        </div>
+      </div>
     </div>
-  ) : (
-    <div className="alert alert-danger m-4">{error || "Item não encontrado."}</div>
   );
 };
 
