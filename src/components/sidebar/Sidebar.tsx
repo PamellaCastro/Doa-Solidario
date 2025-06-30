@@ -15,6 +15,12 @@ interface SidebarProps {
   onLogout: () => void;
 }
 
+
+
+
+
+
+
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   return (
     <aside className="sidebar">
@@ -97,21 +103,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
               <span>Configurações</span>
             </NavLink>
           </li>
-          <li className="mt-auto">
-            <button
-              onClick={onLogout}
-              className="sidebar-link"
-              style={{
-                width: "100%",
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-              }}
-            >
-              <LogOut size={20} />
-              <span>Sair</span>
-            </button>
-          </li>
+
+
         </ul>
       </nav>
     </aside>

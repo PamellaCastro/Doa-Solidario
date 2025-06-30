@@ -2,7 +2,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Legend 
+  PieChart, Pie, Cell, LineChart, Line, Legend
 } from "recharts"
 import { Package, DollarSign, Users, TrendingUp, Monitor, ShoppingBag, Sofa, Shirt } from "lucide-react"
 import { ItemService } from "../../services/ItemService"
@@ -60,7 +60,7 @@ const Dashboard: React.FC = () => {
 
   const calcularEstatisticas = (itens: Item[], pessoas: Pessoa[]): DashboardStats => {
     const totalItens = itens.reduce((acc, item) => acc + item.quantidade, 0)
-    const valorTotal = itens.reduce((acc, item) => acc + (item.valor || 0), 0)
+    // const valorTotal = itens.reduce((acc, item) => acc + (item.valor || 0), 0) REMOVIDO PARA CALCULAR DE OUTRA FORMA ABAIXO
 
     // Itens por categoria
     const categorias = ["ELETRONICO", "ELETRODOMESTICO", "MOVEL", "TEXTIL"]
@@ -100,6 +100,11 @@ const Dashboard: React.FC = () => {
 
     const valorVendidos = itens
       .filter((item) => item.situacao === "VENDIDO")
+      .reduce((acc, item) => acc + (item.valor || 0), 0)
+
+      // ATUALIZADO CAETANO - NOVO CALCULO
+      const valorTotal = itens
+      .filter((item) => item.situacao === "DEPOSITADO")
       .reduce((acc, item) => acc + (item.valor || 0), 0)
 
     return {
@@ -228,12 +233,20 @@ const Dashboard: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="categoria" />
                   <YAxis />
-                  <Tooltip
+
+
+                  <Tooltip // ATUALIZADO CAETANO
                     formatter={(value, name) => [
-                      name === "quantidade" ? value : formatCurrency(Number(value)),
-                      name === "quantidade" ? "Quantidade" : "Valor",
+                      name === "Quantidade"
+                        ? `${value} unidade${Number(value) !== 1 ? "s" : ""}`
+                        : formatCurrency(Number(value)),
+                      name, 
                     ]}
-                  />
+                  /> 
+                  
+
+
+
                   <Legend /> {/* Adicionado Legend para BarChart */}
                   <Bar dataKey="quantidade" fill="#8884d8" name="Quantidade" />
                   <Bar dataKey="valor" fill="#82ca9d" name="Valor" />
@@ -251,6 +264,7 @@ const Dashboard: React.FC = () => {
             <div className="card-body">
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
+                  
                   <Pie
                     data={stats.itensPorSituacao}
                     cx="50%"
@@ -265,8 +279,13 @@ const Dashboard: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
+
+
+
+
+
                   <Tooltip />
-                  <Legend /> 
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
