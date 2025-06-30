@@ -184,7 +184,7 @@ const DetalhesItem: React.FC<DetalhesItemProps> = ({ categoria, titulo }) => {
 
                 <div className="col-md-4">
                   <label className="form-label fw-bold">
-                    Necessita Caminhão
+                    Necessita Coleta
                   </label>
                   <p className="form-control-plaintext">
                     {item.caminhao ? (

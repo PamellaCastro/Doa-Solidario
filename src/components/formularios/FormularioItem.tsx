@@ -391,7 +391,7 @@ const FormularioItem: React.FC<FormularioItemProps> = ({
 
           <div className="mb-3 col-12 col-md-6">
             <label htmlFor="caminhao" className="form-label">
-              Necessita Caminhão?
+              Necessita de Coleta?
             </label>
             <select
               className="form-select"

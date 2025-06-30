@@ -10,9 +10,12 @@ import {
   Filter,
   UserPlus,
   X,
+  Edit,
+  History, 
 } from "lucide-react";
 import { SocialService } from "../../services/SocialService";
 import { PessoaService } from "../../services/PessoaService";
+import { ItemService } from "../../services/ItemService"; 
 import type { Item, Categoria } from "../../types/Item";
 import type { Pessoa } from "../../types/Pessoa";
 import { Estado } from "../../types/Endereco";
@@ -29,7 +32,7 @@ const Social: React.FC = () => {
     "disponiveis" | "doados" | "vendidos"
   >("disponiveis");
 
-  // Modal states
+  // Modal de Doação/Venda states
   const [showModal, setShowModal] = useState(false);
   const [itemSelecionado, setItemSelecionado] = useState<Item | null>(null);
   const [tipoAcao, setTipoAcao] = useState<"doar" | "vender">("doar");
@@ -55,6 +58,11 @@ const Social: React.FC = () => {
       estado: Estado.SC,
     },
   });
+
+  // NOVO: Modal de Edição de Item states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [itemEmEdicao, setItemEmEdicao] = useState<Item | null>(null);
+  const [isUpdatingItem, setIsUpdatingItem] = useState(false);
 
   useEffect(() => {
     carregarItens();
@@ -200,6 +208,83 @@ const Social: React.FC = () => {
       alert(`Erro ao ${tipoAcao} item. Tente novamente.`);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  // NOVO: Função para desfazer doação/venda
+  const handleDesfazerAcao = async (itemId: number) => {
+    if (
+      !window.confirm(
+        "Tem certeza que deseja reverter este item para 'Disponível'? O beneficiário será removido."
+      )
+    ) {
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Chama o serviço para reverter o item (mantendo o doador)
+      await SocialService.reverterItemParaDisponivel(itemId);
+      alert("Item revertido para disponível com sucesso!");
+      await carregarItens();
+    } catch (error) {
+      console.error("Erro ao reverter item:", error);
+      alert("Erro ao reverter item. Tente novamente.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+
+  // NOVO: Funções para edição de item
+  const abrirEditModal = (item: Item) => {
+    setItemEmEdicao({ ...item }); 
+    setShowEditModal(true);
+  };
+
+  const fecharEditModal = () => {
+    setShowEditModal(false);
+    setItemEmEdicao(null);
+  };
+
+  const handleEditItemChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setItemEmEdicao((prev) => {
+      if (!prev) return null;
+      if (name === "quantidade" || name === "valor") {
+        return { ...prev, [name]: Number(value) };
+      }
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const salvarEdicaoItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!itemEmEdicao || !itemEmEdicao.id) {
+      alert("Nenhum item selecionado para edição.");
+      return;
+    }
+
+    setIsUpdatingItem(true);
+    try {
+      // IMPORTANT: NÃO REMOVER pessoadoador ou pessoabeneficiario aqui.
+      // O ItemService.atualizar deve enviar o objeto Item completo.
+      // A API backend é responsável por manter a integridade do pessoadoador
+      // e ignorar pessoabeneficiario se o item está em DEPOSITADO.
+      await ItemService.atualizar(itemEmEdicao.id, itemEmEdicao); 
+
+      alert("Item atualizado com sucesso!");
+      await carregarItens(); 
+      fecharEditModal();
+    } catch (error) {
+      console.error("Erro ao atualizar item:", error);
+      alert("Erro ao atualizar item. Verifique os dados e tente novamente.");
+    } finally {
+      setIsUpdatingItem(false);
     }
   };
 
@@ -406,7 +491,7 @@ const Social: React.FC = () => {
                 </span>{" "}
                 | Estado:{" "}
                 <span className="fw-bold">{item.estadoConservacao}</span> |
-                Caminhão:{" "}
+                Coletado:{" "}
                 <span className="fw-bold">{item.caminhao ? "Sim" : "Não"}</span>
               </p>
 
@@ -466,6 +551,13 @@ const Social: React.FC = () => {
               {abaSelecionada === "disponiveis" && (
                 <div className="d-flex gap-2 mt-3 justify-content-end">
                   <button
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => abrirEditModal(item)}
+                  >
+                    <Edit size={16} className="me-1" />
+                    Editar Item
+                  </button>
+                  <button
                     className="btn btn-outline-success btn-sm"
                     onClick={() => abrirModal(item, "doar")}
                   >
@@ -478,6 +570,32 @@ const Social: React.FC = () => {
                   >
                     <ShoppingCart size={16} className="me-1" />
                     Vender
+                  </button>
+                </div>
+              )}
+
+              {abaSelecionada === "doados" && item.pessoabeneficiario && (
+                <div className="d-flex gap-2 mt-3 justify-content-end">
+                  <button
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => handleDesfazerAcao(item.id!)}
+                    disabled={isProcessing}
+                  >
+                    <History size={16} className="me-1" />
+                    Desfazer Doação
+                  </button>
+                </div>
+              )}
+
+              {abaSelecionada === "vendidos" && item.pessoabeneficiario && (
+                <div className="d-flex gap-2 mt-3 justify-content-end">
+                  <button
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => handleDesfazerAcao(item.id!)}
+                    disabled={isProcessing}
+                  >
+                    <History size={16} className="me-1" />
+                    Desfazer Venda
                   </button>
                 </div>
               )}
@@ -754,6 +872,163 @@ const Social: React.FC = () => {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NOVO: Modal de Edição de Item */}
+      {showEditModal && itemEmEdicao && (
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Editar Item: {itemEmEdicao.descricao}</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={fecharEditModal}
+                ></button>
+              </div>
+              <form onSubmit={salvarEdicaoItem}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="descricao" className="form-label">
+                      Descrição
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="descricao"
+                      name="descricao"
+                      value={itemEmEdicao.descricao}
+                      onChange={handleEditItemChange}
+                      required
+                    />
+                  </div>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label htmlFor="quantidade" className="form-label">
+                        Quantidade
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        id="quantidade"
+                        name="quantidade"
+                        value={itemEmEdicao.quantidade}
+                        onChange={handleEditItemChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label htmlFor="valor" className="form-label">
+                        Valor
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        id="valor"
+                        name="valor"
+                        value={itemEmEdicao.valor || ""}
+                        onChange={handleEditItemChange}
+                        step="0.01"
+                       // required
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="estadoConservacao" className="form-label">
+                      Estado de Conservação
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="estadoConservacao"
+                      name="estadoConservacao"
+                      value={itemEmEdicao.estadoConservacao}
+                      onChange={handleEditItemChange}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="categoria" className="form-label">
+                      Categoria
+                    </label>
+                    <select
+                      className="form-select"
+                      id="categoria"
+                      name="categoria"
+                      value={itemEmEdicao.categoria}
+                      onChange={handleEditItemChange}
+                      required
+                    >
+                      <option value="">Selecione a categoria</option>
+                      <option value="ELETRONICO">Eletrônico</option>
+                      <option value="ELETRODOMESTICO">Eletrodoméstico</option>
+                      <option value="MOVEL">Móvel</option>
+                      <option value="TEXTIL">Têxtil</option>
+                    </select>
+                  </div>
+                  <div className="form-check mb-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="caminhao"
+                      name="caminhao"
+                      checked={itemEmEdicao.caminhao || false}
+                      onChange={(e) =>
+                        setItemEmEdicao((prev) => ({
+                          ...prev!,
+                          caminhao: e.target.checked,
+                        }))
+                      }
+                    />
+                    <label className="form-check-label" htmlFor="caminhao">
+                      Requer Entrega?
+                    </label>
+                  </div>
+                  {/* O doador já deve vir preenchido no itemEmEdicao se ele existe, mas não precisa ser editável aqui */}
+                  {itemEmEdicao.pessoadoador && (
+                    <div className="mb-3 p-2 bg-light rounded">
+                      <h6 className="mb-1">Doador:</h6>
+                      <p className="mb-0">{itemEmEdicao.pessoadoador.nome}</p>
+                      <small className="text-muted">
+                        {itemEmEdicao.pessoadoador.email}
+                      </small>
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={fecharEditModal}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={isUpdatingItem}
+                  >
+                    {isUpdatingItem ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <Edit size={16} className="me-2" />
+                        Salvar Alterações
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

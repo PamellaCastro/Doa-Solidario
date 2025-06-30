@@ -212,7 +212,7 @@ const ListaGenerica: React.FC<ListaGenericaProps> = ({ categoria, titulo, onEdit
                         <div>
                           <strong>{item.descricao}</strong>
                           {item.caminhao && (
-                            <span className="badge bg-warning text-dark ms-2" title="Necessita caminhão">
+                            <span className="badge bg-warning text-dark ms-2" title="Requer Entrega">
                               🚛
                             </span>
                           )}

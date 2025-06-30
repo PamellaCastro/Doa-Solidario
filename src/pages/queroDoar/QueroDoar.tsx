@@ -39,7 +39,7 @@ interface FormData {
   quantidade: number | string;
   data_cadastro: string;
   caminhao: string;
-  valor: number | string;
+ // valor: number | string;
   categoria: string;
   situacao: string;
   estadoConservacao: string;
@@ -87,11 +87,11 @@ export default function QueroDoarIntegrado() {
     quantidade: "",
     data_cadastro: new Date().toISOString().split("T")[0],
     caminhao: "",
-    valor: "",
+    //valor: "",
     categoria: "",
     situacao: Situacao.ABERTO,
     estadoConservacao: "",
-    subCategoriaId: "", // Inicializado vazio
+    subCategoriaId: "", 
   });
 
   const [todasSubCategorias, setTodasSubCategorias] = useState<SubCategoria[]>(
@@ -113,7 +113,7 @@ export default function QueroDoarIntegrado() {
       }
     };
     fetchTodasSubCategorias();
-  }, []); // Dependência vazia: executa apenas uma vez
+  }, []); 
 
   // Efeito para filtrar as subcategorias disponíveis sempre que a categoria ou a lista completa muda
   useEffect(() => {
@@ -142,11 +142,12 @@ export default function QueroDoarIntegrado() {
   ) => {
     const { name, value } = e.target;
 
-    if (name === "valor") {
-      const numeric = value.replace(/[^\d,]/g, "").replace(",", "."); // Permite vírgula para decimal
-      const valorNumber = Number(numeric);
-      setFormData((prev) => ({ ...prev, [name]: valorNumber }));
-    } else if (name === "quantidade") {
+    // if (name === "valor") {
+    //   const numeric = value.replace(/[^\d,]/g, "").replace(",", "."); // Permite vírgula para decimal
+    //   const valorNumber = Number(numeric);
+    //   setFormData((prev) => ({ ...prev, [name]: valorNumber }));
+    // }
+      if (name === "quantidade") {
       const val = value === "" ? "" : Number(value);
       setFormData((prev) => ({ ...prev, [name]: val }));
     } else {
@@ -239,14 +240,14 @@ export default function QueroDoarIntegrado() {
       const novoItem: Item = {
         descricao: formData.descricao,
         quantidade: Number(formData.quantidade) || 0,
-        valor: Number(formData.valor) || 0,
+        //valor: Number(formData.valor) || 0,
         caminhao: formData.caminhao === "true",
         categoria: formData.categoria as Categoria,
         situacao: (formData.situacao as Situacao) || Situacao.ABERTO,
         estadoConservacao: formData.estadoConservacao as EstadoConservacao,
         data_cadastro: formData.data_cadastro,
-        pessoadoador: pessoa, // Usando pessoadoador conforme o backend
-        pessoabeneficiario: undefined, // <-- NOVO: Explicitamente enviando null para o beneficiário
+        pessoadoador: pessoa, 
+        pessoabeneficiario: undefined, 
         subCategoria: {
           id: Number(formData.subCategoriaId),
         } as SubCategoria,
@@ -546,7 +547,7 @@ export default function QueroDoarIntegrado() {
                           required
                         />
                       </div>
-                      <div className="col-md-6">
+                      {/* <div className="col-md-6">
                         <label htmlFor="valor" className="form-label">
                           Valor Estimado (R$)
                         </label>
@@ -566,7 +567,7 @@ export default function QueroDoarIntegrado() {
                           onChange={handleInputChange}
                           placeholder="0,00"
                         />
-                      </div>
+                      </div> */}
                       <div className="col-md-6">
                         <label htmlFor="categoria" className="form-label">
                           Categoria *
@@ -664,7 +665,7 @@ export default function QueroDoarIntegrado() {
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="caminhao" className="form-label">
-                          Necessita Caminhão?
+                          Requer Entrega?
                         </label>
                         <select
                           className="form-select"

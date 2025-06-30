@@ -117,6 +117,24 @@ export class SocialService {
     }
   }
 
+    // NOVO: Reverter item para disponível (limpar beneficiário e situação para DEPOSITADO)
+  static async reverterItemParaDisponivel(id: number): Promise<Item> {
+    try {
+      const item = await this.buscarPorId(id)
+      const itemAtualizado = {
+        ...item,
+        situacao: "DEPOSITADO" as Situacao, 
+        pessoabeneficiario: null, 
+      }
+
+      const response = await api.put(`${this.BASE_URL}/${id}`, itemAtualizado)
+      return response.data
+    } catch (error) {
+      console.error("Erro ao reverter item para disponível:", error)
+      throw error
+    }
+  }
+
   private static async buscarPorId(id: number): Promise<Item> {
     const response = await api.get(`${this.BASE_URL}/${id}`)
     return response.data
