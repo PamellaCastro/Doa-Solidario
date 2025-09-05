@@ -1,74 +1,64 @@
-# DOA SOLIDARIO
+# Doa Solidário 💜 
 
-# 🎨 COMO MEXER NO FRONTEND SEM SURTAR (muito)
-
-## Criação de uma nova *branch* pelo terminal
-
-Siga os passos com carinho e cuidado ❤️
-
-
-# Crie e já entre na nova branch
-git checkout -b nome-da-sua-branch
-
-# Marque o que você mudou
-git add .
-
-# Faça o commit e ja deixa um bilhetinho carinhoso pro projeto
-git commit -m "feat: adiciona botão mágico na home"
-
-# Envie sua criação pro GitHub
-git push -u origin nome-da-sua-branch
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
 
 
-⚠️ **IMPORTANTE:** Não vá sair colando tudo de uma vez! Vai com calma — um comando por vez, hein!
+Plataforma desenvolvida como **Trabalho de Conclusão de Curso (TCC)**, com o objetivo de **aproximar doadores e instituições sociais**, facilitando o gerenciamento da ong e o processo de doação.
+> Habilidades aplicadas: **React, TypeScript, Vite, consumo de APIs, UX/UI e boas práticas de Git**.
 
 ---
 
-## 💡 Nome da branch
-
-Pensa assim: o nome da branch é tipo o nome da missão que você vai cumprir.
-
-Exemplos criativos (e úteis):
-- `feat/componente-card-produto`
-- `fix/corrige-navbar`
-- `docs/update-readme`
-- `chore/organiza-css`
+## 🎓 Contexto
+Este projeto foi o meu **TCC da faculdade**, no qual fui **responsável pelo desenvolvimento do frontend e pela integração com o backend**.  
+Além da parte técnica, esse projeto me permitiu aprender muito sobre **organização de código, boas práticas de versionamento e colaboração em equipe**.
 
 ---
 
-## 📝 Como escrever o bilhetinho do commit?
-
-Siga essa vibe aqui:
-
-- `feat:` quando você cria algo novo  
-  _Ex: `feat: adiciona botão de login`_
-
-- `fix:` quando arruma algum pepino  
-  _Ex: `fix: corrige bug do botão invisível`_
-
-- `docs:` mexeu no README ou anotação  
-  _Ex: `docs: adiciona instruções de uso`_
-
-- `chore:` ajeitou algo que ninguém vê, mas era preciso  
-  _Ex: `chore: atualiza estrutura de pastas`_
+## 🚀 Tecnologias utilizadas
+- **React + Vite**
+- **TypeScript**
+- **Axios** (requisições HTTP)
+- **CSS Modules**
+- Integração com API REST (Node.js no backend)
 
 ---
 
-## 🗂️ Estrutura do frontend (simplona, só pra se achar)
-
-```
-src/
-├── components/      → tudo que é reaproveitável
-├── pages/           → cada telinha que aparece
-├── services/        → onde falamos com a API
-├── assets/          → imagens, ícones, etc
-└── styles/          → arquivos de estilo (CSS, SCSS, etc)
-```
+## 📚 Meus aprendizados
+- Estruturar um projeto frontend do zero
+- Consumir APIs e lidar com respostas assíncronas
+- Criar componentes reutilizáveis e organizados
+- Gerenciar estados e rotas
+- Utilizar Git de forma colaborativa (branches, commits padronizados, pull requests)
+- Boas práticas de UX/UI na criação de interfaces simples e intuitivas
 
 ---
 
-## 🧃 Dica final:
+## ✨ Funcionalidades principais
+- Cadastro e login de usuários
+- Visualização de gráficos informativos
+- Registro de doações
+- Integração completa com API backend
 
-Se bater a dúvida, respira fundo, toma uma água, e chama no grupo! 😄  
-Frontend é caos com glitter — mas juntos a gente doma ele!
-Conto com vocês!!🤝
+---
+
+## 🔮 Próximos passos
+
+- Implementar autenticação JWT para maior segurança
+- Melhorar UI com design mais moderno e responsivo
+- Adicionar testes automatizados (unitários e integrados)
+- Criar documentação para novos colaboradores
+- Implementar deploy em produção para acesso público
+- Explorar novas funcionalidades como notificações e relatórios de doações
+
+## 🛠️ Como executar
+```bash
+git clone https://github.com/pamellacastro/Doa-Solidario.git
+cd Doa-Solidario
+npm install
+npm run dev
+
+
